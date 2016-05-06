@@ -3,7 +3,7 @@ program test
  use metric, only: get_sourceterms
  implicit none
  integer, parameter :: ndim = 3
- real(8) :: x(ndim), v(ndim), fterm(ndim)
+ real(8), dimension(ndim):: x,v,pmom,fterm
  real(8), dimension(1+ndim,1+ndim) :: gcov, gcon
  !real(8) :: dt, tmax, time
  !integer :: nsteps, i
