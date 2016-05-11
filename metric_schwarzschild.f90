@@ -42,7 +42,31 @@ contains
 pure subroutine get_metric(ndim,x,gcov,gcon,sqrtg)
  integer, intent(in)  :: ndim
  real,    intent(in)  :: x(ndim)
- real,    intent(out) :: gcov(ndim,ndim), gcon(ndim,ndim), sqrtg
+ real,    intent(out) :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg
+ real :: rs,r2,r,r3,rs_on_r3,coeff
+ gcov = 0.
+ gcon = 0.
+ rs = 2.*mass1
+ r2 = dot_product(x,x)
+ r  = sqrt(r2)
+ r3 = r**3
+ rs_on_r3 = rs/r3
+
+ if (metric_type .eq. 'Schwarzschild') then
+    coeff = 1./(1.-rs/r)
+    g(0,0) = -(1.-rs/r)
+    g(1,1) = coeff*(1.-rs/r3*(x(2)**2+x(3)**2))
+    g(2,2) = coeff*(1.-rs/r3*(x(1)**2+x(3)**2))
+    g(3,3) = coeff*(1.-rs/r3*(x(1)**2+x(2)**2))
+    g(1,2) = coeff*x(1)*x(2)*rs_on_r3
+    g(2,1) = g(1,2)
+    g(1,3) = coeff*x(1)*x(3)*rs_on_r3
+    g(3,1) = g(1,3)
+    g(2,3) = coeff*x(2)*x(3)*rs_on_r3
+    g(3,2) = g(2,3)
+ endif
+
+ sqrtg=1.
 
 end subroutine get_metric
 
@@ -53,12 +77,16 @@ end subroutine get_metric
 !   T^\mu\nu dg_\mu\nu/dx^i
 !+
 !----------------------------------------------------------------
-pure subroutine get_sourceterms(ndim,x,v,gcov,gcon,fterm)
+pure subroutine get_sourceterms(ndim,x,v,fterm)
  integer, intent(in)  :: ndim
  real,    intent(in)  :: x(ndim),v(ndim)
- real,    intent(in)  :: gcov(ndim,ndim), gcon(ndim,ndim)
  real,    intent(out) :: fterm(ndim)
- 
+ real,    dimension(1+ndim,1+ndim) :: gcov, gcon
+ real    :: sqrtg
+
+ call get_metric(ndim,x,gcov,gcon,sqrtg)
+
+
 end subroutine get_sourceterms
 
 end module metric
