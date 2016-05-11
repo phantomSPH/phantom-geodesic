@@ -54,16 +54,16 @@ pure subroutine get_metric(ndim,x,gcov,gcon,sqrtg)
 
  if (metric_type .eq. 'Schwarzschild') then
     coeff = 1./(1.-rs/r)
-    g(0,0) = -(1.-rs/r)
-    g(1,1) = coeff*(1.-rs/r3*(x(2)**2+x(3)**2))
-    g(2,2) = coeff*(1.-rs/r3*(x(1)**2+x(3)**2))
-    g(3,3) = coeff*(1.-rs/r3*(x(1)**2+x(2)**2))
-    g(1,2) = coeff*x(1)*x(2)*rs_on_r3
-    g(2,1) = g(1,2)
-    g(1,3) = coeff*x(1)*x(3)*rs_on_r3
-    g(3,1) = g(1,3)
-    g(2,3) = coeff*x(2)*x(3)*rs_on_r3
-    g(3,2) = g(2,3)
+    gcov(0,0) = -(1.-rs/r)
+    gcov(1,1) = coeff*(1.-rs/r3*(x(2)**2+x(3)**2))
+    gcov(2,2) = coeff*(1.-rs/r3*(x(1)**2+x(3)**2))
+    gcov(3,3) = coeff*(1.-rs/r3*(x(1)**2+x(2)**2))
+    gcov(1,2) = coeff*x(1)*x(2)*rs_on_r3
+    gcov(2,1) = gcov(1,2)
+    gcov(1,3) = coeff*x(1)*x(3)*rs_on_r3
+    gcov(3,1) = gcov(1,3)
+    gcov(2,3) = coeff*x(2)*x(3)*rs_on_r3
+    gcov(3,2) = gcov(2,3)
  endif
 
  sqrtg=1.
