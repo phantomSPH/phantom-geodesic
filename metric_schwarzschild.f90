@@ -41,7 +41,7 @@ contains
 !----------------------------------------------------------------
 pure subroutine get_metric(ndim,x,gcov,gcon,sqrtg)
  integer, intent(in)  :: ndim
- real,    intent(in)  :: x(ndim)
+ real,    intent(in)  :: x(1:3)
  real,    intent(out) :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg
  real :: rs,r2,r,r3,rs_on_r3,coeff
  gcov = 0.
@@ -79,9 +79,9 @@ end subroutine get_metric
 !----------------------------------------------------------------
 pure subroutine get_sourceterms(ndim,x,v,fterm)
  integer, intent(in)  :: ndim
- real,    intent(in)  :: x(ndim),v(ndim)
- real,    intent(out) :: fterm(ndim)
- real,    dimension(1+ndim,1+ndim) :: gcov, gcon
+ real, dimension(1:3), intent(in)  :: x,v
+ real, dimension(0:3), intent(out) :: fterm
+ real, dimension(0:3,0:3) :: gcov, gcon
  real    :: sqrtg
 
  call get_metric(ndim,x,gcov,gcon,sqrtg)
