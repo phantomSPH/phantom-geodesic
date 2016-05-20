@@ -82,7 +82,7 @@ subroutine get_v_from_p(pmom,v,x)
  real, dimension(0:3,0:3) :: gcon,gcov
  real :: w, U0, sqrtg, gvv
  integer :: i
- call get_metric(4,x,gcov,gcon,sqrtg)
+ call get_metric(x,gcov,gcon,sqrtg)
  gvv = dot_product((/ (dot_product(gcov(:,i),fourv),i=0,3) /),fourv)
  U0  = 1./sqrt(-gvv)
  w   = 1.
@@ -101,7 +101,7 @@ subroutine get_p_from_v(pmom,v,x)
  real, dimension(0:3,0:3) :: gcon,gcov
  real :: w, U0, sqrtg, gvv
  integer :: i
- call get_metric(4,x,gcov,gcon,sqrtg)
+ call get_metric(x,gcov,gcon,sqrtg)
  fourv=(/1.,v/)
  gvv = dot_product((/ (dot_product(gcov(:,i),fourv),i=0,3) /),fourv)
  U0   =1./sqrt(-gvv)

@@ -36,7 +36,7 @@ contains
   do while (maxval(abs(pmom_prev-pmom))<ptol)
     pmom_prev = pmom
     call get_v_from_p(pmom,v,x)               ! Get vstar from pmom_star
-    call get_sourceterms(ndim,x,v,fterm_star) ! Get fterm(pmom_star,x1)=fterm_star !!This will need to be get_fores
+    call get_sourceterms(x,v,fterm_star) ! Get fterm(pmom_star,x1)=fterm_star !!This will need to be get_fores
     pmom = pmom + 0.5*dt*(fterm_star - fterm)
  enddo
 
