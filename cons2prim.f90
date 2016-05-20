@@ -84,11 +84,10 @@ subroutine get_v_from_p(pmom,v,x)
  integer :: i
  call get_metric(4,x,gcov,gcon,sqrtg)
  gvv = dot_product((/ (dot_product(gcov(:,i),fourv),i=0,3) /),fourv)
- U0 = 1./sqrt(-gvv)
- w = 1.
+ U0  = 1./sqrt(-gvv)
+ w   = 1.
  fourv = 1./(U0*w)*(/ (dot_product(gcon(i,1:3),pmom),i=0,3) /)
  v = fourv(1:3)
-
 
  !call conservative2primitive(x,v,0.,0.,0.,rho,pmom,en)
  return

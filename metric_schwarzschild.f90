@@ -44,6 +44,7 @@ pure subroutine get_metric(ndim,x,gcov,gcon,sqrtg)
  real,    intent(in)  :: x(ndim)
  real,    intent(out) :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg
  real :: rs,r2,r,r3,rs_on_r3,coeff
+
  gcov = 0.
  gcon = 0.
  rs = 2.*mass1
@@ -64,9 +65,22 @@ pure subroutine get_metric(ndim,x,gcov,gcon,sqrtg)
     gcov(3,1) = gcov(1,3)
     gcov(2,3) = coeff*x(2)*x(3)*rs_on_r3
     gcov(3,2) = gcov(2,3)
+
+    sqrtg=1.
+
+    gcon(0,0) = -1./(1.-rs/r)
+    gcon(1,1) = 1.-rs_on_r3*x(1)**2
+    gcon(2,2) = 1.-rs_on_r3*x(2)**2
+    gcon(3,3) = 1.-rs_on_r3*x(3)**2
+    gcon(1,2) = -rs_on_r3*x(1)*x(2)
+    gcon(2,1) = gcov(1,2)
+    gcon(1,3) = -rs_on_r3*x(1)*x(3)
+    gcon(3,1) = gcov(1,3)
+    gcon(2,3) = -rs_on_r3*x(2)*x(3)
+    gcon(3,2) = gcov(2,3)
  endif
 
- sqrtg=1.
+
 
 end subroutine get_metric
 
