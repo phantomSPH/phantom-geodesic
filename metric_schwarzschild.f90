@@ -41,7 +41,7 @@ contains
 !----------------------------------------------------------------
 pure subroutine get_metric(ndim,x,gcov,gcon,sqrtg)
  integer, intent(in)  :: ndim
- real,    intent(in)  :: x(1:3)
+ real,    intent(in)  :: x(ndim)
  real,    intent(out) :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg
  real :: rs,r2,r,r3,rs_on_r3,coeff
  gcov = 0.
@@ -70,6 +70,23 @@ pure subroutine get_metric(ndim,x,gcov,gcon,sqrtg)
 
 end subroutine get_metric
 
+
+!----------------------------------------------------------------
+!+
+!  Compute the derivatives of the metric tensor in both covariant
+!  (dgcovdx, dgcovdy, dgcovdz) and contravariant (dgcondx, dgcondy,
+!  dgcondz) form
+!+
+!----------------------------------------------------------------
+pure subroutine get_metric_derivs(ndim,x,dgcovdx, dgcovdy, dgcovdz, dgcondx, dgcondy, dgcondz)
+ integer, intent(in)  :: ndim
+ real,    intent(in)  :: x(ndim)
+ real,    intent(out) :: dgcovdx(0:3,0:3), dgcovdy(0:3,0:3), dgcovdz(0:3,0:3)
+ real,    intent(out) :: dgcondx(0:3,0:3), dgcondy(0:3,0:3), dgcondz(0:3,0:3)
+
+
+end subroutine get_metric_derivs
+
 !----------------------------------------------------------------
 !+
 !  Compute the source terms required on the right hand side of
@@ -79,13 +96,58 @@ end subroutine get_metric
 !----------------------------------------------------------------
 pure subroutine get_sourceterms(ndim,x,v,fterm)
  integer, intent(in)  :: ndim
- real, dimension(1:3), intent(in)  :: x,v
- real, dimension(0:3), intent(out) :: fterm
- real, dimension(0:3,0:3) :: gcov, gcon
- real    :: sqrtg
+ real,    intent(in)  :: x(ndim),v(ndim)
+ real,    intent(out) :: fterm(ndim)
+ real,    :: gcov(0:3,0:3), gcon(0:3,0:3)
+ real,    :: sqrtg
+ real,    :: dgcovdx(0:3,0:3), dgcovdy(0:3,0:3), dgcovdz(0:3,0:3)
+ real,    :: dgcondx(0:3,0:3), dgcondy(0:3,0:3), dgcondz(0:3,0:3)
+ real,    :: v4(0:3), tmunu(0:3,0:3)
+ real,    :: P, rho, u, hcur, uzero2, uzero
 
  call get_metric(ndim,x,gcov,gcon,sqrtg)
+ call get_metric_derivs(ndim,x,dgcovdx, dgcovdy, dgcovdz, dgcondx, dgcondy, dgcondz)
 
+ ! for a test particle
+ P = 0.
+ u = 0.
+ rho = 1. ! this value does not matter (will cancel in the momentum equation)
+ hcur = 1.
+
+ !hcur = 1 + u + P/rho
+
+ ! lower-case 4-velocity
+ do i=1,3
+    v4(i) = v(i)
+ enddo
+ v4(0) = 1.
+
+ ! first component of the upper-case 4-velocity
+ uzero2 = -1./dot_product_gr(v4,v4,gcov)
+ uzero = sqrt(uzero2)
+
+ ! energy-momentum tensor
+ do i=0,3
+    do j=0,3
+       tmunu(i,j) = rho*hcur*uzero2*v4(i)*v4(j) + P*gcont(i,j)
+    enddo
+ enddo
+
+ ! source term
+ fterm(1) = 0.
+ fterm(2) = 0.
+ fterm(3) = 0.
+ do i=0,3
+    do j=0,3
+       fterm(1) = fterm(1) + tmunu(i,j)*dgcovdx(i,j)
+       fterm(2) = fterm(2) + tmunu(i,j)*dgcovdy(i,j)
+       fterm(3) = fterm(3) + tmunu(i,j)*dgcovdz(i,j)
+    enddo
+ enddo
+
+ do i=1,ndim
+    fterm(i) = 0.5*fterm(i) / (rho*uzero)
+ enddo
 
 end subroutine get_sourceterms
 
