@@ -39,7 +39,7 @@ contains
 !  conserved variables are (rho,pmom_i,en)
 !+
 !----------------------------------------------------------------
-subroutine primitive2conservative(x,den,v,u,P,rho,pmom,en)
+subroutine primitive2conservative(x,v,den,u,P,rho,pmom,en)
  use utils_gr, only: dot_product_gr
  use metric, only: get_metric
  real, intent(in)  :: x(1:3)
@@ -48,6 +48,7 @@ subroutine primitive2conservative(x,den,v,u,P,rho,pmom,en)
  real, dimension(0:3,0:3) :: gcov, gcon
  real :: sqrtg, H, gimuvmu, gimuvmuvi, U0, v4(0:3)
  integer :: i, mu
+ 
  v4 = (/1.,v(1:3)/)
  H = 1.+ u + P/den
  call get_metric(x,gcov,gcon,sqrtg)
@@ -65,13 +66,6 @@ subroutine primitive2conservative(x,den,v,u,P,rho,pmom,en)
     enddo
  enddo
  en = U0*(H*gimuvmuvi - (1.+u)*dot_product_gr(v,v,gcov))
-! call get_metric(ndim,x,gcov,gcon,sqrtg)
-
-! Lorentz = 1./sqrt(1. + dot_product_gr(v,v,gcov))
-! w = 1. + u + P/den
-
-! rho = d*gamma*sqrtg
-! pmom = v*gamma
 
  return
 end subroutine primitive2conservative
@@ -97,12 +91,12 @@ subroutine get_v_from_p(pmom,v,x)
  use metric, only: get_metric
  real, intent(in) :: pmom(1:3), x(1:3)
  real, intent(out) :: v(1:3)
- real, dimension(0:3) :: fourv
- real, dimension(0:3,0:3) :: gcon,gcov
- real :: w, U0, sqrtg, gvv
- integer :: i
+ real :: den, u, en, P, rho
 
- !call conservative2primitive(x,v,0.,0.,0.,rho,pmom,en)
+ en = 0. ! ???
+ P  = 0.
+ rho = 0. ! ???
+ call conservative2primitive(x,v,den,u,P,rho,pmom,en)
 
  return
 end subroutine get_v_from_p
@@ -111,16 +105,13 @@ subroutine get_p_from_v(pmom,v,x)
  use metric, only: get_metric
  real, intent(in) :: v(1:3), x(1:3)
  real, intent(out) :: pmom(1:3)
- real, dimension(0:3) :: fourv
- real, dimension(0:3,0:3) :: gcon,gcov
- real :: w, U0, sqrtg, gvv
- integer :: i
- call get_metric(x,gcov,gcon,sqrtg)
- fourv=(/1.,v/)
- gvv = dot_product((/ (dot_product(gcov(:,i),fourv),i=0,3) /),fourv)
- U0   =1./sqrt(-gvv)
- w    =1.
- pmom = U0*w*(/ (dot_product(gcov(i,:),fourv),i=1,3) /)
+ real :: rho, en, den, u, P
+
+ den = 1. ! ???
+ u = 0.
+ P = 0.
+ call primitive2conservative(x,v,den,u,P,rho,pmom,en)
+
  return
 end subroutine get_p_from_v
 
