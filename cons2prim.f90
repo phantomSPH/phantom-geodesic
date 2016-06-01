@@ -48,17 +48,19 @@ subroutine primitive2conservative(x,v,den,u,P,rho,pmom,en)
  real, dimension(0:3,0:3) :: gcov, gcon
  real :: sqrtg, H, gimuvmu, gimuvmuvi, U0, v4(0:3)
  integer :: i, mu
- 
- v4 = (/1.,v(1:3)/)
+
+ v4 = (/1.,v(1),v(2),v(3)/)
  H = 1.+ u + P/den
+
  call get_metric(x,gcov,gcon,sqrtg)
- U0  = 1./sqrt(-dot_product_gr(v,v,gcov))
+ U0  = 1./sqrt(-dot_product_gr(v4,v4,gcov))
 
  rho = sqrtg*den*U0
  do i=1,3
     gimuvmu = dot_product(gcov(i,:),v4(:))
     pmom(i) = U0*H*gimuvmu
  enddo
+
  gimuvmuvi = 0.
  do i=1,3
     do mu=1,4
@@ -67,7 +69,7 @@ subroutine primitive2conservative(x,v,den,u,P,rho,pmom,en)
  enddo
  en = U0*(H*gimuvmuvi - (1.+u)*dot_product_gr(v,v,gcov))
 
- return
+
 end subroutine primitive2conservative
 
 subroutine conservative2primitive(x,v,den,u,P,rho,pmom,en)
@@ -84,21 +86,32 @@ subroutine conservative2primitive(x,v,den,u,P,rho,pmom,en)
 ! rho = d*gamma*sqrtg
 ! pmom = v*gamma
 
- return
+
 end subroutine conservative2primitive
 
 subroutine get_v_from_p(pmom,v,x)
  use metric, only: get_metric
+ use utils_gr, only: dot_product_gr
  real, intent(in) :: pmom(1:3), x(1:3)
  real, intent(out) :: v(1:3)
- real :: den, u, en, P, rho
+ real, dimension(0:3,0:3) :: gcov, gcon
+ real :: den, u, en, P, rho, beta(1:3), alpha, sqrtg, pmom2, beta2
 
- en = 0. ! ???
- P  = 0.
- rho = 0. ! ???
- call conservative2primitive(x,v,den,u,P,rho,pmom,en)
+ call get_metric(x,gcov,gcon,sqrtg)
+ beta  = gcov(0,1:3)
+ beta2 = dot_product_gr(beta,beta,gcon(1:3,1:3))
+ alpha = sqrt(beta2 - gcov(0,0))
+ pmom2 = dot_product_gr(pmom,pmom,gcon)
+ v = alpha*pmom/(sqrt(1+pmom2)) - beta
+ !print*,'alpha,pmom,beta',alpha,pmom,beta
+ !print*,v
+ !stop 'printing v'
+ ! en = 0. ! ???
+ ! P  = 0.
+ ! rho = 0. ! ???
+ ! call conservative2primitive(x,v,den,u,P,rho,pmom,en)
 
- return
+
 end subroutine get_v_from_p
 
 subroutine get_p_from_v(pmom,v,x)
@@ -112,7 +125,7 @@ subroutine get_p_from_v(pmom,v,x)
  P = 0.
  call primitive2conservative(x,v,den,u,P,rho,pmom,en)
 
- return
+
 end subroutine get_p_from_v
 
 end module cons2prim

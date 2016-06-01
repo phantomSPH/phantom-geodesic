@@ -6,9 +6,9 @@ contains
   use metric, only: get_sourceterms
   use cons2prim, only: get_p_from_v, get_v_from_p
   integer, intent(in) :: ndim
-  real, dimension(ndim), intent(in) :: fterm
-  real, dimension(ndim), intent(out) :: x,v
-  real, dimension(ndim) :: pmom, vstar, fterm_star, xprev, pmom_prev
+  real, dimension(3), intent(in) :: fterm
+  real, dimension(3), intent(out) :: x,v
+  real, dimension(3) :: pmom, vstar, fterm_star, xprev, pmom_prev
   real, intent(in) :: dt
   real :: xtol, ptol
 
@@ -53,4 +53,37 @@ contains
 
  end subroutine
 
+ subroutine step_1(x,v,fterm,dt)
+  use cons2prim, only: get_p_from_v, get_v_from_p
+  real, dimension(3), intent(in) :: fterm
+  real, dimension(3), intent(out) :: x,v
+  real :: pmom(3)
+  real, intent(in) :: dt
+  call get_p_from_v(pmom,v,x)
+  pmom = pmom+dt*fterm
+  x    = x + dt*v
+  call get_v_from_p(pmom,v,x)
+ end subroutine
+
+ subroutine step_heuns(x,v,fterm,dt)
+  use metric, only: get_sourceterms
+  use cons2prim, only: get_p_from_v, get_v_from_p
+  real, dimension(3), intent(in) :: fterm
+  real, dimension(3), intent(out) :: x,v
+  real, dimension(3) :: pmom, fterm_old, v_old, pmom_guess, x_guess, fterm_new
+  real, intent(in) :: dt
+
+  call get_p_from_v(pmom,v,x)
+  v_old = v
+  fterm_old = fterm
+  pmom_guess = pmom+dt*fterm
+  x_guess    = x + dt*v
+  call get_v_from_p(pmom_guess,v,x_guess)
+  call get_sourceterms(x_guess,v,fterm_new)
+  pmom = pmom + 0.5*dt*(fterm_new + fterm_old )
+  x    = x + 0.5*dt*(v + v_old)
+
+  call get_v_from_p(pmom,v,x)
+
+ end subroutine
 end module step
