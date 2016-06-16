@@ -15,41 +15,47 @@ contains
   real, dimension(3) :: pmom, vstar, fterm_star, xprev, pmom_prev
   real, intent(in) :: dt
   real :: xtol, ptol
-  integer :: iterations
-  integer, parameter :: max_iterations = 5000
+  logical :: converged_x, converged_pmom
+  integer :: iterations_x, iterations_pmom
+  integer, parameter :: max_iterations = 1000000
+  converged_x = .false.
+  converged_pmom = .false.
+  iterations_x = 0
+  iterations_pmom = 0
 
-  iterations = 0
-  xtol = 1.d-3
-  ptol = 1.d-3
+  xtol = 1.e-12
+  ptol = 1.e-11
 
   call get_p_from_v(pmom,v,x) ! primitive to conservative
   pmom = pmom + 0.5*dt*fterm ! Half step in position
   call get_v_from_p(pmom,v,x) ! Get v(phalf,x0)
   ! Initial first order prediction for position (xstar)
-  xprev = x
   x = x + dt*v
   ! Converge to x
-  do while (maxval(abs(xprev-x))>=xtol .and. iterations < max_iterations)
-   iterations = iterations + 1
+  do while ( .not. converged_x .and. iterations_x < max_iterations)
+   iterations_x = iterations_x + 1
    xprev = x
    call get_v_from_p(pmom,vstar,x) ! Get v(phalf,xstar)=vstar
    x = xprev + 0.5*dt*(vstar - v)
+   if (maxval(abs(xprev-x))<=xtol) converged_x = .true.
   enddo
-  if (iterations >= max_iterations) print*, 'WARNING: implicit timestep did not &
-  &converge! maxval(abs(xprev-x)) =', maxval(abs(xprev-x)), iterations
-  iterations = 0
-  pmom_prev = pmom
+  if (iterations_x >= max_iterations) print*, 'WARNING: implicit timestep did not &
+  &converge! maxval(abs(xprev-x)) =', maxval(abs(xprev-x)), iterations_x
+  ! if (iterations>500000) print*, 'X iterations:',iterations
+
   pmom = pmom + 0.5*dt*fterm !pmom_star
   ! Converge to p
-  do while (maxval(abs(pmom_prev-pmom))>=ptol .and. iterations < max_iterations)
-   iterations = iterations + 1
+  do while (.not. converged_pmom .and. iterations_pmom < max_iterations)
+   iterations_pmom = iterations_pmom + 1
    pmom_prev = pmom
    call get_v_from_p(pmom,v,x)               ! Get vstar from pmom_star
    call get_sourceterms(x,v,fterm_star) ! Get fterm(pmom_star,x1)=fterm_star !!This will need to be get_fores
    pmom = pmom_prev + 0.5*dt*(fterm_star - fterm)
+   if (maxval(abs(pmom_prev-pmom))<=ptol) converged_pmom = .true.
   enddo
-  if (iterations >= max_iterations) print*, 'WARNING: implicit timestep did not &
+  if (iterations_pmom >= max_iterations) print*, 'WARNING: implicit timestep did not &
   &converge! pmom-pmom_prev =',pmom-pmom_prev
+  ! if (iterations>1) print*, 'pmom iterations:',iterations_pmom
   call get_v_from_p(pmom,v,x)
  end subroutine step_leapfrog
 
