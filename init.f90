@@ -5,23 +5,24 @@ contains
   real, intent(out) :: x(3), v(3)
   real :: r, vtan
   real :: ra,va
+  real, parameter :: pi=3.14159265358979
 
-  ! print*,'read r:'
-  ! read(*,*) r
-  ! vtan = sqrt(1./r)
-  ! x = (/r,0.,0./)
-  ! v = (/0.,vtan,0./)
+  print*,'(Circular velocity) Enter radius r:'
+  read(*,*) r
+  vtan = sqrt(1./r)
+  x = (/r,0.,0./)
+  v = (/0.,vtan,0./)
+  print*,'period =',2*pi*r/vtan
 
   ! x = (/84.6,0.,0./)
   ! v = (/0.,0.04777816206847369,0./)
 
-
-
-  ra = 90.
-  va = 0.0521157 ! velocity giving a pericenter rp = 10
-
-  x = (/ra,0.,0./)
-  v = (/0.,va,0./)
+  ! !Clement's orbit
+  ! ra = 90.
+  ! va = 0.0521157 ! velocity giving a pericenter rp = 10
+  !
+  ! x = (/ra,0.,0./)
+  ! v = (/0.,va,0./)
 
   ! x = (/84.6,0.,0./)
   ! v = (/0.,0.04777816206847369,0./)
@@ -34,6 +35,10 @@ contains
 
   ! x = (/3.,0.,0./)
   ! v = (/0.,0.19245008972987526,0./)
+
+  ! !!Circular orbit....?
+  ! x = (/10.,0.,0./)
+  ! v = (/0.,0.316228,0./)
 
  end subroutine initialise
 

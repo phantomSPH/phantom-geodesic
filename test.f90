@@ -14,7 +14,7 @@ program test
  real, dimension(3):: x,v,fterm
  real, dimension(0:3,0:3) :: gcov, gcon
  real :: sqrtg, v4(0:3), time, energy_init, angmom_init, U0
- real, parameter :: dt = 1.e-3, tmax = 10000., dt_out=10.
+ real, parameter :: dt = 1.e-3, tmax = 50000., dt_out=.1
  integer :: nsteps, i, n_out
  nsteps = int(tmax/dt)
  print*,'dt = ',dt
@@ -43,8 +43,8 @@ program test
   time = time + dt
   call check(x,v)
   call get_sourceterms(x,v,fterm)
-  ! call step_leapfrog(x,v,fterm,dt)
-  call step_heuns(x,v,fterm,dt)
+  call step_leapfrog(x,v,fterm,dt)
+  ! call step_heuns(x,v,fterm,dt)
   !call step_1(x,v,fterm,dt)
   if (mod(i,n_out)==0) then
    print*,i, time
