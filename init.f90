@@ -6,23 +6,32 @@ contains
   real :: r, vtan
   real :: ra,va
   real, parameter :: pi=3.14159265358979
+  character(len=*), parameter :: type = 'circular'
 
-  print*,'(Circular velocity) Enter radius r:'
-  read(*,*) r
-  vtan = sqrt(1./r)
-  x = (/r,0.,0./)
-  v = (/0.,vtan,0./)
-  print*,'period =',2*pi*r/vtan
+  if (type=='circular') then
+     print*,'(Circular velocity) Enter radius r:'
+     read(*,*) r
+     vtan = sqrt(1./r)
+     x = (/r,0.,0./)
+     v = (/0.,vtan,0./)
+     print*,'period =',2*pi*r/vtan
+     print*,'Press ENTER to continue:'
+     read(*,*)
+  endif
 
-  ! x = (/84.6,0.,0./)
-  ! v = (/0.,0.04777816206847369,0./)
-
-  ! !Clement's orbit
-  ! ra = 90.
-  ! va = 0.0521157 ! velocity giving a pericenter rp = 10
-  !
-  ! x = (/ra,0.,0./)
-  ! v = (/0.,va,0./)
+  if (type=='radial') then
+     ! Radial infall
+     x = (/-20.,0.,0./)
+     v = (/0.,0.,0./)
+  endif
+  
+  if (type=='precession') then
+     ! Clement's orbit
+     ra = 90.
+     va = 0.0521157 ! velocity giving a pericenter rp = 10
+     x = (/ra,0.,0./)
+     v = (/0.,va,0./)
+  endif
 
   ! x = (/84.6,0.,0./)
   ! v = (/0.,0.04777816206847369,0./)

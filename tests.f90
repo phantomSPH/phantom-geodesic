@@ -1,4 +1,4 @@
-module checks
+module tests
  implicit none
 contains
  !----------------------------------------------------------------
@@ -145,4 +145,4 @@ contains
   print*,"v:",v
  end subroutine sanity_checks
 
-end module checks
+end module tests
