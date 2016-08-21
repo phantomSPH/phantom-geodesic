@@ -1,4 +1,4 @@
-module tests
+module checks
  implicit none
 contains
  !----------------------------------------------------------------
@@ -9,64 +9,12 @@ contains
  !----------------------------------------------------------------
  subroutine check(x,v)
   use metric, only: get_metric
-  use utils_gr, only: dot_product_gr
-  use cons2prim, only: get_p_from_v,get_v_from_p
-  real, dimension(1:3), intent(in) :: x,v
-  real, dimension(0:3) :: v4
-  real, dimension(0:3,0:3) :: gcov, gcon, gg
-  real :: sqrtg, trace, trace_err, offdiag_err, v_from_p(1:3), pmom(1:3), vel_tol
-  integer :: i,j,k, errors
-  errors=0
-
-  v4(0) = 1.
-  v4(1:3) = v(:)
-  call get_metric(x,gcov,gcon,sqrtg)
-
-  if (dot_product_gr(v4,v4,gcov)>0.) STOP "WARNING Causality check: dot_product_gr(v4,v4,gcov)>0"
-  gg = 0.
-  gg = matmul(gcov,gcon)
-  trace = 0.
-  do i=0,3
-   trace = trace + gg(i,i)
-  enddo
-
-  trace_err = 1.e-13
-  offdiag_err = 1.e-15
-  if (trace-4.>trace_err) then
-   errors = 1
-   print*,""
-   print*, "WARNING: trace(gdown*gup)>",trace_err,"trace = ", trace
-   print*, "gdown*gup /= Identity"
-   do i=0,3
-    print*,gg(i,:)
-   enddo
-  endif
-  do i=0,3
-   do j=0,3
-    if (i/=j) then
-     if (gg(i,j)>offdiag_err) then
-      errors = 1
-      print*,""
-      print*,"WARNING: off diagonals of gdown*gup >",offdiag_err
-      print*, "gdown*gup /= Identity"
-      do k=0,3
-       print*,gg(k,:)
-      enddo
-     endif
-    endif
-   enddo
-  enddo
-
-  vel_tol = 1.e-15
-  call get_p_from_v(pmom,v,x)
-  call get_v_from_p(pmom,v_from_p,x)
-  if (maxval(abs(v-v_from_p))>vel_tol) then
-   errors = 1
-   print*,""
-   print*,"WARNING: get_p_from_v -> get_v_from_p didn't work: |v_bef-v_aft|>",vel_tol
-   print*,"v_bef-v_aft =",v-v_from_p
-  endif
-  !if (errors>0) stop 'errors'
+  use testmetric, only: metric_test
+  real, intent(in) :: x(1:3), v(1:3)
+  integer :: ierr
+  
+  call metric_test(x,v,ierr)
+  
  end subroutine check
 
 
@@ -145,4 +93,4 @@ contains
   print*,"v:",v
  end subroutine sanity_checks
 
-end module tests
+end module checks

@@ -6,6 +6,7 @@ contains
   real :: r, vtan
   real :: ra,va
   real, parameter :: pi=3.14159265358979
+
   character(len=*), parameter :: type = 'circular'
 
   if (type=='circular') then
@@ -24,7 +25,7 @@ contains
      x = (/-20.,0.,0./)
      v = (/0.,0.,0./)
   endif
-  
+
   if (type=='precession') then
      ! Clement's orbit
      ra = 90.

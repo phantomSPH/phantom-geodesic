@@ -8,7 +8,7 @@ contains
  !+
  !----------------------------------------------------------------
  subroutine step_leapfrog(x,v,fterm,dt)
-  use metric, only: get_sourceterms
+  use force_gr, only: get_sourceterms
   use cons2prim, only: get_p_from_v, get_v_from_p
   real, dimension(3), intent(inout) :: fterm
   real, dimension(3), intent(inout) :: x,v
@@ -91,7 +91,7 @@ contains
  !+
  !----------------------------------------------------------------
  subroutine step_heuns(x,v,fterm,dt)
-  use metric, only: get_sourceterms
+  use force_gr, only: get_sourceterms
   use cons2prim, only: get_p_from_v, get_v_from_p
   real, dimension(3), intent(in) :: fterm
   real, dimension(3), intent(out) :: x,v
