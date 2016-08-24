@@ -31,6 +31,7 @@ contains
    subroutine primitive2conservative(x,v,dens,u,P,rho,pmom,en)
       use utils_gr, only: dot_product_gr
       use metric, only: get_metric
+      use eos, only: get_enthalpy
       real, intent(in)  :: x(1:3)
       real, intent(in) :: dens,v(1:3),u,P
       real, intent(out)  :: rho,pmom(1:3),en
@@ -41,7 +42,7 @@ contains
       v4U(0) = 1.
       v4U(1:3) = v(:)
 
-      enth = 1.+ u + P/dens
+      call get_enthalpy(enth,dens,p) !enth = 1.+ u + P/dens
 
       call get_metric(x,gcov,gcon,sqrtg)
       U0  = 1./sqrt(-dot_product_gr(v4U,v4U,gcov))
@@ -97,13 +98,19 @@ contains
          call get_enthalpy(enth,dens,p)
 
          f = enth-enth_old
+
+         !This line is unique to the equation of state
          df= -1.+(gam/(gam-1.))/alpha*(1.-pmom2*p/(enth_old**3*lorentz_LEO**2*dens))
+
          enth = enth_old - f/df
+
+         ! Needed in dust case when f/df = NaN casuses enth = NaN
+         if (enth_old==1.) enth=1.
 
          niter = niter + 1
          converged = (abs(enth-enth_old)/enth < tol)
          if (niter > nitermax) then
-            write(*,"(a)") " Warning: reached max number of iterations in cons2prim"
+            write(*,"(a)") " Warning: not converged, reached max number of iterations in cons2prim"
             exit
          endif
       enddo
@@ -133,32 +140,15 @@ contains
       use utils_gr, only: dot_product_gr
       real, intent(in) :: pmom(1:3), x(1:3)
       real, intent(out) :: v(1:3)
-      real, dimension(0:3,0:3) :: gcov, gcon
-      real :: beta(1:3), alpha, sqrtg, pmom2, beta2,gamma,v_down(1:3)
-      integer :: i
+      real :: en, rho, P, u, dens
+      integer :: ierr
 
-      call get_metric(x,gcov,gcon,sqrtg)
-      beta  = gcov(0,1:3)
-      beta2 = dot_product_gr(beta,beta,gcon(1:3,1:3))
-      alpha = sqrt(beta2 - gcov(0,0))
-      pmom2 = dot_product_gr(pmom,pmom,gcon(1:3,1:3))
-      gamma = sqrt(1+pmom2)
-      v_down = alpha*pmom/(sqrt(1+pmom2)) - beta
-
-      !v_down = pmom/gamma
-
-      do i=1,3
-         v(i) = dot_product(gcon(1:3,i),v_down(1:3))
-      enddo
-
-
-      !print*,'alpha,pmom,beta',alpha,pmom,beta
-      !print*,v
-      !stop 'printing v'
-      ! en = 0. ! ???
-      ! P  = 0.
-      ! rho = 0. ! ???
-      ! call conservative2primitive(x,v,dens,u,P,rho,pmom,en)
+      en  = 0.
+      rho = 0.
+      P   = 0.
+      u   = 0.
+      dens= 0.
+      call conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr)
 
 
    end subroutine get_v_from_p
@@ -169,9 +159,9 @@ contains
       real, intent(out) :: pmom(1:3)
       real :: rho, en, dens, u, P
 
-      dens = 1. ! ???
-      u = 0.
-      P = 0.
+      dens = 0.
+      u    = 0.
+      P    = 0.
       call primitive2conservative(x,v,dens,u,P,rho,pmom,en)
 
 

@@ -18,9 +18,10 @@ contains
       write(*,'(/,a)') '--> testing metric'
       write(*,'(a,/)') '    metric type = '//trim(metric_type)
 
-      do i =0,16
-         x = (/2.0+1*10**(-real(i)),0.,0./)
-         bigv = (/i*0.,0.,0./)
+      do i =0,9
+         ! x = (/2.0+1*10**(-real(i)),0.,0./)
+         x    = (/10.,0.,0./)
+         bigv = (/i*0.1,0.,0./)
          call get_metric3plus1(x,alpha,beta,gij)
          v = bigv*alpha-beta
          call test_metric_i(x,v,ntests,npass)
