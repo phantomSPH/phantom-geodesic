@@ -14,46 +14,44 @@ program test
  implicit none
  real, dimension(3):: x,v,fterm
  real, dimension(0:3,0:3) :: gcov, gcon
- real :: sqrtg, v4(0:3), time, energy_init, angmom_init, U0
- real, parameter :: dt = 1.e-3, tmax = 5000., dt_out=.1
- integer :: nsteps, i, n_out
+ real :: sqrtg, v4(0:3), time, energy_init, angmom_init, U0, r
+ real, parameter :: dt = 1.e-3, tmax = 5000., dtout = 1.
+ integer :: nsteps, i, dnout
+ logical :: passed
+
  nsteps = int(tmax/dt)
- print*,'dt = ',dt
+ print*,'dt     = ',dt
  print*,'nsteps = ',nsteps
- time = 0.
- n_out=int(dt_out/dt)
- !call sanity_checks
- !stop "sanity checks"
+ time  = 0.
+ dnout = int(dtout/dt)
 
  print*,'START'
  call initialise(x, v)
-
- !Check 'causality condition thingamajig'
- call get_metric(x,gcov,gcon,sqrtg)
- v4(0) = 1.
- v4(1:3) = v(1:3)
- if (dot_product_gr(v4,v4,gcov)>0.) then
-  print*,"dot_product_gr(v4,v4,gcov)=",dot_product_gr(v4,v4,gcov)
+ call check(x,v,passed)
+ if (.not. passed) then
   STOP "Bad initial conditions!"
  endif
+ call get_metric(x,gcov,gcon,sqrtg)
+
+ v4(0) = 1.
+ v4(1:3) = v(1:3)
  U0 = 1./sqrt(-dot_product_gr(v4,v4,gcov))
- 
  ! For Schwarzschild only
- energy_init = (1. - 2*mass1/sqrt(dot_product(x,x)))/sqrt(-dot_product_gr(v4,v4,gcov))
+ r           = sqrt(dot_product(x,x))
+ energy_init = (1. - 2*mass1/r)*U0
  angmom_init = (x(1)*v(2)-x(2)*v(1))*U0
- 
+
  call write_out(time,x,v,energy_init,angmom_init)
 
  do i =1,nsteps
   time = time + dt
-  call check(x,v)
   call get_sourceterms(x,v,fterm)
   !call step_leapfrog(x,v,fterm,dt)
   call step_heuns(x,v,fterm,dt)
   !call step_1(x,v,fterm,dt)
-  if (mod(i,n_out)==0) then
+  if (mod(i,dnout)==0) then
+   call check(x,v,passed)
    print*,i, time
-   !call check(x,v)
    call write_out(time,x,v,energy_init,angmom_init)
   endif
  enddo

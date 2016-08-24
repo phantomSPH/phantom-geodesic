@@ -3,22 +3,23 @@ module checks
 contains
  !----------------------------------------------------------------
  !+
- !  Subroutine to check metric and 4velocity conditions. As well as if prim2cons
- !  is working or not (to be called at each time-step)
+ !  Subroutine to check the metric and 4velocity conditions. To be
+ !  called in between desired timesteps.
  !+
  !----------------------------------------------------------------
- subroutine check(x,v)
+ subroutine check(x,v,passed)
   use metric, only: get_metric
-  use testmetric, only: metric_test
+  use testmetric, only: test_metric_i
   real, intent(in) :: x(1:3), v(1:3)
-  integer :: ierr
-  
-  call metric_test(x,v,ierr)
-  
+  integer :: ntests,npass
+  logical :: passed
+  npass=0
+  call test_metric_i(x,v,ntests,npass)
+  passed = (npass==1)
  end subroutine check
 
 
-
+!THIS IS OBSOLETE NOW. USE test suite instead.
  !----------------------------------------------------------------
  !+
  !  Subroutine to do simple gr checks/tests (to be called on its own)

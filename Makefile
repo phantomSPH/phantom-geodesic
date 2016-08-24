@@ -5,7 +5,7 @@
 #
 #----------------------------------
 FC=gfortran
-FFLAGS=-O3 -Wall -Wextra -pedantic -std=f2008 -fdefault-real-8 -fdefault-double-8
+FFLAGS=-O3 -Wall -Wextra -g -pedantic -std=f2008 -fdefault-real-8 -fdefault-double-8
 
 # Default metric type
 METRIC=schwarzschild
@@ -24,7 +24,7 @@ OBJ_TEST=${SRC_TEST:.f90=.o}
 
 grtest: ${OBJ}
 	$(FC) $(FFLAGS) -o $@ $(OBJ)
-	
+
 test: $(OBJ_TEST)
 	$(FC) $(FFLAGS) -o $@ $(OBJ_TEST)
 

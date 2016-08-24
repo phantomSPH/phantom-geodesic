@@ -103,14 +103,15 @@ contains
          niter = niter + 1
          converged = (abs(enth-enth_old)/enth < tol)
          if (niter > nitermax) then
-            write(*,"(/,a)") " WARNING: reached max number of iterations"
-            print*,"dens,v,u,p:",dens,v,u,p
+            write(*,"(a)") " Warning: reached max number of iterations in cons2prim"
             exit
          endif
       enddo
 
       if (.not.converged) then
-         print*,'enthold,enth,rel_err=',enth_old,enth,abs(enth-enth_old)/enth
+         print*,' enthold  =',enth_old
+         print*,' enthnew  =',enth
+         print*,' error    =',abs(enth-enth_old)/enth
          ierr = ierr_notconverged
          return
       endif
