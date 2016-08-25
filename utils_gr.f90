@@ -24,7 +24,7 @@
 module utils_gr
  implicit none
 
- public :: dot_product_gr, get_metric3plus1
+ public :: dot_product_gr, get_metric3plus1, get_u0
 
  private
 
@@ -57,12 +57,24 @@ subroutine get_metric3plus1(x,alpha,beta,gij)
    real, intent(in) :: x(1:3)
    real, intent(out) :: alpha,beta(1:3),gij(1:3,1:3)
    real :: gcov(0:3,0:3),gcon(0:3,0:3),sqrtg,beta2
-   
+
    call get_metric(x,gcov,gcon,sqrtg)
    beta  = gcov(0,1:3)
    beta2 = dot_product_gr(beta,beta,gcon(1:3,1:3))
    alpha = sqrt(beta2 - gcov(0,0))
    gij   = gcov(1:3,1:3)
-   
+
 end subroutine get_metric3plus1
+
+subroutine get_u0(x,v,U0)
+   use metric, only: get_metric
+   real, intent(in) :: x(1:3),v(1:3)
+   real, intent(out) :: U0
+   real :: v4(0:3), gcov(0:3,0:3), gcon(0:3,0:3), sqrtg
+
+   call get_metric(x,gcov,gcon,sqrtg)
+   v4(0) = 1.
+   v4(1:3) = v(1:3)
+   U0 = 1./sqrt(-dot_product_gr(v4,v4,gcov))
+end subroutine get_u0
 end module utils_gr
