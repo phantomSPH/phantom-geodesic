@@ -5,10 +5,9 @@ contains
    subroutine setup(xall,vall,np)
       integer, intent(out) :: np
       real, allocatable, intent(inout), dimension(:,:) :: xall,vall
+      np = 2
       allocate(xall(3,np),vall(3,np))
 
-      np = 2
-      
       call initialise(xall(:,1),vall(:,1),'precession')
       call initialise(xall(:,2),vall(:,2),'circular')
 
