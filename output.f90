@@ -49,8 +49,8 @@ contains
          open(unit=66, file='positions.dat',status='replace')
          write(66,*) '# Number of particles (n)'
          write(66,*) np
-         write(60,*) '# First Column = Time'
-         write(60,*) '# Subsequent columns =  x(1),x(2),...x(n),y(1),y(2),...y(n),z(1),z(2),...,z(n)'
+         write(66,*) '# First Column = Time'
+         write(66,*) '# Subsequent columns =  x(1),x(2),...x(n),y(1),y(2),...y(n),z(1),z(2),...,z(n)'
       else
          open(unit=66, file='positions.dat',position='append')
       endif
