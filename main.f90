@@ -4,7 +4,7 @@
 !+
 !----------------------------------------------------------------
 program test
-   use init, only: setup
+   use init, only: setup,setup_dude
    use metric, only: get_metric, mass1
    use force_gr, only: get_sourceterms
    use step, only: step_leapfrog, step_1, step_heuns
@@ -16,7 +16,7 @@ program test
    real, allocatable, dimension(:,:) :: xall,vall
    real, dimension(3):: x,v,fterm
    real :: time, energy_init, angmom_init, energy, angmom, U0, r
-   real, parameter :: dt = 1.e-3, tmax = 10000., dtout = 100., dtout_ev = 10.
+   real, parameter :: dt = 1.e-3, tmax = 15000., dtout = 50., dtout_ev = 10.
    integer :: nsteps, i,j, dnout, dnout_ev
    logical :: passed
 
@@ -27,7 +27,8 @@ program test
    dnout = int(dtout/dt)
    dnout_ev = int(dtout_ev/dt)
    print*,'START'
-   call setup(xall, vall,np)
+   ! call setup(xall, vall,np)
+   call setup_dude(xall, vall,np)
 
    angmom = 0.
    energy = 0.

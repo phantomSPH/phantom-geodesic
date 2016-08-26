@@ -13,6 +13,54 @@ contains
 
    end subroutine setup
 
+   subroutine setup_dude(xall,vall,np)
+      integer, intent(out) :: np
+      real, allocatable, intent(inout), dimension(:,:) :: xall,vall
+      integer :: i,index,nleg,nbody,narm,nhead
+      real, parameter :: spacing=1.,head_radius=10., pi = acos(-1.), start=90.
+
+      nbody = 10
+      narm  = 5
+      nhead = 10
+      nleg=5
+      np = nbody + (2*narm + 1) + nhead + 2*nleg
+
+      allocate(xall(3,np),vall(3,np))
+      vall = 0.
+      xall = 0.
+
+      index = 0
+
+      do i=1,nbody
+         index = index+1
+         xall(1,index)=start+spacing*(i-1)
+      enddo
+
+      do i=-narm,narm
+         index = index+1
+         xall(:,index) = (/0.75*(spacing*nbody) + start,spacing*i,0./)
+      enddo
+
+      do i=1,nhead
+         index = index+1
+         xall(:,index) = (/start+nbody*spacing + head_radius + head_radius*cos(i*2.*pi/10.),head_radius*sin(i*2.*pi/10.),0./)
+      enddo
+
+      do i=1,nleg
+         index=index+1
+         xall(1,index) = start-nleg*spacing+(i-1)*spacing
+         xall(2,index) = -xall(1,index) + start
+      enddo
+      do i=1,nleg
+         index=index+1
+         xall(1,index) = start-nleg*spacing+(i-1)*spacing
+         xall(2,index) = xall(1,index) - start
+      enddo
+
+      vall(2,:) = 0.0521157
+
+   end subroutine setup_dude
+
    subroutine initialise(x,v,type)
       real, intent(out) :: x(3), v(3)
       real :: r, vtan
