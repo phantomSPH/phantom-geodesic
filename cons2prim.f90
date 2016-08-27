@@ -29,7 +29,7 @@ contains
    !+
    !----------------------------------------------------------------
    subroutine primitive2conservative(x,v,dens,u,P,rho,pmom,en)
-      use utils_gr, only: dot_product_gr
+      use utils_gr, only: get_u0
       use metric, only: get_metric
       use eos, only: get_enthalpy
       real, intent(in)  :: x(1:3)
@@ -45,7 +45,7 @@ contains
       call get_enthalpy(enth,dens,p) !enth = 1.+ u + P/dens
 
       call get_metric(x,gcov,gcon,sqrtg)
-      U0  = 1./sqrt(-dot_product_gr(v4U,v4U,gcov))
+      call get_u0(x,v,U0)
       rho = sqrtg*dens*U0
       do i=1,3
          v3d = dot_product(gcov(i,:),v4U(:))
@@ -58,7 +58,7 @@ contains
             v3_DOT_v3 = v3_DOT_v3 + gcov(i,mu)*v(mu)*v(i)
          enddo
       enddo
-      en = U0*(enth*v3_DOT_v3 - (1.+u)*dot_product_gr(v4U,v4U,gcov))
+      en = U0*enth*v3_DOT_v3 + (1.+u)/U0
 
    end subroutine primitive2conservative
 
