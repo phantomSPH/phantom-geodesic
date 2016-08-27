@@ -45,7 +45,7 @@ pure real function dot_product_gr(vec1,vec2,gcov)
  dot_product_gr = 0.
  do i=1,size(vec1)
     do j=1,size(vec2)
-       dot_product_gr = dot_product_gr + gcov(i,j)*vec1(i)*vec2(j)
+       dot_product_gr = dot_product_gr + gcov(j,i)*vec1(i)*vec2(j)
     enddo
  enddo
 
