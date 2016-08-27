@@ -13,7 +13,7 @@ contains
       x = (/10.,0.,0./)
       dens = 10.
       call get_metric3plus1(x,alpha,beta,gij)
-      do i=0,9
+      do i=0,5
          bigv = (/i*0.1,0.,0./)
          v = bigV*alpha-beta
          do j=0,1
