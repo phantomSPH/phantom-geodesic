@@ -16,11 +16,11 @@ contains
       write(filename,"(a,i5.5,a)") 'output_',ifile,'.dat'
       open(unit=50, file=filename, status='replace')
       write(50,*) time
-      write(50,"(a12,6a26)") 'Particle #','x','y','z','vx','vy','vz'
+      write(50,"(6a26)") 'x','y','z','vx','vy','vz'
       do i=1,np
          x = xall(:,i)
          v = vall(:,i)
-         write(50,"(I12,6e26.16)") i,x,v
+         write(50,"(6e26.16)") x,v
       enddo
    end subroutine write_out
 
@@ -29,7 +29,7 @@ contains
       integer, save :: i=0
 
       if (i==0) then
-         open(unit=55, file='output.ev',status='replace')
+         open(unit=55, file='ev.dat',status='replace')
          write(55,*) '# Time, Energy, Angular momentum'
       else
          open(unit=55, file='output.ev',position='append')

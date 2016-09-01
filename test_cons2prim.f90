@@ -13,10 +13,10 @@ contains
       x = (/10.,0.,0./)
       dens = 10.
       call get_metric3plus1(x,alpha,beta,gij)
-      do i=0,5
+      do i=0,10
          bigv = (/i*0.1,0.,0./)
          v = bigV*alpha-beta
-         do j=0,1
+         do j=0,10
             p = j*.1
             call get_u(u,p,dens)
             call test_cons2prim_i(x,v,dens,u,p,ntests,npass)

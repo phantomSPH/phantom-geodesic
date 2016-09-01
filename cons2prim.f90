@@ -80,8 +80,7 @@ contains
       logical :: converged
       ierr = 0
 
-      call get_metric(x,gcov,gcon,sqrtg)
-      call get_metric3plus1(x,alpha,beta,gij)
+      call get_metric3plus1(x,alpha,beta,gij,gcov,gcon,sqrtg)
       beta2 = dot_product_gr(beta,beta,gcon(1:3,1:3))
       pmom2 = dot_product_gr(pmom,pmom,gcon(1:3,1:3))
 

@@ -4,7 +4,7 @@
 !+
 !----------------------------------------------------------------
 program test
-   use init, only: setup,setup_dude
+   use init, only: setup,setup_dude,setup_sphere
    use metric, only: get_metric, mass1
    use force_gr, only: get_sourceterms
    use step, only: step_leapfrog, step_1, step_heuns
@@ -16,9 +16,10 @@ program test
    real, allocatable, dimension(:,:) :: xall,vall
    real, dimension(3):: x,v,fterm
    real :: time, energy_init, angmom_init, energy, angmom, U0, r
-   real, parameter :: dt = 1.e-3, tmax = 15000., dtout = 50., dtout_ev = 10.
+   real, parameter :: dt = 0.5e-3, tmax = 30000, dtout = 50./90., dtout_ev = 50./90.
    integer :: nsteps, i,j, dnout, dnout_ev
    logical :: passed
+   real :: start, finish
 
    nsteps = int(tmax/dt)
    print*,'dt     = ',dt
@@ -28,7 +29,7 @@ program test
    dnout_ev = int(dtout_ev/dt)
    print*,'START'
    ! call setup(xall, vall,np)
-   call setup_dude(xall, vall,np)
+   call setup(xall, vall,np)
 
    angmom = 0.
    energy = 0.
@@ -48,17 +49,19 @@ program test
    enddo
    call write_out(time,xall,vall,np)
 
+   call cpu_time(start)
    do i=1,nsteps
       time = time + dt
       angmom =0.
       energy =0.
 
+      !$OMP DO
       do j=1,np
 
          x = xall(:,j)
          v = vall(:,j)
          call get_sourceterms(x,v,fterm)
-         !call step_leapfrog(x,v,fterm,dt)
+         ! call step_leapfrog(x,v,fterm,dt)
          call step_heuns(x,v,fterm,dt)
          !call step_1(x,v,fterm,dt)
          if (mod(i,dnout)==0) call check(x,v,passed)
@@ -71,6 +74,7 @@ program test
          energy = energy + (1. - 2*mass1/r)*U0
          angmom = angmom + (x(1)*v(2)-x(2)*v(1))*U0
       enddo
+      !$OMP END DO
 
       if (mod(i,dnout_ev)==0) then
          call write_ev(time,energy,angmom)
@@ -79,7 +83,10 @@ program test
       endif
       if (mod(i,dnout)==0) then
          call check(x,v,passed)
-         print*,'TIME =', time
+         call cpu_time(finish)
+         print*,'TIME =', time,'Percent complete %:',time/tmax*100.,'Time left (approx) (s) :'&
+         &,(tmax-time)/dtout*(finish-start),' real time taken (s) =',finish-start
+         call cpu_time(start)
          call write_out(time,xall,vall,np)
       endif
 

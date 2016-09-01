@@ -33,7 +33,7 @@ contains
   x = x + dt*v
   ! Converge to x
   ! do while ( .not. converged_x .and. iterations_x < max_iterations)
-  do while (iterations_x < 20)
+  do while (iterations_x < 3)
      iterations_x = iterations_x + 1
      xprev = x
      call get_v_from_p(pmom,vstar,x) ! Get v(phalf,xstar)=vstar
@@ -49,7 +49,7 @@ contains
   pmom = pmom + 0.5*dt*fterm !pmom_star
   ! Converge to p
   ! do while (.not. converged_pmom .and. iterations_pmom < max_iterations)
-  do while (iterations_pmom < 20)
+  do while (iterations_pmom < 3)
      iterations_pmom = iterations_pmom + 1
      pmom_prev = pmom
      call get_v_from_p(pmom,v,x)               ! Get vstar from pmom_star
