@@ -6,6 +6,7 @@ contains
    subroutine setup(xall,vall,np)
       integer, intent(out) :: np
       real, allocatable, intent(inout), dimension(:,:) :: xall,vall
+
       call setup_dude(xall,vall,np)
 
    end subroutine setup
@@ -27,7 +28,7 @@ contains
       integer :: i,index,nleg,nbody,narm,nhead
       real :: rotate_z(3,3),head_radius,rtan(3),r
       real, parameter :: spacing=0.05, theta_z=pi/2.
-      real, parameter :: translate(3) = (/10.,0.,0./)
+      real, parameter :: translate(3) = (/6.,0.,0./)
 
       nbody = 10
       narm  = 5
@@ -76,7 +77,7 @@ contains
          xall(:,i)=matmul(rotate_z,xall(:,i))
          xall(:,i)=xall(:,i) + translate
          call cross_product((/0.,0.,1./),xall(:,i),rtan)
-         rtan = rtan/sqrt(dot_product(rtan,rtan))
+         rtan = rtan/sqrt(dot_product(rtan,rtan)) ! Unit vector tangential to motion
          r = sqrt(dot_product(xall(:,i),xall(:,i)))
          vall(:,i) = rtan/sqrt(r)
       enddo

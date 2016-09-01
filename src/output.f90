@@ -32,7 +32,7 @@ contains
          open(unit=55, file='ev.dat',status='replace')
          write(55,*) '# Time, Energy, Angular momentum'
       else
-         open(unit=55, file='output.ev',position='append')
+         open(unit=55, file='ev.dat',position='append')
       endif
       i = i+1
       write(55,*) time, energy, angmom

@@ -16,7 +16,7 @@ program test
    real, allocatable, dimension(:,:) :: xall,vall
    real, dimension(3):: x,v,fterm
    real :: time, energy_init, angmom_init, energy, angmom, U0, r
-   real, parameter :: dt = 0.5e-3, tmax = 30000, dtout = 50./90., dtout_ev = 50./90.
+   real, parameter :: dt = 1.e-2, tmax = 300, dtout = 50./45., dtout_ev = 50./45.
    integer :: nsteps, i,j, dnout, dnout_ev
    logical :: passed
    real :: start, finish
