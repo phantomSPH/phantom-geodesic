@@ -6,6 +6,7 @@ default:
 	cd $(BUILD_DIR) && make
 	cp $(BUILD_DIR)/$(CODE_NAME) .
 
+.PHONY: test
 test:
 	cd $(BUILD_DIR) && make test
 	cp $(BUILD_DIR)/test .
