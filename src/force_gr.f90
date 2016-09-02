@@ -18,13 +18,13 @@ subroutine get_forcegr(x,v,dens,u,p,fterm)
  real    :: gcov(0:3,0:3), gcon(0:3,0:3)
  real    :: sqrtg
  real    :: dgcovdx(0:3,0:3), dgcovdy(0:3,0:3), dgcovdz(0:3,0:3)
- real    :: dgcondx(0:3,0:3), dgcondy(0:3,0:3), dgcondz(0:3,0:3)
+ ! real    :: dgcondx(0:3,0:3), dgcondy(0:3,0:3), dgcondz(0:3,0:3)
  real    :: v4(0:3), tmunu(0:3,0:3)
  real    :: enth, uzero2, uzero
  integer :: i,j
  ! Note to self: try with potential from Tejeda, Rosswog  2013
  call get_metric(x,gcov,gcon,sqrtg)
- call get_metric_derivs(x,dgcovdx, dgcovdy, dgcovdz, dgcondx, dgcondy, dgcondz)
+ call get_metric_derivs(x,dgcovdx, dgcovdy, dgcovdz)
 
  call get_enthalpy(enth,dens,p)
 

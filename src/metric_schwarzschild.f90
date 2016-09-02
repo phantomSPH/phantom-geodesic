@@ -71,18 +71,18 @@ contains
  !  dgcondz) form
  !+
  !----------------------------------------------------------------
- pure subroutine get_metric_derivs(position,dgcovdx, dgcovdy, dgcovdz, dgcondx, dgcondy, dgcondz)
+ pure subroutine get_metric_derivs(position,dgcovdx, dgcovdy, dgcovdz)
   real,    intent(in)  :: position(3)
   real,    intent(out) :: dgcovdx(0:3,0:3), dgcovdy(0:3,0:3), dgcovdz(0:3,0:3)
-  real,    intent(out) :: dgcondx(0:3,0:3), dgcondy(0:3,0:3), dgcondz(0:3,0:3)
+  ! real,    intent(out) :: dgcondx(0:3,0:3), dgcondy(0:3,0:3), dgcondz(0:3,0:3)
   real :: x,y,z, rs,r,r2,r3,r4,r5,rs_on_r3,x2,y2,z2,rs2
 
   dgcovdx = 0.
   dgcovdy = 0.
   dgcovdz = 0.
-  dgcondx = 0.
-  dgcondy = 0.
-  dgcondz = 0.
+  ! dgcondx = 0.
+  ! dgcondy = 0.
+  ! dgcondz = 0.
 
   x = position(1)
   y = position(2)
@@ -120,22 +120,22 @@ contains
    dgcovdx(3,3) = (-2*(r - rs)**2*x*(-z2) + r*(-2*r + rs)*x*z2)&
    /(r4*(r - rs)**2)
 
-   dgcondx(0,0) = (rs*x)/(r*(r - rs)**2)
-   dgcondx(0,1) = 0
-   dgcondx(0,2) = 0
-   dgcondx(0,3) = 0
-   dgcondx(1,0) = 0
-   dgcondx(1,1) = -((x*(-2*r3 + 2*r2*rs - 3*rs*x2 + 2*r3))/r5)
-   dgcondx(1,2) = -((rs*(r2 - 3*x2)*y)/r5)
-   dgcondx(1,3) = -((rs*(r2 - 3*x2)*z)/r5)
-   dgcondx(2,0) = 0
-   dgcondx(2,1) = -((rs*(r2 - 3*x2)*y)/r5)
-   dgcondx(2,2) = (x*(2*r3 + 3*rs*y2 - 2*r3))/r5
-   dgcondx(2,3) = (3*rs*x*y*z)/r5
-   dgcondx(3,0) = 0
-   dgcondx(3,1) = -((rs*(r2 - 3*x2)*z)/r5)
-   dgcondx(3,2) = (3*rs*x*y*z)/r5
-   dgcondx(3,3) = (x*(2*r3 + 3*rs*z2 - 2*r3))/r5
+   ! dgcondx(0,0) = (rs*x)/(r*(r - rs)**2)
+   ! dgcondx(0,1) = 0
+   ! dgcondx(0,2) = 0
+   ! dgcondx(0,3) = 0
+   ! dgcondx(1,0) = 0
+   ! dgcondx(1,1) = -((x*(-2*r3 + 2*r2*rs - 3*rs*x2 + 2*r3))/r5)
+   ! dgcondx(1,2) = -((rs*(r2 - 3*x2)*y)/r5)
+   ! dgcondx(1,3) = -((rs*(r2 - 3*x2)*z)/r5)
+   ! dgcondx(2,0) = 0
+   ! dgcondx(2,1) = -((rs*(r2 - 3*x2)*y)/r5)
+   ! dgcondx(2,2) = (x*(2*r3 + 3*rs*y2 - 2*r3))/r5
+   ! dgcondx(2,3) = (3*rs*x*y*z)/r5
+   ! dgcondx(3,0) = 0
+   ! dgcondx(3,1) = -((rs*(r2 - 3*x2)*z)/r5)
+   ! dgcondx(3,2) = (3*rs*x*y*z)/r5
+   ! dgcondx(3,3) = (x*(2*r3 + 3*rs*z2 - 2*r3))/r5
 
    ! dy
    dgcovdy(0,0) = -((rs*y)/r3)
@@ -158,22 +158,22 @@ contains
    dgcovdy(3,3) = (-2*(r - rs)**2*y*(-z2) + r*(-2*r + rs)*y*z2)&
    /(r4*(r - rs)**2)
 
-   dgcondy(0,0) = (rs*y)/(r*(r - rs)**2)
-   dgcondy(0,1) = 0
-   dgcondy(0,2) = 0
-   dgcondy(0,3) = 0
-   dgcondy(1,0) = 0
-   dgcondy(1,1) = (y*(2*r3 + 3*rs*x2 - 2*r3))/r5
-   dgcondy(1,2) = -((rs*x*(r2 - 3*y2))/r5)
-   dgcondy(1,3) = (3*rs*x*y*z)/r5
-   dgcondy(2,0) = 0
-   dgcondy(2,1) = -((rs*x*(r2 - 3*y2))/r5)
-   dgcondy(2,2) = -((y*(-2*r3 + 2*r2*rs - 3*rs*y2 + 2*r3))/r5)
-   dgcondy(2,3) = -((rs*(r2 - 3*y2)*z)/r5)
-   dgcondy(3,0) = 0
-   dgcondy(3,1) = (3*rs*x*y*z)/r5
-   dgcondy(3,2) = -((rs*(r2 - 3*y2)*z)/r5)
-   dgcondy(3,3) = (y*(2*r3 + 3*rs*z2 - 2*r3))/r5
+   ! dgcondy(0,0) = (rs*y)/(r*(r - rs)**2)
+   ! dgcondy(0,1) = 0
+   ! dgcondy(0,2) = 0
+   ! dgcondy(0,3) = 0
+   ! dgcondy(1,0) = 0
+   ! dgcondy(1,1) = (y*(2*r3 + 3*rs*x2 - 2*r3))/r5
+   ! dgcondy(1,2) = -((rs*x*(r2 - 3*y2))/r5)
+   ! dgcondy(1,3) = (3*rs*x*y*z)/r5
+   ! dgcondy(2,0) = 0
+   ! dgcondy(2,1) = -((rs*x*(r2 - 3*y2))/r5)
+   ! dgcondy(2,2) = -((y*(-2*r3 + 2*r2*rs - 3*rs*y2 + 2*r3))/r5)
+   ! dgcondy(2,3) = -((rs*(r2 - 3*y2)*z)/r5)
+   ! dgcondy(3,0) = 0
+   ! dgcondy(3,1) = (3*rs*x*y*z)/r5
+   ! dgcondy(3,2) = -((rs*(r2 - 3*y2)*z)/r5)
+   ! dgcondy(3,3) = (y*(2*r3 + 3*rs*z2 - 2*r3))/r5
 
    ! dz
    dgcovdz(0,0) = -((rs*z)/r3)
@@ -196,22 +196,22 @@ contains
    dgcovdz(3,3) = (z*(2*(r - rs)*(r3 - r*(x2 + y2) + rs*(x2 + y2)) + &
    r*(-2*r + rs)*z2))/(r4*(r - rs)**2)
 
-   dgcondz(0,0) = (rs*z)/(r*(r - rs)**2)
-   dgcondz(0,1) = 0
-   dgcondz(0,2) = 0
-   dgcondz(0,3) = 0
-   dgcondz(1,0) = 0
-   dgcondz(1,1) = (z*(2*r3 + 3*rs*x2 - 2*r3))/r5
-   dgcondz(1,2) = (3*rs*x*y*z)/r5
-   dgcondz(1,3) = -((rs*x*(r2 - 3*z2))/r5)
-   dgcondz(2,0) = 0
-   dgcondz(2,1) = (3*rs*x*y*z)/r5
-   dgcondz(2,2) = (z*(2*r3 + 3*rs*y2 - 2*r3))/r5
-   dgcondz(2,3) = -((rs*y*(r2 - 3*z2))/r5)
-   dgcondz(3,0) = 0
-   dgcondz(3,1) = -((rs*x*(r2 - 3*z2))/r5)
-   dgcondz(3,2) = -((rs*y*(r2 - 3*z2))/r5)
-   dgcondz(3,3) = (z*(2*r3 - 2*r2*rs + 3*rs*z2 - 2*r3))/r5
+   ! dgcondz(0,0) = (rs*z)/(r*(r - rs)**2)
+   ! dgcondz(0,1) = 0
+   ! dgcondz(0,2) = 0
+   ! dgcondz(0,3) = 0
+   ! dgcondz(1,0) = 0
+   ! dgcondz(1,1) = (z*(2*r3 + 3*rs*x2 - 2*r3))/r5
+   ! dgcondz(1,2) = (3*rs*x*y*z)/r5
+   ! dgcondz(1,3) = -((rs*x*(r2 - 3*z2))/r5)
+   ! dgcondz(2,0) = 0
+   ! dgcondz(2,1) = (3*rs*x*y*z)/r5
+   ! dgcondz(2,2) = (z*(2*r3 + 3*rs*y2 - 2*r3))/r5
+   ! dgcondz(2,3) = -((rs*y*(r2 - 3*z2))/r5)
+   ! dgcondz(3,0) = 0
+   ! dgcondz(3,1) = -((rs*x*(r2 - 3*z2))/r5)
+   ! dgcondz(3,2) = -((rs*y*(r2 - 3*z2))/r5)
+   ! dgcondz(3,3) = (z*(2*r3 - 2*r2*rs + 3*rs*z2 - 2*r3))/r5
 
  end subroutine get_metric_derivs
 

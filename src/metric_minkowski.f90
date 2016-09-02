@@ -31,15 +31,15 @@ contains
   endif
  end subroutine get_metric
 
- pure subroutine get_metric_derivs(position,dgcovdx, dgcovdy, dgcovdz, dgcondx, dgcondy, dgcondz)
+ pure subroutine get_metric_derivs(position,dgcovdx, dgcovdy, dgcovdz)
     real,    intent(in)  :: position(3)
     real,    intent(out) :: dgcovdx(0:3,0:3), dgcovdy(0:3,0:3), dgcovdz(0:3,0:3)
-    real,    intent(out) :: dgcondx(0:3,0:3), dgcondy(0:3,0:3), dgcondz(0:3,0:3)
+   !  real,    intent(out) :: dgcondx(0:3,0:3), dgcondy(0:3,0:3), dgcondz(0:3,0:3)
     dgcovdx = 0.
     dgcovdy = 0.
     dgcovdz = 0.
-    dgcondx = 0.
-    dgcondy = 0.
-    dgcondz = 0.
+   !  dgcondx = 0.
+   !  dgcondy = 0.
+   !  dgcondz = 0.
  end subroutine
 end module metric
