@@ -39,7 +39,7 @@ z=xyz[:,2*n+1:]
 # i.e. Set the speed of the animation
 # Use this if you have a lot of small steps.
 speed = 2
-n_frames = int(n/speed)
+n_frames = int(tnmax/speed)
 
 # First set up the figure, the axis, and the plot element we want to animate
 markersize = 5
@@ -51,7 +51,10 @@ ax = fig.gca(projection='3d')
 # ax.axis('equal')
 # ax.set_xlim([-100,100])
 # ax.set_ylim([-100,100])
-# ax.set_zlim([-10,10])
+# ax.set_zlim([-100,100])
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('z')
 
 phi   = np.linspace(0, 2 * np.pi, 100)
 theta = np.linspace(0, np.pi, 100)
@@ -76,7 +79,6 @@ def animate(i):
     for j in range(n):
         body[j].set_data(x[i*speed,j],y[i*speed,j])
         body[j].set_3d_properties(z[i*speed,j])
-
     return body[0],
 
 # call the animator.  blit=True means only re-draw the parts that have changed.
