@@ -118,13 +118,13 @@ contains
    dgcovdx(3,1) = (rs*(r3 - r2*rs - 3*r*x2 + 2*rs*x2)*z)/(r4*(r - rs)**2)
 
    dgcovdx(0,2) = 0.
-   dgcovdx(1,2) = (rs*(r3 - r2*rs - 3*r*x2 + 2*rs*x2)*y)/(r4*(r - rs)**2)
+   dgcovdx(1,2) = dgcovdx(2,1)
    dgcovdx(2,2) = (x*(2*r4 - 4*r3*rs + 2*r2*(rs2 - r2) - 2*rs2*(x2 + z2) + r*rs*(4*x2 + y2 + 4*z2)))/(r4*(r - rs)**2)
    dgcovdx(3,2) = (rs*(-3*r + 2*rs)*x*y*z)/(r4*(r - rs)**2)
 
    dgcovdx(0,3) = 0.
-   dgcovdx(1,3) = (rs*(r3 - r2*rs - 3*r*x2 + 2*rs*x2)*z)/(r4*(r - rs)**2)
-   dgcovdx(2,3) = (rs*(-3*r + 2*rs)*x*y*z)/(r4*(r - rs)**2)
+   dgcovdx(1,3) = dgcovdx(3,1)
+   dgcovdx(2,3) = dgcovdx(3,2)
    dgcovdx(3,3) = (-2*(r - rs)**2*x*(-z2) + r*(-2*r + rs)*x*z2)/(r4*(r - rs)**2)
 
    ! dgcondx(0,0) = (rs*x)/(r*(r - rs)**2)
@@ -156,13 +156,13 @@ contains
    dgcovdy(3,1) = (rs*(-3*r + 2*rs)*x*y*z)/(r4*(r - rs)**2)
 
    dgcovdy(0,2) = 0.
-   dgcovdy(1,2) = (rs*x*(r3 - r2*rs - 3*r*y2 + 2*rs*y2))/(r4*(r - rs)**2)
+   dgcovdy(1,2) = dgcovdy(2,1)
    dgcovdy(2,2) = (y*(2*r4 - 2*r3*rs - 2*rs2*(x2 + z2) - 2*r4 + r*rs*(4*x2 + y2 + 4*z2)))/(r4*(r - rs)**2)
    dgcovdy(3,2) = (rs*(r3 - r2*rs - 3*r*y2 + 2*rs*y2)*z)/(r4*(r - rs)**2)
 
    dgcovdy(0,3) = 0.
-   dgcovdy(1,3) = (rs*(-3*r + 2*rs)*x*y*z)/(r4*(r - rs)**2)
-   dgcovdy(2,3) = (rs*(r3 - r2*rs - 3*r*y2 + 2*rs*y2)*z)/(r4*(r - rs)**2)
+   dgcovdy(1,3) = dgcovdy(3,1)
+   dgcovdy(2,3) = dgcovdy(3,2)
    dgcovdy(3,3) = (-2*(r - rs)**2*y*(-z2) + r*(-2*r + rs)*y*z2)/(r4*(r - rs)**2)
 
    ! dgcondy(0,0) = (rs*y)/(r*(r - rs)**2)
@@ -194,13 +194,13 @@ contains
    dgcovdz(3,1) = (rs*x*(r3 - r2*rs - 3*r*z2 + 2*rs*z2))/(r4*(r - rs)**2)
 
    dgcovdz(0,2) = 0.
-   dgcovdz(1,2) = (rs*(-3*r + 2*rs)*x*y*z)/(r4*(r - rs)**2)
+   dgcovdz(1,2) = dgcovdz(2,1)
    dgcovdz(2,2) = (z*(2*r4 - 4*r3*rs + 2*r2*(rs2 - r2) -2*rs2*(x2 + z2) + r*rs*(4*x2 + y2 + 4*z2)))/(r4*(r - rs)**2)
    dgcovdz(3,2) = (rs*y*(r3 - r2*rs - 3*r*z2 + 2*rs*z2))/(r4*(r - rs)**2)
 
    dgcovdz(0,3) = 0.
-   dgcovdz(1,3) = (rs*x*(r3 - r2*rs - 3*r*z2 + 2*rs*z2))/(r4*(r - rs)**2)
-   dgcovdz(2,3) = (rs*y*(r3 - r2*rs - 3*r*z2 + 2*rs*z2))/(r4*(r - rs)**2)
+   dgcovdz(1,3) = dgcovdz(3,1)
+   dgcovdz(2,3) = dgcovdz(3,2)
    dgcovdz(3,3) = (z*(2*(r - rs)*(r3 - r*(x2 + y2) + rs*(x2 + y2)) + r*(-2*r + rs)*z2))/(r4*(r - rs)**2)
 
    ! dgcondz(0,0) = (rs*z)/(r*(r - rs)**2)
