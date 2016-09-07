@@ -7,9 +7,53 @@ contains
       integer, intent(out) :: np
       real, allocatable, intent(inout), dimension(:,:) :: xall,vall
 
-      call setup_dude(xall,vall,np)
-
+      call setup_multisphere(xall,vall,np)
    end subroutine setup
+
+   subroutine setup_multisphere(xall,vall,np)
+      integer, intent(out) :: np
+      real, allocatable, intent(inout), dimension(:,:) :: xall,vall
+      real, allocatable, dimension(:,:) :: x1,v1,x2,v2,x3,v3
+      integer :: n1, n2,i,n3
+      real :: rotate_y(3,3), rotate_x(3,3), rotate_z(3,3),theta_y, theta_z, theta_x
+
+      theta_y=-0.5*pi
+      rotate_y(1,:)=(/ cos(theta_y), 0. , sin(theta_y)/)
+      rotate_y(2,:)=(/ 0.          , 1. , 0.          /)
+      rotate_y(3,:)=(/-sin(theta_y), 0. , cos(theta_y)/)
+
+      theta_z=-0.5*pi
+      rotate_z(1,:)=(/cos(theta_z),-sin(theta_z),0./)
+      rotate_z(2,:)=(/sin(theta_z), cos(theta_z),0./)
+      rotate_z(3,:)=(/0.        ,0.         ,1./)
+
+      theta_x= 0.5*pi
+      rotate_x(1,:)=(/1. , 0.          , 0.          /)
+      rotate_x(2,:)=(/0. , cos(theta_x),-sin(theta_x)/)
+      rotate_x(3,:)=(/0. , sin(theta_x), cos(theta_x)/)
+
+      ! call setup_dude(xall,vall,np)
+      call setup_sphere(x1,v1,n1)
+      call setup_sphere(x2,v2,n2)
+      call setup_sphere(x3,v3,n3)
+      np = n1+n2+n3
+      allocate(xall(3,np),vall(3,np))
+      do i=1,n2
+         x2(:,i)=matmul(rotate_y,x2(:,i))
+         v2(:,i)=matmul(rotate_y,v2(:,i))
+      enddo
+      do i=1,n3
+         x3(:,i)=matmul(rotate_x,matmul(rotate_z,x3(:,i)))
+         v3(:,i)=matmul(rotate_x,matmul(rotate_z,v3(:,i)))
+      enddo
+      xall(:,1:n1) = x1
+      vall(:,1:n1) = v1
+      xall(:,n1+1:n1+n2) = x2
+      vall(:,n1+1:n1+n2) = v2
+      xall(:,n1+n2+1:n1+n2+n3) = x3
+      vall(:,n1+n2+1:n1+n2+n3) = v3
+
+   end subroutine setup_multisphere
 
    subroutine setup_2testbodies(xall,vall,np)
       integer, intent(out) :: np
