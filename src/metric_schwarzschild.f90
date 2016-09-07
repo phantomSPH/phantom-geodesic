@@ -58,13 +58,13 @@ contains
 
    gcon(1,1) = 1.-rs_on_r3*x2
    gcon(2,1) = -rs_on_r3*x*y
-   gcon(3,1) = gcon(1,3)
+   gcon(3,1) = -rs_on_r3*x*z
 
    gcon(1,2) = gcon(2,1)
    gcon(2,2) = 1.-rs_on_r3*y2
    gcon(3,2) = -rs_on_r3*y*z
 
-   gcon(1,3) = -rs_on_r3*x*z
+   gcon(1,3) = gcon(3,1)
    gcon(2,3) = gcon(3,2)
    gcon(3,3) = 1.-rs_on_r3*z2
 
