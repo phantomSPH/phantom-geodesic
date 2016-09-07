@@ -47,4 +47,3 @@ while make_figure is False:
 
 if make_figure:
     fig.savefig('figure.pdf')
-    
