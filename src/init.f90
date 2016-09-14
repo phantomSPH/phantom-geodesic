@@ -3,13 +3,73 @@ module init
    real, parameter :: pi = acos(-1.)
 contains
 
+!--- Wrapper subroutine called in main.f90
    subroutine setup(xall,vall,np)
       integer, intent(out) :: np
       real, allocatable, intent(inout), dimension(:,:) :: xall,vall
-
-      call setup_multisphere(xall,vall,np)
+      ! call setup_multisphere(xall,vall,np)
+      ! call setup_2testbodies(xall,vall,np)
+      call setup_singletype(xall,vall,np)
    end subroutine setup
 
+!--- Setup up a single body (wrapper to call initialise once)
+   subroutine setup_singletype(xall,vall,np)
+      integer, intent(out) :: np
+      real, allocatable, intent(inout), dimension(:,:) :: xall,vall
+      np = 1
+      allocate(xall(3,np),vall(3,np))
+      call initialise(xall(:,1),vall(:,1),'circular')
+   end subroutine setup_singletype
+
+!--- Setup up multipe (wrapper to call initialise multiple times)
+   subroutine setup_multitypes(xall,vall,np)
+      integer, intent(out) :: np
+      real, allocatable, intent(inout), dimension(:,:) :: xall,vall
+      np = 2
+      allocate(xall(3,np),vall(3,np))
+      call initialise(xall(:,1),vall(:,1),'precession')
+      call initialise(xall(:,2),vall(:,2),'circular')
+   end subroutine setup_multitypes
+
+!--- Setup a proxy for a sphere of particles
+   subroutine setup_sphere(xall,vall,np)
+      integer, intent(out) :: np
+      real, allocatable, intent(inout), dimension(:,:) :: xall,vall
+      real :: dlayer, dr
+      integer :: i,j,k, nlayers, nrings,index,n,nringsmax
+      real, parameter :: translate(3) = (/90.,0.,0./)
+      dlayer = 0.5
+      dr = 0.5
+      nlayers = 7
+      nringsmax = 4
+      index = 0
+      np=107
+      allocate(xall(3,np),vall(3,np))
+      do i=0,(nlayers-1)/2 !layer index
+         nrings = nringsmax-i
+         do j=1,nrings !number of rings in layer
+            n=5*(j-1)+1
+            do k=1,n !number of points in ring
+               index=index+1
+               if (j==0) then
+                  xall(:,index)= (/0.,0.,i*dlayer/)
+               else
+                  xall(:,index)= (/(j-1)*dr*cos(2.*pi/n*k),(j-1)*dr*sin(2.*pi/n*k), i*dlayer/)
+
+                  index=index+1
+                  xall(:,index)= (/(j-1)*dr*cos(2.*pi/n*k),(j-1)*dr*sin(2.*pi/n*k),-i*dlayer/)
+
+               endif
+            enddo
+         enddo
+      enddo
+      do i=1,np
+         xall(:,i)=xall(:,i) + translate
+         vall(:,i)=(/0.,0.0521157,0./)
+      enddo
+   end subroutine setup_sphere
+
+!--- Setup multiple spheres of particles
    subroutine setup_multisphere(xall,vall,np)
       integer, intent(out) :: np
       real, allocatable, intent(inout), dimension(:,:) :: xall,vall
@@ -55,17 +115,7 @@ contains
 
    end subroutine setup_multisphere
 
-   subroutine setup_2testbodies(xall,vall,np)
-      integer, intent(out) :: np
-      real, allocatable, intent(inout), dimension(:,:) :: xall,vall
-      np = 2
-      allocate(xall(3,np),vall(3,np))
-
-      call initialise(xall(:,1),vall(:,1),'precession')
-      call initialise(xall(:,2),vall(:,2),'circular')
-
-   end subroutine setup_2testbodies
-
+!--- Setup a stick-figure person
    subroutine setup_dude(xall,vall,np)
       integer, intent(out) :: np
       real, allocatable, intent(inout), dimension(:,:) :: xall,vall
@@ -130,19 +180,25 @@ contains
 
    end subroutine setup_dude
 
+!--- Several types of single particle geodesics
    subroutine initialise(x,v,type)
+      use metric, only: metric_type, a, mass1
       real, intent(out) :: x(3), v(3)
       real :: r, vtan
-      real :: ra,va
-      ! real, parameter :: pi=3.14159265358979
-
-      !character(len=*), parameter :: type = 'precession'
+      real :: ra,va,rBL
       character(len=*), intent(in) :: type
 
       if (type=='circular') then
-         print*,'(Circular velocity) Enter radius r:'
+         print*,'(Circular velocity in x-y plane, anticlockwise) Enter radius r:'
          read(*,*) r
-         vtan = sqrt(1./r)
+         if (metric_type=='Schwarzschild') then
+            vtan = sqrt(1./r)
+         else if (metric_type=='Kerr') then
+            rBL = r!sqrt(r**2-a**2)
+            vtan = rBL/(sqrt(rBL**3)+a*sqrt(mass1**3))
+         else if (metric_type=='Minkowski') then
+            STOP 'Cannot make circular orbits in Minkowski metric.'
+         endif
          x = (/r,0.,0./)
          v = (/0.,vtan,0./)
          print*,'period =',2*pi*r/vtan
@@ -152,7 +208,9 @@ contains
 
       if (type=='radial') then
          ! Radial infall
-         x = (/-20.,0.,0./)
+         print*,'(Radial infall) Enter radius r (on x-axis):'
+         read(*,*) r
+         x = (/r,0.,0./)
          v = (/0.,0.,0./)
       endif
 
@@ -163,62 +221,9 @@ contains
          x = (/ra,0.,0./)
          v = (/0.,va,0./)
       endif
-
-      ! x = (/84.6,0.,0./)
-      ! v = (/0.,0.04777816206847369,0./)
-
-      ! x = (/500.,0.,0./)
-      ! v = (/0.,0.044721359549996,0./)
-
-      ! x = (/6.001,0.,0./)
-      ! v = (/0.,0.136083276348796,0./)
-
-      ! x = (/3.,0.,0./)
-      ! v = (/0.,0.19245008972987526,0./)
-
-      ! !!Circular orbit....?
-      ! x = (/10.,0.,0./)
-      ! v = (/0.,0.316228,0./)
-
    end subroutine initialise
 
-   subroutine setup_sphere(xall,vall,np)
-      integer, intent(out) :: np
-      real, allocatable, intent(inout), dimension(:,:) :: xall,vall
-      real :: dlayer, dr
-      integer :: nr, ntheta, nphi, i,j,k, nlayers, nrings,index,n,nringsmax
-      real, parameter :: translate(3) = (/90.,0.,0./)
-      dlayer = 0.5
-      dr = 0.5
-      nlayers = 7
-      nringsmax = 4
-      index = 0
-      np=107
-      allocate(xall(3,np),vall(3,np))
-      do i=0,(nlayers-1)/2 !layer index
-         nrings = nringsmax-i
-         do j=1,nrings !number of rings in layer
-            n=5*(j-1)+1
-            do k=1,n !number of points in ring
-               index=index+1
-               if (j==0) then
-                  xall(:,index)= (/0.,0.,i*dlayer/)
-               else
-                  xall(:,index)= (/(j-1)*dr*cos(2.*pi/n*k),(j-1)*dr*sin(2.*pi/n*k), i*dlayer/)
-
-                  index=index+1
-                  xall(:,index)= (/(j-1)*dr*cos(2.*pi/n*k),(j-1)*dr*sin(2.*pi/n*k),-i*dlayer/)
-
-               endif
-            enddo
-         enddo
-      enddo
-      do i=1,np
-         xall(:,i)=xall(:,i) + translate
-         vall(:,i)=(/0.,0.0521157,0./)
-      enddo
-   end subroutine setup_sphere
-
+!--- Subroutine to compute the 3-vector cross product
    subroutine cross_product(a,b,c)
       real, dimension(3), intent(in) :: a,b
       real, dimension(3), intent(out) :: c
