@@ -2,6 +2,8 @@ module metric
    implicit none
    character(len=*), parameter :: metric_type = 'Kerr'
 
+   !--- This is the Kerr metric in Kerr-Schild, 'Cartesian' coordinates
+
    public :: get_metric, metric_type, get_metric_derivs
 
    real, parameter, public :: mass1 = 1.  ! mass of central object
