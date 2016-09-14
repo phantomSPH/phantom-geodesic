@@ -9,8 +9,10 @@ program test
    call test_metric(ntests,npass)
    call test_cons2prim(ntests,npass)
 
-   write(*,'(/,a,i4)') 'Number of tests = ',ntests
-   write(*,'(a,i4,/)') 'Number passed   = ',npass
+   write(*,'(/,a,i10)') 'Number of tests = ',ntests
+   write(*,'(a,i10)')   'Number passed   = ',npass
+   write(*,'(a,i10,/)') 'Number failed   = ',ntests-npass
+   
    if (ntests==npass) then
       write(*,'(a)') "-----> PASSED <-----"
    else

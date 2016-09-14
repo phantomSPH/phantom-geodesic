@@ -5,7 +5,7 @@
 !----------------------------------------------------------------
 program test
    use init, only: setup,setup_dude,setup_sphere
-   use metric, only: get_metric, mass1
+   use metric, only: get_metric, mass1, metric_type
    use force_gr, only: get_sourceterms
    use step, only: step_leapfrog, step_1, step_heuns
    use utils_gr, only: get_u0
@@ -16,11 +16,12 @@ program test
    real, allocatable, dimension(:,:) :: xall,vall
    real, dimension(3):: x,v,fterm
    real :: time, energy_init, angmom_init, energy, angmom, U0, r
-   real, parameter :: dt = 1.e-2, tmax = 300, dtout = 50./45., dtout_ev = 50./45.
+   real, parameter :: dt = 1.e-2, tmax = 3000./17.*31.6227, dtout = 50./4, dtout_ev = 50./4
    integer :: nsteps, i,j, dnout, dnout_ev
    logical :: passed
    real :: start, finish
 
+   print*,"Metric type = ",metric_type
    nsteps = int(tmax/dt)
    print*,'dt     = ',dt
    print*,'nsteps = ',nsteps
@@ -28,7 +29,6 @@ program test
    dnout = int(dtout/dt)
    dnout_ev = int(dtout_ev/dt)
    print*,'START'
-   ! call setup(xall, vall,np)
    call setup(xall, vall,np)
 
    angmom = 0.

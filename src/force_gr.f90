@@ -59,7 +59,7 @@ subroutine get_forcegr(x,v,dens,u,p,fterm)
 
 end subroutine get_forcegr
 
-! for a test particle
+! Wrapper routine to call get_forcegr for a test particle
 subroutine get_sourceterms(x,v,fterm)
  real, intent(in)  :: x(3),v(3)
  real, intent(out) :: fterm(3)
