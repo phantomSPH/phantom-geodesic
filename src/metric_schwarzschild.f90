@@ -5,6 +5,8 @@ module metric
  public :: get_metric, metric_type, get_metric_derivs
 
  real, parameter, public :: mass1 = 1.  ! mass of central object
+ real, parameter, public :: a     = 0.0
+ real, parameter, public :: rs    = 2.*mass1
 
  private
 
@@ -19,11 +21,10 @@ contains
  pure subroutine get_metric(position,gcov,gcon,sqrtg)
   real,    intent(in)  :: position(3)
   real,    intent(out) :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg
-  real :: rs,r,r2,r3,rs_on_r3,coeff,x,y,z,x2,y2,z2,term
+  real :: r,r2,r3,rs_on_r3,coeff,x,y,z,x2,y2,z2,term
 
   gcov = 0.
   gcon = 0.
-  rs = 2.*mass1
   r2 = dot_product(position,position)
   r  = sqrt(r2)
   r3 = r*r2
@@ -82,7 +83,7 @@ contains
   real,    intent(in)  :: position(3)
   real,    intent(out) :: dgcovdx(0:3,0:3), dgcovdy(0:3,0:3), dgcovdz(0:3,0:3)
   ! real,    intent(out) :: dgcondx(0:3,0:3), dgcondy(0:3,0:3), dgcondz(0:3,0:3)
-  real :: x,y,z, rs,r,r2,r3,r4,r5,rs_on_r3,x2,y2,z2,rs2
+  real :: x,y,z,r,r2,r3,r4,r5,rs_on_r3,x2,y2,z2,rs2
 
   dgcovdx = 0.
   dgcovdy = 0.
@@ -97,7 +98,6 @@ contains
   x2= x**2
   y2= y**2
   z2= z**2
-  rs = 2.*mass1
   r2 = dot_product(position,position)
   r  = sqrt(r2)
   r3 = r*r2

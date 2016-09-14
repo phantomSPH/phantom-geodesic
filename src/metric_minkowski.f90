@@ -4,7 +4,9 @@ module metric
 
  public :: get_metric, get_metric_derivs, metric_type
 
- real, parameter, public :: mass1 = 1.  ! mass of central object
+ real, parameter, public :: mass1 = 0.  ! mass of central object
+ real, parameter, public :: a     = 0.  ! spin of central object
+ real, parameter, public :: rs    = 2.*mass1
 
  private
 
