@@ -104,7 +104,7 @@ contains
          enth = enth_old - f/df
 
          ! Needed in dust case when f/df = NaN casuses enth = NaN
-         if (enth_old==1.) enth=1.
+         if (abs(enth_old-1.)<tiny(enth_old)) enth=1.
 
          niter = niter + 1
          converged = (abs(enth-enth_old)/enth < tol)

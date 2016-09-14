@@ -28,7 +28,7 @@ subroutine get_enthalpy(enth,dens,P)
    enth = 1.+P/dens*(gam/(gam-1.))
 
    ! Needed in dust case when dens = 0 causes P/dens = NaN and therefore enth = NaN
-   if(p==0.) enth=1.
+   if(abs(p)<tiny(p)) enth=1.
 
 end subroutine
 end module
