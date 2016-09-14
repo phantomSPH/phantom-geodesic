@@ -8,23 +8,36 @@ contains
 !+
 !----------------------------------------------------------------
    subroutine test_metric(ntests,npass)
-      use metric, only: metric_type
-      use utils_gr, only: get_metric3plus1
+      use metric, only: metric_type, get_metric
+      use utils_gr, only: get_metric3plus1, dot_product_gr
       integer, intent(inout) :: ntests,npass
-      real :: x(1:3), v(1:3),alpha,beta(1:3),gij(1:3,1:3),bigv(1:3)
-      integer :: i,ierr
+      real :: x(1:3), v(1:3), v4(0:3)
+      real :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg,r
+      integer :: ierr, ix,iy,iz,vx,vy,vz
       ierr = 0
 
       write(*,'(/,a)') '--> testing metric'
       write(*,'(a,/)') '    metric type = '//trim(metric_type)
 
-      do i =0,5
-         ! x = (/2.0+1*10**(-real(i)),0.,0./)
-         x    = (/20.,0.,0./)
-         bigv = (/i*0.1,0.,0./)
-         call get_metric3plus1(x,alpha,beta,gij)
-         v = bigv*alpha-beta
-         call test_metric_i(x,v,ntests,npass)
+      do ix=0,50
+         do iy=0,50
+            do iz=0,50
+               do vx=0,10
+                  do vy=0,10
+                     do vz=0,10
+                        x = (/0.1*ix,0.1*iy,0.1*iz/)
+                        call get_metric(x,gcov,gcon,sqrtg)
+                        v = (/0.1*vx,0.1*vy,0.1*vz/)
+                        v4(0) = 1.
+                        v4(1:3) = v(:)
+                        r = sqrt(dot_product(x,x))
+                        ! Only allow valid combinations of position and velocity to be tested.
+                        if (dot_product_gr(v4,v4,gcov) < 0.) call test_metric_i(x,v,ntests,npass)
+                     enddo
+                  enddo
+               enddo
+            enddo
+         enddo
       enddo
 
       write(*,'(/,a,/)') '<-- metric test complete'
@@ -45,7 +58,7 @@ contains
       real, intent(in) :: x(1:3), v(1:3)
       real, dimension(0:3,0:3) :: gcov,gcon,gg
       real :: sqrtg, v4(0:3), sum
-      real, parameter :: tol=1.e-15
+      real, parameter :: tol=6.e-13
       integer :: i,j, nerrors,ncheck,n_error
       real :: errmax
 
