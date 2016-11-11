@@ -11,7 +11,7 @@ ORIGINALLY:
 MODIFIED by: David Liptai, Monash University, 2016.
 
 USE:
-    3D animation of particle orbits.
+    Animate the orbits of particles whilst showing their full path.
     Call this script with 'positions.dat' file as an input
     [Should contain: (time,xyz,xyz...) as columns]
 
@@ -43,27 +43,25 @@ z=xyz[:,3:tnmax:3]
 # Choose how many lines of the data file to skip between each frame.
 # i.e. Set the speed of the animation
 # Use this if you have a lot of small steps.
-speed = 2
+speed = 1
 n_frames = int(tnmax/speed)
 
 # First set up the figure, the axis, and the plot element we want to animate
-markersize = 5
+markersize = 20
 # fig = plt.figure(figsize=plt.figaspect(1)*1.5)
 # ax = plt.axes()
-fig = plt.figure(figsize=(15*2,11*2))
-ax  = p3.Axes3D(fig)
-# ax = fig.gca(projection='3d')
+circle1=plt.Circle((0,0),2,color='Black')
+fig = plt.figure(figsize=(15,11))
+ax = fig.add_subplot(111)
 
-# ax.axis('equal')
+ax.add_artist(circle1)
+fs=40
+ax.set_ylabel(r'$y$',fontsize=fs)
+ax.set_xlabel(r'$x$',fontsize=fs)
+
+ax.axis('equal')
 # ax.set_xlim([-100,100])
 # ax.set_ylim([-100,100])
-# ax.set_zlim([-100,100])
-ax.set_xlim3d([-100.0, 100.0])
-ax.set_xlabel('X')
-ax.set_ylim3d([-100.0, 100.0])
-ax.set_ylabel('Y')
-ax.set_zlim3d([-100.0, 100.0])
-ax.set_zlabel('Z')
 
 phi   = np.linspace(0, 2 * np.pi, 100)
 theta = np.linspace(0, np.pi, 100)
@@ -74,27 +72,28 @@ z_bh = 2 * np.outer(np.ones(np.size(phi)), np.cos(theta))
 
 body=[]
 for i in range(n):
-    body += ax.plot([],[],[],color='red',marker='.',ms=markersize)
+    body += ax.plot([],[],color='blue',marker='.',ms=markersize)
 
 # initialization function: plot the background of each frame
 def init():
-    ax.plot_surface(x_bh, y_bh, z_bh,color='black')
+    ax.plot(x,y,color='k')
+
+    # ax.plot_surface(x_bh, y_bh, z_bh,color='black')
     return body[0],
 
 # animation function.  This is called sequentially
 def animate(i):
     for j in range(n):
         body[j].set_data(x[i*speed,j],y[i*speed,j])
-        body[j].set_3d_properties(z[i*speed,j])
     return body,
 
 #### call the animator.  blit=True means only re-draw the parts that have changed.
 #### Note: when using the Mac OS X Backend, blit=True will not work!!
-####    Need to manually set matplotlib.use('TkAgg') first....
+####       Need to manually set matplotlib.use('TkAgg') first....
 anim = animation.FuncAnimation(fig, animate, init_func=init, frames=n_frames, interval=1, blit=False)
 plt.show()
 
-# #### This is for creating image files to make a movie
+#### This is for creating image files to make a movie
 # init()
 # for i in range(tnmax):
 #     animate(i)
