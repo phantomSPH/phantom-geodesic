@@ -8,7 +8,7 @@ contains
  !+
  !----------------------------------------------------------------
  subroutine check(x,v,passed)
-  use metric, only: get_metric
+  use metric_tools, only: get_metric
   use testmetric, only: test_metric_i
   real, intent(in) :: x(1:3), v(1:3)
   integer :: ntests,npass
@@ -27,7 +27,7 @@ contains
  !----------------------------------------------------------------
  subroutine sanity_checks
   use cons2prim, only: get_p_from_v, get_v_from_p
-  use metric, only: get_metric
+  use metric_tools, only: get_metric
   use utils_gr, only: dot_product_gr
   real, dimension(3) :: x, v, pmom
   real, dimension(0:3,0:3):: gcov,gcon,gg,identity
@@ -38,11 +38,11 @@ contains
   !r = 2.0+1.e-1
   !print*,"Enter r and v:"
   !read*,r,vx
-  r = 3
-  x = (/r,0.,0./)
+  r = 25.
+  x = (/r,1.5,0./)
   !x = (/2.9,0.,0./)
   vx= 0.0
-  v = (/0.0,0.7,0.0/)
+  v = (/0.,0.,0./)
   print*,"r: ",r
   print*,'x:',x
   print*,"v:",v

@@ -12,7 +12,7 @@ program test
    write(*,'(/,a,i10)') 'Number of tests = ',ntests
    write(*,'(a,i10)')   'Number passed   = ',npass
    write(*,'(a,i10,/)') 'Number failed   = ',ntests-npass
-   
+
    if (ntests==npass) then
       write(*,'(a)') "-----> PASSED <-----"
    else

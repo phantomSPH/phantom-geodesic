@@ -3,23 +3,40 @@ module testcons2prim
 contains
    subroutine test_cons2prim(ntests,npass)
       use eos, only: get_u
-      use utils_gr, only: get_metric3plus1
+      use utils_gr, only: dot_product_gr
+      use metric_tools, only: get_metric
       integer, intent(inout) :: ntests,npass
-      integer :: i,j
-      real :: x(1:3),v(1:3),dens,u,p,alpha,beta(1:3),gij(1:3,1:3),bigv(1:3)
+      integer :: j,ix,iy,iz,vx,vy,vz
+      real :: x(1:3),v(1:3),v4(0:3)
+      real :: dens,u,p,gcov(0:3,0:3),gcon(0:3,0:3),sqrtg
 
       write(*,'(/,a,/)') '--> testing conservative2primitive solver'
 
-      x = (/10.,0.,0./)
       dens = 10.
-      call get_metric3plus1(x,alpha,beta,gij)
-      do i=0,5
-         bigv = (/i*0.1,0.,0./)
-         v = bigV*alpha-beta
-         do j=0,10
-            p = j*.1
-            call get_u(u,p,dens)
-            call test_cons2prim_i(x,v,dens,u,p,ntests,npass)
+      do ix=0,50
+         do iy=0,50
+            do iz=0,50
+               do vx=0,10
+                  do vy=0,10
+                     do vz=0,10
+                        x = (/0.1*ix,0.1*iy,0.1*iz/)
+                        call get_metric(x,gcov,gcon,sqrtg)
+                        v = (/0.1*vx,0.1*vy,0.1*vz/)
+                        v4(0) = 1.
+                        v4(1:3) = v(:)
+                        ! Only allow valid combinations of position and velocity to be tested.
+                        ! i.e. Not faster than the speed of light locally.
+                        if (dot_product_gr(v4,v4,gcov) < 0.) then
+                           do j=0,0
+                              p = j*.1
+                              call get_u(u,p,dens)
+                              call test_cons2prim_i(x,v,dens,u,p,ntests,npass)
+                           enddo
+                        endif
+                     enddo
+                  enddo
+               enddo
+            enddo
          enddo
       enddo
 
@@ -37,6 +54,7 @@ contains
       real :: rho,pmom(1:3),en
       real :: v_out(1:3),dens_out,u_out,p_out
       real, parameter :: tol = 4.e-12
+      ! real, parameter :: tol = 4.e-10
       integer :: nerrors, ierr,metricpass, j
       integer :: ncheck,dummy
       real :: errmax

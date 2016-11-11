@@ -8,11 +8,12 @@ contains
 !+
 !----------------------------------------------------------------
    subroutine test_metric(ntests,npass)
-      use metric, only: metric_type, get_metric
+      use metric_tools, only: get_metric
+      use metric, only: metric_type
       use utils_gr, only: get_metric3plus1, dot_product_gr
       integer, intent(inout) :: ntests,npass
       real :: x(1:3), v(1:3), v4(0:3)
-      real :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg,r
+      real :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg
       integer :: ierr, ix,iy,iz,vx,vy,vz
       ierr = 0
 
@@ -30,16 +31,18 @@ contains
                         v = (/0.1*vx,0.1*vy,0.1*vz/)
                         v4(0) = 1.
                         v4(1:3) = v(:)
-                        r = sqrt(dot_product(x,x))
                         ! Only allow valid combinations of position and velocity to be tested.
-                        if (dot_product_gr(v4,v4,gcov) < 0.) call test_metric_i(x,v,ntests,npass)
+                        ! i.e. Not faster than the speed of light locally.
+                        if (dot_product_gr(v4,v4,gcov) < 0.) then
+                           ! print*,dot_product_gr(v4,v4,gcov)
+                           call test_metric_i(x,v,ntests,npass)
+                        endif
                      enddo
                   enddo
                enddo
             enddo
          enddo
       enddo
-
       write(*,'(/,a,/)') '<-- metric test complete'
 
    end subroutine test_metric
@@ -52,13 +55,14 @@ contains
 !----------------------------------------------------------------
    subroutine test_metric_i(x,v,ntests,npass)
       use testutils, only: checkvalbuf
-      use metric, only: get_metric
+      use metric_tools, only: get_metric
       use utils_gr, only: dot_product_gr
       integer, intent(inout) :: ntests,npass
       real, intent(in) :: x(1:3), v(1:3)
       real, dimension(0:3,0:3) :: gcov,gcon,gg
       real :: sqrtg, v4(0:3), sum
-      real, parameter :: tol=6.e-13
+      real, parameter :: tol=6.e-11
+      ! real, parameter :: tol=4.e-13
       integer :: i,j, nerrors,ncheck,n_error
       real :: errmax
 

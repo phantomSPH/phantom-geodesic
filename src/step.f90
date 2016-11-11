@@ -17,7 +17,7 @@ contains
   real :: xtol, ptol
   logical :: converged_x, converged_pmom
   integer :: iterations_x, iterations_pmom
-  integer, parameter :: max_iterations = 1000000
+  integer, parameter :: max_iterations = 100
   converged_x = .false.
   converged_pmom = .false.
   iterations_x = 0
@@ -32,8 +32,8 @@ contains
   ! Initial first order prediction for position (xstar)
   x = x + dt*v
   ! Converge to x
-  ! do while ( .not. converged_x .and. iterations_x < max_iterations)
-  do while (iterations_x < 3)
+  do while ( .not. converged_x .and. iterations_x < max_iterations)
+  ! do while (iterations_x < 3)
      iterations_x = iterations_x + 1
      xprev = x
      call get_v_from_p(pmom,vstar,x) ! Get v(phalf,xstar)=vstar
@@ -48,8 +48,8 @@ contains
 
   pmom = pmom + 0.5*dt*fterm !pmom_star
   ! Converge to p
-  ! do while (.not. converged_pmom .and. iterations_pmom < max_iterations)
-  do while (iterations_pmom < 3)
+  do while (.not. converged_pmom .and. iterations_pmom < max_iterations)
+  ! do while (iterations_pmom < 3)
      iterations_pmom = iterations_pmom + 1
      pmom_prev = pmom
      call get_v_from_p(pmom,v,x)               ! Get vstar from pmom_star
@@ -110,4 +110,44 @@ contains
   call get_v_from_p(pmom,v,x)
 
  end subroutine
+
+ !----------------------------------------------------------------
+ !+
+ !  RK2 Method (2nd Order)
+ !+
+ !----------------------------------------------------------------
+ subroutine step_rk2(x,v,fterm,dt)
+  use force_gr, only: get_sourceterms
+  use cons2prim, only: get_p_from_v, get_v_from_p
+  real, dimension(3), intent(inout) :: fterm
+  real, dimension(3), intent(inout) :: x,v
+  real, intent(in) :: dt
+  real :: pmomstar(3),xstar(3),vstar(3),pmom(3)
+  !real :: xin(3),vin(3)
+
+  ! xin=x
+  ! vin=v
+  ! print*,'in',x,v
+  call get_p_from_v(pmom,v,x)
+
+! ENTRY
+! v(1:2) = 0.
+
+  call get_sourceterms(x,v,fterm)
+  xstar    = x    + 0.5*dt*v
+  pmomstar = pmom + 0.5*dt*fterm
+  call get_v_from_p(pmomstar,vstar,xstar)
+! vstar(1:2)=0.
+  call get_sourceterms(xstar,vstar,fterm)
+  x        = x    + dt*vstar
+  pmom     = pmom + dt*fterm
+
+! EXIT
+  call get_v_from_p(pmom,v,x)
+! v(1:2) = 0.
+  ! print*,'out',x,v
+  ! print*,'dif',xin-x,vin-v
+  ! read*
+
+  end subroutine step_rk2
 end module step

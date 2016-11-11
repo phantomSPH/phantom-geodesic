@@ -30,13 +30,13 @@ contains
    !----------------------------------------------------------------
    subroutine primitive2conservative(x,v,dens,u,P,rho,pmom,en)
       use utils_gr, only: get_u0
-      use metric, only: get_metric
+      use metric_tools, only: get_metric
       use eos, only: get_enthalpy
       real, intent(in)  :: x(1:3)
       real, intent(in) :: dens,v(1:3),u,P
       real, intent(out)  :: rho,pmom(1:3),en
       real, dimension(0:3,0:3) :: gcov, gcon
-      real :: sqrtg, enth, v3d, v3_DOT_v3, U0, v4U(0:3)
+      real :: sqrtg, enth, gvv, U0, v4U(0:3)
       integer :: i, mu
 
       v4U(0) = 1.
@@ -48,41 +48,39 @@ contains
       call get_u0(x,v,U0)
       rho = sqrtg*dens*U0
       do i=1,3
-         v3d = dot_product(gcov(i,:),v4U(:))
-         pmom(i) = U0*enth*v3d
+         pmom(i) = U0*enth*dot_product(gcov(i,:),v4U(:))
       enddo
 
-      v3_DOT_v3 = 0.
+      gvv = 0.
       do mu=1,4
          do i=1,3
-            v3_DOT_v3 = v3_DOT_v3 + gcov(i,mu)*v(mu)*v(i)
+            gvv = gvv + gcov(i,mu)*v(mu)*v(i)
          enddo
       enddo
-      en = U0*enth*v3_DOT_v3 + (1.+u)/U0
+      en = U0*enth*gvv + (1.+u)/U0
 
    end subroutine primitive2conservative
 
    subroutine conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr)
       use utils_gr, only: dot_product_gr, get_metric3plus1
-      use metric, only: get_metric
+      use metric_tools, only: get_metric
       use eos, only: get_enthalpy, get_u, gam
       real, intent(in)  :: x(1:3)
       real, intent(inout) :: v(1:3),dens,u,P
       real, intent(in)  :: rho,pmom(1:3),en
       integer, intent(out) :: ierr
       real, dimension(0:3,0:3) :: gcov,gcon
-      real :: gij(1:3,1:3)
-      real :: sqrtg,enth,lorentz_LEO,pmom2,alpha,beta(1:3),beta2,enth_old,v3d(1:3)
+      real, dimension(1:3,1:3) :: gammaijdown, gammaijUP
+      real :: sqrtg,enth,lorentz_LEO,pmom2,alpha,beta(1:3),enth_old,v3d(1:3)
       real :: f,df
-      integer :: niter, i
+      integer :: niter, i,j
       real, parameter :: tol = 1.e-10
       integer, parameter :: nitermax = 100
       logical :: converged
       ierr = 0
 
-      call get_metric3plus1(x,alpha,beta,gij,gcov,gcon,sqrtg)
-      beta2 = dot_product_gr(beta,beta,gcon(1:3,1:3))
-      pmom2 = dot_product_gr(pmom,pmom,gcon(1:3,1:3))
+      call get_metric3plus1(x,alpha,beta,gammaijdown,gammaijUP,gcov,gcon,sqrtg)
+      pmom2 = dot_product_gr(pmom,pmom,gammaijUP)
 
       call get_enthalpy(enth,dens,p)
 
@@ -90,10 +88,9 @@ contains
       converged = .false.
       do while (.not.converged)
          enth_old = enth
-
          lorentz_LEO = sqrt(1.+pmom2/enth_old**2)
          dens = rho*alpha/(sqrtg*lorentz_LEO)
-         p = max(rho/sqrtg*(enth*lorentz_LEO*alpha-en-dot_product_gr(pmom,beta,gcon(1:3,1:3))),0.)
+         p = max(rho/sqrtg*(enth*lorentz_LEO*alpha-en-dot_product_gr(pmom,beta,gammaijUP)),0.)
          call get_enthalpy(enth,dens,p)
 
          f = enth-enth_old
@@ -124,25 +121,31 @@ contains
 
       lorentz_LEO = sqrt(1.+pmom2/enth**2)
       dens = rho*alpha/(sqrtg*lorentz_LEO)
-      p = max(rho/sqrtg*(enth*lorentz_LEO*alpha-en-dot_product_gr(pmom,beta,gcon(1:3,1:3))),0.)
-      v3d = alpha*pmom/(enth*lorentz_LEO)-beta
+      p = max(rho/sqrtg*(enth*lorentz_LEO*alpha-en-dot_product_gr(pmom,beta,gammaijUP)),0.)
+
+      v3d(:) = alpha*pmom(:)/(enth*lorentz_LEO)-beta(:)
+
+      v = 0.
       do i=1,3
-         v(i) = dot_product(gcon(1:3,i),v3d(1:3)) ! Raise index from down to up
+         do j=1,3
+            v(i) = v(i) + gammaijUP(i,j)*v3d(j) ! Raise index from down to up
+         enddo
       enddo
+
       call get_u(u,P,dens)
 
    end subroutine conservative2primitive
 
    subroutine get_v_from_p(pmom,v,x)
       ! Conservative to primitive solver for the dust case (Pressure=0)
-      use metric, only: get_metric
+      use metric_tools, only: get_metric
       use utils_gr, only: dot_product_gr
       real, intent(in) :: pmom(1:3), x(1:3)
       real, intent(out) :: v(1:3)
       real :: en, rho, P, u, dens
       integer :: ierr
 
-      en  = 0.
+      en  = 1.
       rho = 0.
       P   = 0.
       u   = 0.
@@ -153,7 +156,7 @@ contains
    end subroutine get_v_from_p
 
    subroutine get_p_from_v(pmom,v,x)
-      use metric, only: get_metric
+      use metric_tools, only: get_metric
       real, intent(in) :: v(1:3), x(1:3)
       real, intent(out) :: pmom(1:3)
       real :: rho, en, dens, u, P

@@ -3,6 +3,7 @@ module output
 contains
    subroutine write_out(time,xall,vall,np)
       use utils_gr, only: dot_product_gr
+      use metric, only: spherical2cartesian
       real, intent(in) :: time
       integer, intent(in) :: np
       real, dimension(1:3,np), intent(in) :: xall, vall
@@ -20,14 +21,17 @@ contains
       do i=1,np
          x = xall(:,i)
          v = vall(:,i)
+         ! call spherical2cartesian(xall(:,i),x)
          write(50,"(6e26.16)") x,v
       enddo
    end subroutine write_out
 
    subroutine write_ev(time,energy,angmom)
+      use metric, only: metric_type
       real, intent(in) :: time, energy, angmom
       integer, save :: i=0
 
+      if(metric_type=='Schwarzschild') then
       if (i==0) then
          open(unit=55, file='ev.dat',status='replace')
          write(55,*) '# Time, Energy, Angular momentum'
@@ -37,25 +41,32 @@ contains
       i = i+1
       write(55,*) time, energy, angmom
       close(unit=55)
+      endif
    end subroutine write_ev
 
    subroutine write_xyz(time,xall,np)
+      use metric, only: spherical2cartesian
       real, intent(in) :: time
       integer, intent(in) :: np
       real, dimension(1:3,np) :: xall
       integer, save :: j=0
+      !integer :: i
+      !real :: x(3)
 
       if (j==0) then
          open(unit=66, file='positions.dat',status='replace')
          write(66,*) '# Number of particles (n)'
          write(66,*) np
          write(66,*) '# First Column = Time'
-         write(66,*) '# Subsequent columns =  x(1),x(2),...x(n),y(1),y(2),...y(n),z(1),z(2),...,z(n)'
+         write(66,*) '# Subsequent columns =  x1(1),x2(1),x3(1),.....,x1(n),x2(n),x3(n).'
       else
          open(unit=66, file='positions.dat',position='append')
       endif
       j = j+1
-      write(66,*) time, xall(1,:),xall(2,:),xall(3,:)
+      write(66,*) time, xall(1:3,:)
+      ! x = xall(:,1)
+      ! call spherical2cartesian(xall(:,1),x)
+      ! write(66,*) time, x
       close(unit=66)
    end subroutine write_xyz
 
@@ -75,7 +86,7 @@ contains
          open(unit=70, file='velocities.dat',position='append')
       endif
       j = j+1
-      write(70,*) time, vall(1,:),vall(2,:),vall(3,:)
+      write(70,*) time, vall(1:3,:)
       close(unit=70)
    end subroutine write_vxyz
 end module
