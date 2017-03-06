@@ -52,9 +52,9 @@ contains
       enddo
 
       gvv = 0.
-      do mu=1,4
+      do mu=0,3
          do i=1,3
-            gvv = gvv + gcov(i,mu)*v(mu)*v(i)
+            gvv = gvv + gcov(i,mu)*v4U(mu)*v4U(i)
          enddo
       enddo
       en = U0*enth*gvv + (1.+u)/U0
@@ -74,7 +74,7 @@ contains
       real :: sqrtg,enth,lorentz_LEO,pmom2,alpha,beta(1:3),enth_old,v3d(1:3)
       real :: f,df
       integer :: niter, i,j
-      real, parameter :: tol = 1.e-10
+      real, parameter :: tol = 1.e-12
       integer, parameter :: nitermax = 100
       logical :: converged
       ierr = 0
@@ -86,7 +86,7 @@ contains
 
       niter = 0
       converged = .false.
-      do while (.not.converged)
+      do while (.not. converged .and. niter < nitermax)
          enth_old = enth
          lorentz_LEO = sqrt(1.+pmom2/enth_old**2)
          dens = rho*alpha/(sqrtg*lorentz_LEO)
@@ -104,14 +104,12 @@ contains
          if (abs(enth_old-1.)<tiny(enth_old)) enth=1.
 
          niter = niter + 1
-         converged = (abs(enth-enth_old)/enth < tol)
-         if (niter > nitermax) then
-            write(*,"(a)") " Warning: not converged, reached max number of iterations in cons2prim"
-            exit
-         endif
+
+         if (abs(enth-enth_old)/enth < tol) converged = .true.
       enddo
 
       if (.not.converged) then
+         print*,' Warning: cons2prim did not converge, reached max number of iterations',niter
          print*,' enthold  =',enth_old
          print*,' enthnew  =',enth
          print*,' error    =',abs(enth-enth_old)/enth
