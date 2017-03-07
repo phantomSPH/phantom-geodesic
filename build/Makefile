@@ -5,7 +5,7 @@
 #
 #----------------------------------
 FC=gfortran
-FFLAGS=-O3 -Wall -Wextra -g -pedantic -std=f2008 -fdefault-real-8 -fdefault-double-8#-freal-4-real-16 #
+FFLAGS=-O3 -Wall -Wextra -g -pedantic -std=f2008 -fcheck=all -fdefault-real-8 -fdefault-double-8 #-freal-4-real-16 #
 
 VPATH= ../src
 
@@ -16,6 +16,9 @@ METRIC_FILE=metric_$(METRIC).f90
 SRC=inverse4x4.f90 $(METRIC_FILE) metric_tools.f90 io.f90 utils_testsuite.f90 utils_gr.f90 eos.f90 \
 force_gr.f90 init.f90 cons2prim.f90 step.f90 output.f90 test_metric.f90 checks.f90 test_cons2prim.f90\
  main.f90
+# SRC=inverse4x4.f90 $(METRIC_FILE) metric_tools.f90 io.f90 utils_testsuite.f90 utils_gr.f90 eos.f90 \
+# force_gr_newtonian.f90 init.f90 cons2prim_newtonian.f90 step.f90 output.f90 test_metric.f90 checks.f90 test_cons2prim.f90\
+#  main.f90
 OBJ=${SRC:.f90=.o}
 
 SRC_TEST=${SRC:main.f90=test.f90}
