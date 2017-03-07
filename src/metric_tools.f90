@@ -19,7 +19,9 @@ subroutine get_metric(position,gcov,gcon,sqrtg)
   use inverse4x4, only: inv4x4
   real,    intent(in)  :: position(3)
   real,    intent(out) :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg
+  real :: det
 ! real :: gcovs(0:3,0:3), gcons(0:3,0:3), sqrtgs, dxdx(0:3,0:3), det, xsphere(3)
+  logical, parameter :: useinv4x4 = .true.
 
   select case(coordinate_sys)
 
@@ -29,6 +31,7 @@ subroutine get_metric(position,gcov,gcon,sqrtg)
     call get_metric_spherical(position,gcov,gcon,sqrtg)
   end select
 
+  if (useinv4x4) call inv4x4(gcov,gcon,det)
    ! call cartesian2spherical(position,xsphere)
    ! sqrtg=1.
    ! call inv4x4(gcov,gcon,det)
@@ -39,18 +42,23 @@ end subroutine get_metric
 ! The actual analytic metric derivaties are in the metric module, which are different for each type
 ! of metric.
 subroutine get_metric_derivs(position,dgcovdx1, dgcovdx2, dgcovdx3)
-   use metric, only: metric_cartesian_derivatives, metric_spherical_derivatives
+   use metric, only: metric_cartesian_derivatives, metric_spherical_derivatives, metric_type
    real,    intent(in)  :: position(3)
    real,    intent(out) :: dgcovdx1(0:3,0:3), dgcovdx2(0:3,0:3), dgcovdx3(0:3,0:3)
 
    select case(coordinate_sys)
 
    case('Cartesian')
-     call metric_cartesian_derivatives(position,dgcovdx1, dgcovdx2, dgcovdx3)
+     if (.not. metric_type=='Kerr') then
+        call metric_cartesian_derivatives(position,dgcovdx1, dgcovdx2, dgcovdx3)
+     else if (metric_type=='Kerr') then
+        call numerical_metric_derivs(position,dgcovdx1, dgcovdx2, dgcovdx3)
+     else
+        STOP 'No derivatives being used...'
+     end if
    case('Spherical')
      call metric_spherical_derivatives(position,dgcovdx1, dgcovdx2, dgcovdx3)
    end select
-   ! call numerical_metric_derivs(position,dgcovdx1, dgcovdx2, dgcovdx3)
 
 end subroutine get_metric_derivs
 
