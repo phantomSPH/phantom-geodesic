@@ -45,13 +45,14 @@ contains
    end subroutine write_ev
 
    subroutine write_xyz(time,xall,np)
-      use metric, only: spherical2cartesian
+      use metric_tools, only: coordinate_sys
+      use metric, only: spherical2cartesian, cartesian2spherical
       real, intent(in) :: time
       integer, intent(in) :: np
       real, dimension(1:3,np) :: xall
       integer, save :: j=0
-      !integer :: i
-      !real :: x(3)
+      logical, parameter :: write_cartesian = .true.
+      real :: x(3)
 
       if (j==0) then
          open(unit=66, file='positions.dat',status='replace')
@@ -63,10 +64,32 @@ contains
          open(unit=66, file='positions.dat',position='append')
       endif
       j = j+1
-      write(66,*) time, xall(1:3,:)
-      ! x = xall(:,1)
-      ! call spherical2cartesian(xall(:,1),x)
-      ! write(66,*) time, x
+
+      ! Write to positions.dat file in cartesian
+      if (write_cartesian) then
+         if (coordinate_sys == 'Cartesian') then
+            write(66,*) time, xall(1:3,:)
+         else if (coordinate_sys == 'Spherical') then
+            x = xall(:,1)
+            call spherical2cartesian(xall(:,1),x)
+            write(66,*) time, x
+         else
+             STOP "Please pick a coordinate system that I can write to file in"
+         endif
+
+      ! Write to positions.dat file in spherical
+      else if (.not. write_cartesian) then
+         if (coordinate_sys == 'Spherical') then
+            write(66,*) time, xall(1:3,:)
+         else if (coordinate_sys == 'Cartesian') then
+            x = xall(:,1)
+            call cartesian2spherical(xall(:,1),x)
+            write(66,*) time, x
+         else
+             STOP "Please pick a coordinate system that I can write to file in"
+         endif
+
+      endif
       close(unit=66)
    end subroutine write_xyz
 
