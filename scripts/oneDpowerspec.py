@@ -44,11 +44,13 @@ def powerspec_fft(time,radius):
 def plot_powerspec(freqs,power):
     # plt.figure()
     plt.plot(freqs,power)
-    plt.grid()
+    # plt.grid()
     # plt.xscale('log')
     # plt.yscale('log')
     plt.xlabel('Angular frequency')
     plt.ylabel('Power')
+    ax=plt.gca()
+    return ax
     # plt.show()
 
 def peak_freq(freqs,power):

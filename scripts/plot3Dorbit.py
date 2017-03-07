@@ -38,10 +38,17 @@ y   = xyz[:,2]
 z   = xyz[:,3]
 mpl.rcParams['legend.fontsize'] = 10
 fig = plt.figure()
-ax = fig.gca(projection='3d')
+ax = fig.gca(projection='3d')#,aspect='equal') #, adjustable='box-forced'
+ax.axis('equal')
 ax.plot(x,y,z, label='orbit',color='b')
 ax.plot_surface(x_bh, y_bh, z_bh,color='black')
-ax.legend()
+# ax.legend()
+plt.xlabel(r'$x$')
+plt.ylabel(r'$y$')
+ax.set_zlabel(r'$z$')
+# ax.set_zlim(-100, 100)
+# plt.ylim([-100,100])
+# plt.xlim([-100,100])
 plt.show()
 
 # make_figure = False

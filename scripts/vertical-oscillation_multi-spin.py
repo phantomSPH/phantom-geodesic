@@ -7,42 +7,61 @@ Call it from the directory containing the directories of each simulation with di
 from bash import BASH
 import numpy as np
 import matplotlib.pyplot as plt
-from oscillation_frequencies import omega_z
+from oscillation_frequencies import omega_z,isco
 
-directories = BASH('ls -d spin-*/').split('\n')
+d_neg = BASH('ls -dr spin-neg*/').split('\n')
+d_zer = BASH('ls -d spin-zero*/').split('\n')
+d_pos = BASH('ls -d spin-pos*/').split('\n')
+directories = d_neg+d_zer+d_pos
+plt.style.use('paper')
 
-colormap = plt.cm.nipy_spectral #I suggest to use nipy_spectral, Set1,Paired
-fig = plt.figure(figsize=(15,10))
-ax = fig.add_subplot(111)
-ax.set_color_cycle([colormap(i) for i in np.linspace(0, 1,len(directories))])
+# colormap = plt.cm.nipy_spectral #I suggest to use nipy_spectral, Set1,Paired
+colormap = plt.cm.terrain
+fig1 = plt.figure(1)
+fig2 = plt.figure(2)
+ax = fig1.add_subplot(111)
+ax2= fig2.add_subplot(111)
+ax.set_color_cycle([colormap(i) for i in np.linspace(0, 0.25,len(directories))])
+ax2.set_color_cycle([colormap(i) for i in np.linspace(0, 0.25,len(directories))])
 
 for d in directories:
     try:
         f = d+'omega-z.dat'
         print('Loading: '+f)
         r,omegaz,omegaz_exact=np.loadtxt(f,unpack=True)
-        rfine=np.linspace(r[0],r[-1],250)
-        i = 0
-        for line in open(f):
-            if i==0: a=float(line.strip("#").strip())
-            if i==1:
-                df=float(line.strip("#").strip())
-                break
-            i+=1
-        print('')
-        # p = plt.plot(r,omegaz,'x')
-        p = plt.errorbar(r,omegaz,yerr=df/2,fmt='.')
-        c = p[0].get_color()
-        # plt.plot(r,omegaz_exact,label="a = "+str(a),color=c)
-        plt.plot(rfine,omega_z(rfine,a),label="a = "+str(a),color=c)
+        print('  |--> Success')
     except:
         print('  |--> Failed')
+        continue
+    i = 0
+    for line in open(f):
+        if i==0: a=float(line.strip("#").strip())
+        if i==1:
+            df=float(line.strip("#").strip())
+            break
+        i+=1
+    plt.figure(1)
+    # p = plt.plot(r,omegaz,'x')
+    p = plt.errorbar(r,omegaz,yerr=df/2,fmt='.')
+    c = p[0].get_color()
+    # rfine=np.linspace(r[0],r[-1],250)
+    r0 = isco(a)
+    rmax = 13.
+    rfine = np.linspace(r0,rmax,500)
+    # plt.plot(r,omegaz_exact,label="a = "+str(a),color=c)
+    plt.plot(rfine,omega_z(rfine,a),label="a = "+str(a),color=c,lw=1)
+    plt.figure(2)
+    plt.plot(r,np.abs(omega_z(r,a)-omegaz)/omega_z(r,a),'o-')
 
-fs=25
-plt.xlabel(r'$r$',fontsize=fs)
-plt.ylabel(r'$\Omega_z$',fontsize=fs)
-plt.legend()
+plt.yscale('log')
+plt.figure(1)
+# fs=25
+plt.xlabel(r'$r$')
+plt.ylabel(r'$\Omega_z$')
+plt.xlim(xmax=rmax)
+plt.ylim(ymin=0,ymax=0.18)
+# plt.legend(frameon=False)
 
-plt.savefig('python_plot.pdf')
+plt.savefig('python_plot.pdf',bbox_inches='tight')
 
 plt.show()

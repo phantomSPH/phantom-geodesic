@@ -7,13 +7,15 @@ Also calculates the number of radii to use for spins when simulating.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from oscillation_frequencies import omega_z
+from oscillation_frequencies import omega_z, isco
 
 spin=np.linspace(-1,1,11)
-risco=np.array([ 9.     ,  8.43176,  7.85069,  7.25427,  6.63904,  6. ,5.32944,  4.61434,  3.82907,  2.90664,  1.     ])
+# risco=np.array([ 9.     ,  8.43176,  7.85069,  7.25427,  6.63904,  6. ,5.32944,  4.61434,  3.82907,  2.90664,  1.     ])
+risco = np.zeros(len(spin))
 
 for i in range(len(spin)):
    a = spin[i]
+   risco[i] = isco(a)
    r = np.linspace(risco[i],14,500)
    plt.plot(r,omega_z(r,a),label=a)
 
