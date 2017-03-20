@@ -1,9 +1,17 @@
 module output
    implicit none
 contains
+
+   !----------------------------------------------------------------
+   !+
+   !  Write output files containing positions of all particles at a particular time.
+   !  (This is useful for plotting in splash, so output is always in cartesian coordinates.)
+   !+
+   !----------------------------------------------------------------
    subroutine write_out(time,xall,vall,np)
       use utils_gr, only: dot_product_gr
       use metric, only: spherical2cartesian
+      use metric_tools, only: coordinate_sys
       real, intent(in) :: time
       integer, intent(in) :: np
       real, dimension(1:3,np), intent(in) :: xall, vall
@@ -17,12 +25,11 @@ contains
       write(filename,"(a,i5.5,a)") 'output_',ifile,'.dat'
       open(unit=50, file=filename, status='replace')
       write(50,*) time
-      write(50,"(6a26)") 'x','y','z','vx','vy','vz'
+      write(50,"(6a26)") 'x','y','z'
       do i=1,np
          x = xall(:,i)
-         v = vall(:,i)
-         ! call spherical2cartesian(xall(:,i),x)
-         write(50,"(6e26.16)") x,v
+         if (coordinate_sys == 'Spherical') call spherical2cartesian(xall(:,i),x)
+         write(50,"(3e26.16)") x
       enddo
    end subroutine write_out
 
