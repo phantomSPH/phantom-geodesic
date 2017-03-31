@@ -61,7 +61,7 @@ contains
 
    end subroutine primitive2conservative
 
-   subroutine conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr)
+   subroutine conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr,en_type)
       use utils_gr, only: dot_product_gr, get_metric3plus1
       use metric_tools, only: get_metric
       use eos, only: get_enthalpy, get_u, gam
@@ -69,6 +69,7 @@ contains
       real, intent(inout) :: v(1:3),dens,u,P
       real, intent(in)  :: rho,pmom(1:3),en
       integer, intent(out) :: ierr
+      character(len=*), intent(in) :: en_type
       real, dimension(0:3,0:3) :: gcov,gcon
       real, dimension(1:3,1:3) :: gammaijdown, gammaijUP
       real :: sqrtg,enth,lorentz_LEO,pmom2,alpha,beta(1:3),enth_old,v3d(1:3)
@@ -90,7 +91,10 @@ contains
          enth_old = enth
          lorentz_LEO = sqrt(1.+pmom2/enth_old**2)
          dens = rho*alpha/(sqrtg*lorentz_LEO)
+
          p = max(rho/sqrtg*(enth*lorentz_LEO*alpha-en-dot_product_gr(pmom,beta,gammaijUP)),0.)
+         if (en_type == 'entropy') p = en*(rho*alpha/(sqrtg*lorentz_LEO))**gam
+
          call get_enthalpy(enth,dens,p)
 
          f = enth-enth_old
@@ -119,7 +123,9 @@ contains
 
       lorentz_LEO = sqrt(1.+pmom2/enth**2)
       dens = rho*alpha/(sqrtg*lorentz_LEO)
+
       p = max(rho/sqrtg*(enth*lorentz_LEO*alpha-en-dot_product_gr(pmom,beta,gammaijUP)),0.)
+      if (en_type == 'entropy') p = en*(rho*alpha/(sqrtg*lorentz_LEO))**gam
 
       v3d(:) = alpha*pmom(:)/(enth*lorentz_LEO)-beta(:)
 
@@ -148,7 +154,7 @@ contains
       P   = 0.
       u   = 0.
       dens= 0.
-      call conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr)
+      call conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr,'energy')
 
 
    end subroutine get_v_from_p
