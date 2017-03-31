@@ -28,13 +28,14 @@ contains
    !  conserved variables are (rho,pmom_i,en)
    !+
    !----------------------------------------------------------------
-   subroutine primitive2conservative(x,v,dens,u,P,rho,pmom,en)
-      use utils_gr, only: get_u0
+   subroutine primitive2conservative(x,v,dens,u,P,rho,pmom,en,en_type)
+      use utils_gr,     only: get_u0
       use metric_tools, only: get_metric
-      use eos, only: get_enthalpy
+      use eos,          only: get_enthalpy, gam
       real, intent(in)  :: x(1:3)
       real, intent(in) :: dens,v(1:3),u,P
       real, intent(out)  :: rho,pmom(1:3),en
+      character(len=*), intent(in) :: en_type
       real, dimension(0:3,0:3) :: gcov, gcon
       real :: sqrtg, enth, gvv, U0, v4U(0:3)
       integer :: i, mu
@@ -58,6 +59,8 @@ contains
          enddo
       enddo
       en = U0*enth*gvv + (1.+u)/U0
+
+      if (en_type == "entropy") en = P/(dens**gam)
 
    end subroutine primitive2conservative
 
@@ -100,7 +103,8 @@ contains
          f = enth-enth_old
 
          !This line is unique to the equation of state
-         df= -1.+(gam/(gam-1.))/alpha*(1.-pmom2*p/(enth_old**3*lorentz_LEO**2*dens))
+         df= -1.+(gam/(gam-1.))*(1.-pmom2*p/(enth_old**3*lorentz_LEO**2*dens))
+         if (en_type == 'entropy') df = -1. + (gam*pmom2*P)/(lorentz_LEO**2 * enth_old**3 * dens)
 
          enth = enth_old - f/df
 
@@ -168,7 +172,7 @@ contains
       dens = 0.
       u    = 0.
       P    = 0.
-      call primitive2conservative(x,v,dens,u,P,rho,pmom,en)
+      call primitive2conservative(x,v,dens,u,P,rho,pmom,en,'energy')
 
 
    end subroutine get_p_from_v
