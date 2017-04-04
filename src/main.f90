@@ -4,26 +4,26 @@
 !+
 !----------------------------------------------------------------
 program test
-   use init,         only: setup
-   use metric,       only: metric_type
-   use metric_tools, only: coordinate_sys
-   use force_gr,     only: get_sourceterms
-   use step,         only: timestep, step_type
-   use utils_gr,     only: get_ev
-   use output,       only: write_out, write_ev, write_xyz, write_vxyz
-   use checks,       only: check,sanity_checks
-   use utils_gr,     only: get_rderivs
-   implicit none
+use init,         only: setup
+use metric,       only: metric_type
+use metric_tools, only: coordinate_sys
+use force_gr,     only: get_sourceterms
+use step,         only: timestep, step_type
+use utils_gr,     only: get_ev
+use output,       only: write_out, write_ev, write_xyz, write_vxyz
+use checks,       only: check,sanity_checks
+use utils_gr,     only: get_rderivs
+implicit none
 
-   integer, parameter :: ndumps=1500*2 !0!500!/15*20
-   real,    parameter :: dt = 1.e-2, tmax =10330.*5, dtout_ev = tmax/ndumps, dtout = dtout_ev*1000.
-   real, allocatable, dimension(:,:) :: xall,vall
-   real, dimension(3) :: x,v
-   integer :: np
-   real    :: time, energy_init, angmom_init, energy, angmom, energy_i, angmom_i
-   integer :: nsteps, i,j, dnout, dnout_ev
-   logical :: passed
-   real    :: start, finish, frac_done, twall_elapsed
+integer, parameter :: ndumps=1500*2 !0!500!/15*20
+real,    parameter :: dt = 1.e-2, tmax =10330.*5, dtout_ev = tmax/ndumps, dtout = dtout_ev*1000.
+real, allocatable, dimension(:,:) :: xall,vall
+real, dimension(3) :: x,v
+integer :: np
+real    :: time, energy_init, angmom_init, energy, angmom, energy_i, angmom_i
+integer :: nsteps, i,j, dnout, dnout_ev
+logical :: passed
+real    :: start, finish, frac_done, twall_elapsed
 
    print*,'Metric type       = ',metric_type
    print*,'Coord. sys. type  = ',coordinate_sys
@@ -89,4 +89,5 @@ program test
       endif
 
    enddo
+
 end program test

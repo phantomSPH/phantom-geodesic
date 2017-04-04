@@ -22,14 +22,14 @@
 !+
 !--------------------------------------------------------------------------
 module utils_gr
- implicit none
+implicit none
 
- public :: dot_product_gr, get_metric3plus1, get_u0, get_rderivs, get_ev
+public :: dot_product_gr, get_metric3plus1, get_u0, get_rderivs, get_ev
 
- private
- interface get_metric3plus1
-  module procedure get_metric3plus1_only, get_metric3plus1_both
- end interface get_metric3plus1
+private
+interface get_metric3plus1
+module procedure get_metric3plus1_only, get_metric3plus1_both
+end interface get_metric3plus1
 
 contains
 
@@ -40,21 +40,21 @@ contains
 !+
 !----------------------------------------------------------------
 pure real function dot_product_gr(vec1,vec2,gcov)
- real, intent(in) :: vec1(:)
- real, intent(in) :: vec2(size(vec1))
- real, intent(in) :: gcov(size(vec1),size(vec2))
- real :: vec1i
- integer :: i,j
+   real, intent(in) :: vec1(:)
+   real, intent(in) :: vec2(size(vec1))
+   real, intent(in) :: gcov(size(vec1),size(vec2))
+   real :: vec1i
+   integer :: i,j
 
- dot_product_gr = 0.
- do i=1,size(vec1)
-    vec1i = vec1(i)
-    do j=1,size(vec2)
-       dot_product_gr = dot_product_gr + gcov(j,i)*vec1i*vec2(j)
-    enddo
- enddo
+   dot_product_gr = 0.
+   do i=1,size(vec1)
+      vec1i = vec1(i)
+      do j=1,size(vec2)
+         dot_product_gr = dot_product_gr + gcov(j,i)*vec1i*vec2(j)
+      enddo
+   enddo
 
- return
+   return
 end function dot_product_gr
 
 subroutine get_metric3plus1_only(x,alpha,beta,gammaijdown,gammaijUP)

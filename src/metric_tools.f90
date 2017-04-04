@@ -15,23 +15,23 @@ contains
 ! This is a wrapper subroutine to get the metric tensor in both covariant (gcov) and
 ! contravariant (gcon) form.
 subroutine get_metric(position,gcov,gcon,sqrtg)
-  use metric, only: get_metric_cartesian,get_metric_spherical,cartesian2spherical
-  use inverse4x4, only: inv4x4
-  real,    intent(in)  :: position(3)
-  real,    intent(out) :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg
-  real :: det
-! real :: gcovs(0:3,0:3), gcons(0:3,0:3), sqrtgs, dxdx(0:3,0:3), det, xsphere(3)
-  logical, parameter :: useinv4x4 = .true.
+   use metric, only: get_metric_cartesian,get_metric_spherical,cartesian2spherical
+   use inverse4x4, only: inv4x4
+   real,    intent(in)  :: position(3)
+   real,    intent(out) :: gcov(0:3,0:3), gcon(0:3,0:3), sqrtg
+   real :: det
+   ! real :: gcovs(0:3,0:3), gcons(0:3,0:3), sqrtgs, dxdx(0:3,0:3), det, xsphere(3)
+   logical, parameter :: useinv4x4 = .true.
 
-  select case(coordinate_sys)
+   select case(coordinate_sys)
 
-  case('Cartesian')
-    call get_metric_cartesian(position,gcov,gcon,sqrtg)
-  case('Spherical')
-    call get_metric_spherical(position,gcov,gcon,sqrtg)
-  end select
+   case('Cartesian')
+      call get_metric_cartesian(position,gcov,gcon,sqrtg)
+   case('Spherical')
+      call get_metric_spherical(position,gcov,gcon,sqrtg)
+   end select
 
-  if (useinv4x4) call inv4x4(gcov,gcon,det)
+   if (useinv4x4) call inv4x4(gcov,gcon,det)
    ! call cartesian2spherical(position,xsphere)
    ! sqrtg=1.
    ! call inv4x4(gcov,gcon,det)
@@ -49,21 +49,21 @@ subroutine get_metric_derivs(position,dgcovdx1, dgcovdx2, dgcovdx3)
    select case(coordinate_sys)
 
    case('Cartesian')
-     if (.not. metric_type=='Kerr') then
-        call metric_cartesian_derivatives(position,dgcovdx1, dgcovdx2, dgcovdx3)
-     else if (metric_type=='Kerr') then
-        call numerical_metric_derivs(position,dgcovdx1, dgcovdx2, dgcovdx3)
-     else
-        STOP 'No derivatives being used...'
-     end if
+      if (.not. metric_type=='Kerr') then
+         call metric_cartesian_derivatives(position,dgcovdx1, dgcovdx2, dgcovdx3)
+      else if (metric_type=='Kerr') then
+         call numerical_metric_derivs(position,dgcovdx1, dgcovdx2, dgcovdx3)
+      else
+         STOP 'No derivatives being used...'
+      end if
    case('Spherical')
-     call metric_spherical_derivatives(position,dgcovdx1, dgcovdx2, dgcovdx3)
+      call metric_spherical_derivatives(position,dgcovdx1, dgcovdx2, dgcovdx3)
    end select
 
 end subroutine get_metric_derivs
 
 !--- The numerical derivatives of the covariant metric tensor
- subroutine numerical_metric_derivs(position,dgcovdx, dgcovdy, dgcovdz)
+subroutine numerical_metric_derivs(position,dgcovdx, dgcovdy, dgcovdz)
    real, intent(in) :: position(3)
    real, intent(out), dimension(0:3,0:3) :: dgcovdx,dgcovdy,dgcovdz
    real :: gblah(0:3,0:3), temp(3), gplus(0:3,0:3),gminus(0:3,0:3),dx,dy,dz,di,sqrtgblag
@@ -111,7 +111,7 @@ subroutine tensortransform_dd(position,T_old,T_new)
       do j=0,3
          do k=0,3
             do l=0,3
-                  T_new(i,j) = T_new(i,j)+dxdx(k,i)*dxdx(l,j)*T_old(k,l)
+               T_new(i,j) = T_new(i,j)+dxdx(k,i)*dxdx(l,j)*T_old(k,l)
             enddo
          enddo
       enddo

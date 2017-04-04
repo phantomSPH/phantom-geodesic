@@ -92,10 +92,10 @@ subroutine write_xyz(time,xall,np)
          enddo
          write(66,*) time, x(1:3,:)
       else
-          STOP "Please pick a coordinate system that I can write to file in"
+         STOP "Please pick a coordinate system that I can write to file in"
       endif
 
-   ! Write to positions.dat file in spherical
+      ! Write to positions.dat file in spherical
    else if (.not. write_cartesian) then
       if (coordinate_sys == 'Spherical') then
          write(66,*) time, xall(1:3,:)
@@ -105,7 +105,7 @@ subroutine write_xyz(time,xall,np)
          enddo
          write(66,*) time, x(1:3,:)
       else
-          STOP "Please pick a coordinate system that I can write to file in"
+         STOP "Please pick a coordinate system that I can write to file in"
       endif
 
    endif

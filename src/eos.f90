@@ -14,7 +14,7 @@ subroutine get_pressure(P,dens,u)
 end subroutine
 
 subroutine get_u(u,P,dens)
-   real, intent(in) :: dens,P
+   real, intent(in)  :: dens,P
    real, intent(out) :: u
 
    u = P/((gam-1.)*dens)
@@ -22,7 +22,7 @@ subroutine get_u(u,P,dens)
 end subroutine
 
 subroutine get_enthalpy(enth,dens,P)
-   real, intent(in) :: dens,P
+   real, intent(in)  :: dens,P
    real, intent(out) :: enth
 
    enth = 1.+P/dens*(gam/(gam-1.))
