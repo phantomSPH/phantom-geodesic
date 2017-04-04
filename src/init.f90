@@ -7,12 +7,23 @@ contains
    subroutine setup(xall,vall,np)
       integer, intent(out) :: np
       real, allocatable, intent(inout), dimension(:,:) :: xall,vall
-      ! call setup_multisphere(xall,vall,np)
-      ! call setup_2testbodies(xall,vall,np)
-      ! call setup_singletype(xall,vall,np)
-      call setup_multitypes(xall,vall,np)
-      ! call setup_dude(xall,vall,np)
-      ! call setup_sphere(xall,vall,np)
+      integer, parameter :: isetup = 3
+
+      select case(isetup)
+      case(1)
+         call setup_multisphere(xall,vall,np)
+      case(2)
+         call setup_2testbodies(xall,vall,np)
+      case(3)
+         call setup_singletype(xall,vall,np)
+      case(4)
+         call setup_multitypes(xall,vall,np)
+      case(5)
+         call setup_dude(xall,vall,np)
+      case(6)
+         call setup_sphere(xall,vall,np)
+      end select
+
    end subroutine setup
 
 !--- Setup up a single body (wrapper to call initialise once)
@@ -21,7 +32,7 @@ contains
       real, allocatable, intent(inout), dimension(:,:) :: xall,vall
       np = 1
       allocate(xall(3,np),vall(3,np))
-      call initialise(xall(:,1),vall(:,1),'radial',3.5)
+      call initialise(xall(:,1),vall(:,1),'precession inclined',r0 = 2.9108)
    end subroutine setup_singletype
 
 !--- Setup up multipe (wrapper to call initialise multiple times)
@@ -36,7 +47,6 @@ contains
          r0 = 0.+i*4.
          call initialise(xall(:,i),vall(:,i),'radial',r0)
       enddo
-      ! call initialise(xall(:,2),vall(:,2),'circular')
    end subroutine setup_multitypes
 
 !--- Setup a proxy for a sphere of particles
@@ -96,7 +106,6 @@ contains
       theta_x= 0.5*pi
       call get_rotation_matrix(theta_x,rotate_x,'x')
 
-      ! call setup_dude(xall,vall,np)
       call setup_sphere(x1,v1,n1)
       call setup_sphere(x2,v2,n2)
       call setup_sphere(x3,v3,n3)
@@ -188,21 +197,26 @@ contains
       use metric_tools, only: coordinate_sys
       use force_gr, only: get_sourceterms
       use utils_gr, only: get_u0
-      real, intent(in)  :: r0
+      real, intent(in), optional  :: r0
       real, intent(out) :: x(3), v(3)
       real :: r, vy, x1
       real :: ra,va,omega,fac
-      !real :: fterm(3),term,term1,term2,term3,u0
       character(len=*), intent(in) :: type
-      ! real :: rotate_y(3,3)
+      real :: rotate_y(3,3), inclination
+
+      if (present(r0)) then
+         r = r0
+         print*,'r0 = ',r0
+      endif
 
       select case(type)
 
       case('circular')
          print*,'(Circular velocity in x-y plane, anticlockwise)'
-         print*,' Enter radius r for (r,theta,phi)=(r,pi/2,0):'
-         ! read(*,*) r
-         r = r0
+         if (.not. present(r0)) then
+            print*,' Enter radius r for (r,theta,phi)=(r,pi/2,0):'
+            read(*,*) r
+         endif
          if (metric_type=='Schwarzschild') then
             x1 = r                                    ! x1 = r in Schwarzschild
             omega = sqrt(1./r**3)
@@ -215,7 +229,6 @@ contains
          elseif(metric_type=='Minkowski') then
             STOP 'Cannot make circular orbits in Minkowski metric.'
          endif
-
          select case(coordinate_sys)
          case('Cartesian')
             x = (/x1,0.,0./)
@@ -224,29 +237,15 @@ contains
             x = (/r,0.5*pi,0./)
             v = (/0.,0.,omega/)
          end select
-
-         ! x = (/r,a,0./)
-         ! v = (/-a*omega,r*omega,0./)
-
-         ! call get_sourceterms(x,v,fterm)
-         ! call get_u0(x,v,u0)
-         ! term1 = -rs/x(1)**2
-         ! term2 = 2.*a*rs*v(3)/x(1)**2
-         ! term3 = (2.*x(1)**5-a**2*x(1)**2*rs)*v(3)**2/x(1)**4
-         ! term = term1+term2+term3
-         ! term = term*0.5*u0
-         ! print*,'Start fterm:',fterm(1),term,abs((term-fterm(1))/fterm(1))
-         ! print*,'Start fterm:',fterm
-         ! stop
-
-         print*,'period =',2*pi*r/vy
+         print*,'period =',2*pi/omega
          print*,'Press ENTER to continue:'
          read*
 
       case ('radial') ! Radial infall
-         print*,'(Radial infall) Enter radius r for (r,theta,phi)=(r,pi/2,0):'
-         ! read(*,*) r
-         r=r0
+         if (.not. present(r0)) then
+            print*,'(Radial infall) Enter radius r for (r,theta,phi)=(r,pi/2,0):'
+            read(*,*) r
+         endif
          select case(coordinate_sys)
          case('Cartesian')
             x1 = sqrt(r**2 + a**2)
@@ -255,25 +254,50 @@ contains
             x = (/r,0.5*pi,0./)
          end select
          v = (/0.,0.,0./)
-         ! call get_rotation_matrix(-pi/16.,rotate_y,'y')
-         ! x = matmul(rotate_y,x)
 
       case('precession') ! Clement's orbit
-         if (.not. coordinate_sys=='Cartesian') STOP 'Can only set up precession in cartesian coordinate system'
          ra = 90.
          va = 0.0521157 ! velocity giving a pericenter rp = 10
+         print*,'Precessing orbit: r =',ra,' and vy = ',va
+         if (present(r0)) then
+            print*, "WARNING: You're trying to set r = ",r0," but r is already set for this type of orbit. Continue?"
+            read*,
+         endif
+         select case(coordinate_sys)
+         case('Cartesian')
+            x = (/ra,0.,0./)
+            v = (/0.,va,0./)
+         case('Spherical')
+            x = (/ra,0.5*pi,0./)
+            v = (/0.,0.,va/ra /)
+            if (.not. metric_type=='Schwarzschild') STOP 'Only have precession setup for spherical in Schwarzschild'
+         end select
+
+      case('precession inclined')
+         ra = 90.
+         va = 0.0521157 ! velocity giving a pericenter rp = 10
+         inclination = -pi/6
+         print*,'Inclined precessing orbit: r =',ra,' and vy = ',va,' inclined to plane by ',inclination*180./pi, 'degrees.'
+         if (present(r0)) then
+            print*, "WARNING: You're trying to set r = ",r0," but r is already set for this type of orbit. Continue?"
+            read*,
+         endif
+         if (.not. metric_type=='Kerr') then
+            print*,"Warning, you are not using the Kerr metric for 'precession inclined'...result will be same as Schwarzschild"
+            read*
+         endif
+         if (.not. coordinate_sys=='Cartesian') STOP "Haven't tested 'precession inclined' for Spherical coordinates"
          x = (/ra,0.,0./)
          v = (/0.,va,0./)
-         ! x = (/ra,0.5*pi,0./)
-         ! v = (/0.,0.,ra*va/)
-         ! call get_rotation_matrix(-pi/4.,rotate_y,'y')
-         ! x = matmul(rotate_y,x)
+         call get_rotation_matrix(inclination,rotate_y,'y')
+         x = matmul(rotate_y,x)
 
       case('epicycle')
          print*,'(Radial epicyclic motion in x-y plane, anticlockwise)'
-         ! print*,' Enter radius r for (r,theta,phi)=(r,pi/2,0):'
-         ! read(*,*) r
-         r=r0
+         if (.not. present(r0)) then
+            print*,' Enter radius r for (r,theta,phi)=(r,pi/2,0):'
+            read(*,*) r
+         endif
          if (metric_type=='Schwarzschild') then
             x1 = r                                    ! x1 = r in Schwarzschild
             omega = sqrt(1./r**3)
@@ -287,7 +311,6 @@ contains
          elseif(metric_type=='Minkowski') then
             STOP 'Cannot make circular orbits in Minkowski metric.'
          endif
-
          fac = 1.00001
          select case(coordinate_sys)
          case('Cartesian')
@@ -300,9 +323,10 @@ contains
 
       case('vertical-oscillation')
          print*,'(Small vertical-oscillation from circular orbit in x-y plane, anticlockwise)'
-         ! print*,' Enter radius r for (r,theta,phi)=(r,pi/2,0):'
-         ! read(*,*) r
-         r=r0
+         if (.not. present(r0)) then
+            print*,' Enter radius r for (r,theta,phi)=(r,pi/2,0):'
+            read(*,*) r
+         endif
          if (metric_type=='Schwarzschild') then
             x1 = r                                    ! x1 = r in Schwarzschild
             omega = sqrt(1./r**3)
@@ -316,12 +340,11 @@ contains
          elseif(metric_type=='Minkowski') then
             STOP 'Cannot make circular orbits in Minkowski metric.'
          endif
-
          fac = 1.00001
          select case(coordinate_sys)
          case('Cartesian')
             x = (/x1,0.,0.+(fac-1.)/)
-            v = (/0.,1.05*vy,0./)
+            v = (/0.,vy,0./)
          case('Spherical')
             x = (/r,0.5*pi*fac,0./)
             v = (/0.,0.,omega/)
@@ -370,16 +393,5 @@ contains
       end select
 
    end subroutine get_rotation_matrix
-
-   ! subroutine get_isco(a,r_isco)
-   !    use metric, only: a
-   !    real, intent(in)  :: a
-   !    real, intent(out) :: r_isco
-   !    real :: z1,z2, onethird
-   !
-   !    onethird = 1./3.
-   !    z1 = 1. + (1. - a**2)**onethird*((1.+a)**onethird+(1.-a)**onethird)
-   !
-   ! end subroutine get_isco
 
 end module init
