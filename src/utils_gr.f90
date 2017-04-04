@@ -134,19 +134,29 @@ subroutine get_ev(x,v,energy,angmom)
    use metric, only: metric_type, rs
    use metric_tools, only: coordinate_sys
    real, intent(in), dimension(3) :: x,v
-   real, intent(inout) :: energy, angmom
+   real, intent(out) :: energy, angmom
    real :: r, U0
+   integer, save :: i = 0
 
    ! For Schwarzschild only
    if (metric_type=='Schwarzschild') then
       call get_u0(x,v,U0)
       if (coordinate_sys=='Cartesian') then
          r      = sqrt(dot_product(x,x))
-         energy = energy + (1. - rs/r)*U0
-         angmom = angmom + (x(1)*v(2)-x(2)*v(1))*U0
+         energy = (1. - rs/r)*U0
+         angmom = (x(1)*v(2)-x(2)*v(1))*U0
       else if (coordinate_sys=='Spherical') then
-         energy = energy + (1. - rs/x(1))*U0
-         angmom = angmom + x(1)**2*v(3)*U0
+         energy = (1. - rs/x(1))*U0
+         angmom = x(1)**2*v(3)*U0
+      endif
+   else
+      if (i==0) then
+         i = i+1
+         print*,'WARNING: Energy and angular momentum are not being calculated for this metric. They will just be set to zero.'
+         print*,'Continue?'
+         read*
+         energy = 0.
+         angmom = 0.
       endif
    endif
 
