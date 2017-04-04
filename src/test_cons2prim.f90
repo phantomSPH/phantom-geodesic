@@ -74,8 +74,8 @@ contains
          print*,'Warning: Metric test failed so cons2prim may also fail...'
       endif
 
-      call primitive2conservative(x,v,dens,u,P,rho,pmom,en)
-      call conservative2primitive(x,v_out,dens_out,u_out,p_out,rho,pmom,en,ierr)
+      call primitive2conservative(x,v,dens,u,P,rho,pmom,en,'energy')
+      call conservative2primitive(x,v_out,dens_out,u_out,p_out,rho,pmom,en,ierr,'energy')
 
       ! if (ierr /= 0) print*,'ERROR: '//trim(error_to_string(ierr))
       ! print*,error_to_string((/1,0,1,0/))
