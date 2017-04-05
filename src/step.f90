@@ -1,16 +1,16 @@
 module step
 implicit none
 
-character(len=*), parameter :: step_type = 'RK2'
+character(len=*), parameter :: step_type = 'Leapfrog'
 
 contains
 
 subroutine timestep(time,dt,x,v)
    use force_gr, only: get_sourceterms
    real, dimension(3), intent(inout) :: x,v
-   real, intent(in) :: dt
+   real, intent(in)    :: dt
    real, intent(inout) :: time
-   real, dimension(3) :: fterm
+   real, dimension(3)  :: fterm
 
    time = time + dt
    call get_sourceterms(x,v,fterm)
@@ -49,8 +49,8 @@ subroutine step_leapfrog(x,v,fterm,dt)
    iterations_x = 0
    iterations_pmom = 0
 
-   xtol = 1.e-20
-   ptol = 1.e-20
+   xtol = 1.e-15
+   ptol = 1.e-15
 
    call get_p_from_v(pmom,v,x) ! primitive to conservative
 
