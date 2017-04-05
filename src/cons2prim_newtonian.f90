@@ -28,19 +28,20 @@ end function error_to_string
 !  conserved variables are (rho,pmom_i,en)
 !+
 !----------------------------------------------------------------
-subroutine primitive2conservative(x,v,dens,u,P,rho,pmom,en)
+subroutine primitive2conservative(x,v,dens,u,P,rho,pmom,en,en_type)
    real, intent(in)  :: x(1:3)
    real, intent(in) :: dens,v(1:3),u,P
    real, intent(out)  :: rho,pmom(1:3),en
-
+   character(len=*), intent(in) :: en_type
 
 end subroutine primitive2conservative
 
-subroutine conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr)
+subroutine conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr,en_type)
    real, intent(in)  :: x(1:3)
    real, intent(inout) :: v(1:3),dens,u,P
    real, intent(in)  :: rho,pmom(1:3),en
    integer, intent(out) :: ierr
+   character(len=*), intent(in) :: en_type
 
 
 end subroutine conservative2primitive
