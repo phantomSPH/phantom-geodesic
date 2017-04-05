@@ -32,7 +32,7 @@ subroutine setup_singletype(xall,vall,np)
    real, allocatable, intent(inout), dimension(:,:) :: xall,vall
    np = 1
    allocate(xall(3,np),vall(3,np))
-   call initialise(xall(:,1),vall(:,1),'precession inclined',r0 = 2.9108)
+   call initialise(xall(:,1),vall(:,1),'circular',r0=10.)
 end subroutine setup_singletype
 
 !--- Setup up multipe (wrapper to call initialise multiple times)
@@ -206,15 +206,15 @@ subroutine initialise(x,v,type,r0)
 
    if (present(r0)) then
       r = r0
-      print*,'r0 = ',r0
+      write(*,'(a,f6.2)') ' Using init with r = ',r0
    endif
 
    select case(type)
 
    case('circular')
-      print*,'(Circular velocity in x-y plane, anticlockwise)'
+      print*,'#--- Circular velocity in x-y plane, anticlockwise ---#'
       if (.not. present(r0)) then
-         print*,' Enter radius r for (r,theta,phi)=(r,pi/2,0):'
+         print*,'Enter radius r for (r,theta,phi)=(r,pi/2,0):'
          read(*,*) r
       endif
       if (metric_type=='Schwarzschild') then
@@ -242,8 +242,9 @@ subroutine initialise(x,v,type,r0)
       read*
 
    case ('radial') ! Radial infall
+      print*,'#--- Radial infall ---#'
       if (.not. present(r0)) then
-         print*,'(Radial infall) Enter radius r for (r,theta,phi)=(r,pi/2,0):'
+         print*,'Enter radius r for (r,theta,phi)=(r,pi/2,0):'
          read(*,*) r
       endif
       select case(coordinate_sys)
@@ -258,7 +259,7 @@ subroutine initialise(x,v,type,r0)
    case('precession') ! Clement's orbit
       ra = 90.
       va = 0.0521157 ! velocity giving a pericenter rp = 10
-      print*,'Precessing orbit: r =',ra,' and vy = ',va
+      print*,'#--- Precessing orbit: r =',ra,' and vy = ',va
       if (present(r0)) then
          print*, "WARNING: You're trying to set r = ",r0," but r is already set for this type of orbit. Continue?"
          read*,
@@ -277,7 +278,7 @@ subroutine initialise(x,v,type,r0)
       ra = 90.
       va = 0.0521157 ! velocity giving a pericenter rp = 10
       inclination = -pi/6
-      print*,'Inclined precessing orbit: r =',ra,' and vy = ',va,' inclined to plane by ',inclination*180./pi, 'degrees.'
+      print*,'#--- Inclined precessing orbit: r =',ra,' and vy = ',va,' inclined to plane by ',inclination*180./pi, 'degrees.'
       if (present(r0)) then
          print*, "WARNING: You're trying to set r = ",r0," but r is already set for this type of orbit. Continue?"
          read*,
@@ -293,9 +294,9 @@ subroutine initialise(x,v,type,r0)
       x = matmul(rotate_y,x)
 
    case('epicycle')
-      print*,'(Radial epicyclic motion in x-y plane, anticlockwise)'
+      print*,'#--- Radial epicyclic motion in x-y plane, anticlockwise ---#'
       if (.not. present(r0)) then
-         print*,' Enter radius r for (r,theta,phi)=(r,pi/2,0):'
+         print*,'Enter radius r for (r,theta,phi)=(r,pi/2,0):'
          read(*,*) r
       endif
       if (metric_type=='Schwarzschild') then
@@ -322,9 +323,9 @@ subroutine initialise(x,v,type,r0)
       end select
 
    case('vertical-oscillation')
-      print*,'(Small vertical-oscillation from circular orbit in x-y plane, anticlockwise)'
+      print*,'#--- Small vertical-oscillation from circular orbit in x-y plane, anticlockwise ---#'
       if (.not. present(r0)) then
-         print*,' Enter radius r for (r,theta,phi)=(r,pi/2,0):'
+         print*,'Enter radius r for (r,theta,phi)=(r,pi/2,0):'
          read(*,*) r
       endif
       if (metric_type=='Schwarzschild') then

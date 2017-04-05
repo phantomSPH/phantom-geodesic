@@ -15,8 +15,8 @@ use checks,       only: check,sanity_checks
 use utils_gr,     only: get_rderivs
 implicit none
 
-integer, parameter :: ndumps=1500*2 !0!500!/15*20
-real,    parameter :: dt = 1.e-2, tmax =10330.*5, dtout_ev = tmax/ndumps, dtout = dtout_ev*1000.
+integer, parameter :: ndumps=200 !0!500!/15*20
+real,    parameter :: dt = 1.e-2, tmax =100.*4, dtout_ev = tmax/ndumps, dtout = dtout_ev*1000.
 real, allocatable, dimension(:,:) :: xall,vall
 real, dimension(3) :: x,v
 integer :: np
@@ -25,16 +25,21 @@ integer :: nsteps, i,j, dnout, dnout_ev
 logical :: passed
 real    :: start, finish, frac_done, twall_elapsed
 
-   print*,'Metric type       = ',metric_type
-   print*,'Coord. sys. type  = ',coordinate_sys
-   print*,'Timestepping used = ',step_type
-   print*,'dt                = ',dt
-   nsteps = int(tmax/dt)
-   ! print*,'nsteps = ',nsteps
-   time     = 0.
+   print*,'-------------------------------------------------------------------'
+   print*,'GR-TEST'
+   print*,'-------------------------------------------------------------------'
+   print*,              'Metric type       = ',metric_type
+   print*,              'Coord. sys. type  = ',coordinate_sys
+   print*,              'Timestepping used = ',step_type
+   write(*,'(a,f10.2)') ' dt                = ',dt
+   write(*,'(a,f10.2)') ' tmax              = ',tmax
+   nsteps   = int(tmax/dt)
    dnout    = int(dtout/dt)
    dnout_ev = int(dtout_ev/dt)
+   print*,'-------------------------------------------------------------------'
    print*,'START'
+   print*,'-------------------------------------------------------------------'
+   time     = 0.
    call setup(xall, vall,np)
 
    angmom = 0.
@@ -80,7 +85,8 @@ real    :: start, finish, frac_done, twall_elapsed
          call write_vxyz(time,vall,np)
          twall_elapsed = finish-start
          frac_done     = time/tmax
-         print*,'t =', time,'%:',frac_done*100.,'t-minus (s):',(1.-frac_done)/frac_done*twall_elapsed
+         write(*,'(i3.1,a,f10.2,a,f10.2)') &
+         & nint(frac_done*100.),'%   t =', time,'      t-minus (s):',(1.-frac_done)/frac_done*twall_elapsed
          call cpu_time(finish)
       endif
       if (mod(i,dnout)==0) then
