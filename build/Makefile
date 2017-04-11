@@ -18,7 +18,7 @@ force_gr.f90 init.f90 cons2prim.f90 step.f90 output.f90 test_metric.f90 checks.f
  main.f90
 
 ifeq ($(NEWTONIAN), yes)
-	SRC=inverse4x4.f90 $(METRIC_FILE) metric_tools.f90 io.f90 utils_testsuite.f90 utils_gr.f90 eos.f90 \
+	SRC=inverse4x4.f90 metric_minkowski.f90 metric_tools.f90 io.f90 utils_testsuite.f90 utils_gr.f90 eos.f90 \
 	force_gr_newtonian.f90 init.f90 cons2prim_newtonian.f90 step.f90 output.f90 test_metric.f90 checks.f90 test_cons2prim.f90 \
 	main.f90
 endif
