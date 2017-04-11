@@ -13,3 +13,6 @@ test:
 
 clean:
 	cd $(BUILD_DIR) && make clean
+
+delete:
+	rm *.dat
