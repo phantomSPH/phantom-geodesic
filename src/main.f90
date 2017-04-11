@@ -28,11 +28,12 @@ real    :: start, finish, frac_done, twall_elapsed
    print*,'-------------------------------------------------------------------'
    print*,'GR-TEST'
    print*,'-------------------------------------------------------------------'
-   print*,              'Metric type       = ',metric_type
-   print*,              'Coord. sys. type  = ',coordinate_sys
-   print*,              'Timestepping used = ',step_type
+   print*,               'Metric type       = ',metric_type
+   print*,               'Coord. sys. type  = ',coordinate_sys
+   print*,               'Timestepping used = ',step_type
    write(*,'(a,f10.2)') ' dt                = ',dt
    write(*,'(a,f10.2)') ' tmax              = ',tmax
+   write(*,'(a,f10.2)') ' dtout_ev          = ',dtout_ev
    nsteps   = int(tmax/dt)
    dnout    = int(dtout/dt)
    dnout_ev = int(dtout_ev/dt)
@@ -41,6 +42,8 @@ real    :: start, finish, frac_done, twall_elapsed
    print*,'-------------------------------------------------------------------'
    time     = 0.
    call setup(xall, vall,np)
+   print*,'Ready...'
+   read*
 
    angmom = 0.
    energy = 0.
@@ -85,7 +88,7 @@ real    :: start, finish, frac_done, twall_elapsed
          call write_vxyz(time,vall,np)
          twall_elapsed = finish-start
          frac_done     = time/tmax
-         write(*,'(i3.1,a,f10.2,a,f10.2)') &
+         write(*,'(i4.1,a,f10.2,a,f10.2)') &
          & nint(frac_done*100.),'%   t =', time,'      t-minus (s):',(1.-frac_done)/frac_done*twall_elapsed
          call cpu_time(finish)
       endif
@@ -95,5 +98,9 @@ real    :: start, finish, frac_done, twall_elapsed
       endif
 
    enddo
+
+   print*,'-------------------------------------------------------------------'
+   print*,'Finished.'
+   print*,'-------------------------------------------------------------------'
 
 end program test
