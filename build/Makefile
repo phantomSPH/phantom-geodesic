@@ -5,7 +5,7 @@
 #
 #----------------------------------
 FC=gfortran
-FFLAGS=-O3 -Wall -Wextra -g -pedantic -std=f2008 -fcheck=all -fdefault-real-8 -fdefault-double-8 #-freal-4-real-16 #
+FFLAGS=-O3 -Wall -Wextra -g -pedantic -std=f2008 -fcheck=all -fdefault-real-8 -fdefault-double-8 -Wno-compare-reals #-freal-4-real-16 #
 
 VPATH= ../src
 
