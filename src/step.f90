@@ -1,7 +1,7 @@
 module step
 implicit none
 
-character(len=*), parameter :: step_type = 'Leapfrog'
+character(len=*), parameter :: step_type = 'L&R05'
 
 contains
 
@@ -24,6 +24,8 @@ subroutine timestep(time,dt,x,v)
       call step_1(x,v,fterm,dt)
    case('Heuns')
       call step_heuns(x,v,fterm,dt)
+   case('L&R05')
+      call step_landr05(x,v,fterm,dt)
    end select
 end subroutine timestep
 
@@ -102,6 +104,84 @@ subroutine step_leapfrog(x,v,fterm,dt)
    ! write(2,*) x,v
 
 end subroutine step_leapfrog
+
+!----------------------------------------------------------------
+!+
+!  Modified leapfrog (2nd order) from Leimkuhler & Reich (2005)
+!+
+!----------------------------------------------------------------
+subroutine step_landr05(x,v,fterm,dt)
+   use force_gr, only: get_sourceterms
+   use cons2prim, only: get_p_from_v, get_v_from_p
+   real, dimension(3), intent(inout) :: fterm
+   real, dimension(3), intent(inout) :: x,v
+   real, dimension(3) :: pmom, vstar, fterm_star, xprev, pmom_prev
+   real, intent(in) :: dt
+   real :: xtol, ptol
+   logical :: converged_x, converged_pmom
+   integer :: iterations_x, iterations_pmom
+   integer, parameter :: max_iterations = 100
+
+   converged_x = .false.
+   converged_pmom = .false.
+   iterations_x = 0
+   iterations_pmom = 0
+
+   xtol = 1.e-15
+   ptol = 1.e-15
+
+   call get_p_from_v(pmom,v,x) ! primitive to conservative
+
+   ! print*,"IN:"
+   ! print*,x
+   ! print*,v
+
+   pmom = pmom + 0.5*dt*fterm  !pmom_star
+
+   ! Converge to p
+   do while (.not. converged_pmom .and. iterations_pmom < max_iterations)
+      iterations_pmom = iterations_pmom + 1
+      pmom_prev = pmom
+      call get_v_from_p(pmom,v,x)                ! Get vstar from pmom_star
+      call get_sourceterms(x,v,fterm_star)       ! Get fterm(pmom_star,x1)=fterm_star !!This will need to be get_forces
+      !   print*,"accel: ",fterm_star
+      pmom = pmom_prev + 0.5*dt*fterm_star - 0.5*dt*fterm !0.5*dt*(fterm_star - fterm)!
+      !   print*,'pmom: ',pmom
+      if (maxval(abs(pmom_prev-pmom))<=ptol) converged_pmom = .true.
+      fterm = fterm_star
+   enddo
+   if (.not. converged_pmom) print*, 'WARNING: implicit timestep did not & converge! pmom-pmom_prev =',&
+   &                                    pmom-pmom_prev
+
+
+   call get_v_from_p(pmom,v,x) ! Get v(phalf,x0)
+   ! print*,"vhalf: ",v
+   ! Initial first order prediction for position (xstar)
+   x = x + dt*v
+   ! Converge to x
+   do while ( .not. converged_x .and. iterations_x < max_iterations)
+      iterations_x = iterations_x + 1
+      xprev = x
+      call get_v_from_p(pmom,vstar,x) ! Get v(phalf,xstar)=vstar
+      x = xprev + 0.5*dt*(vstar - v)
+      if (maxval(abs(xprev-x))<=xtol) converged_x = .true.
+      v = vstar
+   enddo
+   if (.not. converged_x) print*, 'WARNING: implicit timestep did not converge! maxval(abs(xprev-x)) =',&
+   &                                 maxval(abs(xprev-x)), iterations_x
+
+
+   pmom = pmom + 0.5*dt*fterm  ! Half step in position
+
+   call get_v_from_p(pmom,v,x)
+
+   ! print*,"OUT:"
+   ! print*,x
+   ! print*,v
+   ! read*
+   ! write(2,*) x,v
+
+end subroutine step_landr05
 
 
 !----------------------------------------------------------------
