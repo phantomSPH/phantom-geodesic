@@ -83,8 +83,8 @@ subroutine metric_spherical_derivatives(position,dgcovdr, dgcovdtheta, dgcovdphi
 end subroutine metric_spherical_derivatives
 
 subroutine cartesian2spherical(xcart,xspher)
-   real, intent(in) :: xcart(3)
-   real, intent(out) ::xspher(3)
+   real, intent(in)  :: xcart(3)
+   real, intent(out) :: xspher(3)
    real :: x,y,z
    real :: r,theta,phi
 
@@ -98,6 +98,22 @@ subroutine cartesian2spherical(xcart,xspher)
 
    xspher   = (/r,theta,phi/)
 end subroutine cartesian2spherical
+
+subroutine spherical2cartesian(xspher,xcart)
+   real, intent(in)  :: xspher(3)
+   real, intent(out) :: xcart(3)
+   real :: x,y,z,r,theta,phi
+
+   r     = xspher(1)
+   theta = xspher(2)
+   phi   = xspher(3)
+   x = r*sin(theta)*cos(phi)
+   y = r*sin(theta)*sin(phi)
+   z = r*cos(theta)
+
+   xcart = (/x,y,z/)
+
+end subroutine spherical2cartesian
 
 subroutine get_jacobian(position,dxdx)
    real, intent(in), dimension(3) :: position
