@@ -32,7 +32,7 @@ subroutine setup_singletype(xall,vall,np)
    real, allocatable, intent(inout), dimension(:,:) :: xall,vall
    np = 1
    allocate(xall(3,np),vall(3,np))
-   call initialise(xall(:,1),vall(:,1),'circular',r0=10.)
+   call initialise(xall(:,1),vall(:,1),'precession')
 end subroutine setup_singletype
 
 !--- Setup up multipe (wrapper to call initialise multiple times)

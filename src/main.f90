@@ -15,8 +15,8 @@ use checks,       only: check,sanity_checks
 use utils_gr,     only: get_rderivs
 implicit none
 
-integer, parameter :: ndumps=200 !0!500!/15*20
-real,    parameter :: dt = 1.e-2, tmax =100.*4, dtout_ev = tmax/ndumps, dtout = dtout_ev*1000.
+integer, parameter :: ndumps=2000 !0!500!/15*20
+real,    parameter :: dt = 1.e-2, tmax =10000., dtout_ev = tmax/ndumps, dtout = dtout_ev*1000.
 real, allocatable, dimension(:,:) :: xall,vall
 real, dimension(3) :: x,v
 integer :: np
