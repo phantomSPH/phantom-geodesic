@@ -204,6 +204,8 @@ subroutine initialise(x,v,type,r0)
  character(len=*), intent(in) :: type
  real :: rotate_y(3,3), inclination
 
+ print*,""
+
  if (present(r0)) then
     r = r0
     write(*,'(a,f6.2)') ' Using init with r = ',r0
@@ -352,6 +354,9 @@ subroutine initialise(x,v,type,r0)
     end select
 
  end select
+
+ print*,""
+ 
 end subroutine initialise
 
 !--- Subroutine to compute the 3-vector cross product

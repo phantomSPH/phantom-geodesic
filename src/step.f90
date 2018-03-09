@@ -1,9 +1,34 @@
 module step
  implicit none
 
- character(len=*), parameter :: step_type = 'L&R05'
+ integer :: steptype
+
+ integer, parameter :: &
+         ileapfrog = 1, &
+         irk2      = 2, &
+         ieuler    = 3, &
+         iheuns    = 4, &
+         ilnro5    = 5
 
 contains
+
+character(len=10) function stepname(i)
+ integer, intent(in) :: i
+
+ select case(i)
+ case(ileapfrog)
+    stepname = 'Leapfrog'
+ case(irk2)
+    stepname = 'RK2'
+ case(ieuler)
+    stepname = 'Euler'
+ case(iheuns)
+    stepname = "Heun's"
+ case(ilnro5)
+    stepname = 'L&R05'
+ end select
+
+end function stepname
 
 subroutine timestep(time,dt,x,v)
  use force_gr, only: get_sourceterms
@@ -15,16 +40,16 @@ subroutine timestep(time,dt,x,v)
  time = time + dt
  call get_sourceterms(x,v,fterm)
 
- select case(step_type)
- case('Leapfrog')
+ select case(steptype)
+ case(ileapfrog)
     call step_leapfrog(x,v,fterm,dt)
- case('RK2')
+ case(irk2)
     call step_rk2(x,v,fterm,dt)
- case('Euler')
+ case(ieuler)
     call step_1(x,v,fterm,dt)
- case('Heuns')
+ case(iheuns)
     call step_heuns(x,v,fterm,dt)
- case('L&R05')
+ case(ilnro5)
     call step_landr05(x,v,fterm,dt)
  end select
 end subroutine timestep

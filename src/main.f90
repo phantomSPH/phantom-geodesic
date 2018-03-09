@@ -8,15 +8,16 @@ program test
  use metric,       only: metric_type
  use metric_tools, only: coordinate_sys
  use force_gr,     only: get_sourceterms
- use step,         only: timestep, step_type
+ use step,         only: timestep, stepname, steptype, ilnro5
  use utils_gr,     only: get_ev
  use output,       only: write_out, write_ev, write_xyz, write_vxyz
  use checks,       only: check,sanity_checks
  use utils_gr,     only: get_rderivs
+ use prompting,    only: prompt
  implicit none
 
  integer, parameter :: ndumps=15000
- real,    parameter :: dt = 1.e-2, tmax = 30000., dtout_ev = tmax/ndumps, dtout = dtout_ev*1000.
+ real :: dt, tmax, dtout_ev, dtout
 
  real, allocatable, dimension(:,:) :: xall,vall
  real, dimension(3) :: x,v
@@ -28,24 +29,32 @@ program test
  real    :: tminus
  integer :: percentage,prev_percent
 
+ steptype = ilnro5
+ dt       = 1.e-2
+ tmax     = 30000
+ call prompt(" Enter step type (1 = Leapfrog  |  2 = RK2  |  3 = Euler  |  4 = Heun's  |  5 = L&R05) ",steptype)
+ call prompt(" Enter dt  ",dt,0.)
+ call prompt(" Enter tmax",tmax,dt)
+ dtout_ev = tmax/ndumps
+ dtout    = dtout_ev*1000.
+
  print*,'-------------------------------------------------------------------'
  print*,'GR-TEST'
  print*,'-------------------------------------------------------------------'
  print*,               'Metric type       = ',metric_type
  print*,               'Coord. sys. type  = ',coordinate_sys
- print*,               'Timestepping used = ',step_type
+ print*,               'Timestepping used = ',trim(stepname(steptype))
  write(*,'(a,f10.2)') ' dt                = ',dt
  write(*,'(a,f10.2)') ' tmax              = ',tmax
  write(*,'(a,f10.2)') ' dtout_ev          = ',dtout_ev
  nsteps   = int(tmax/dt)
  dnout    = int(dtout/dt)
  dnout_ev = int(dtout_ev/dt)
- print*,'-------------------------------------------------------------------'
- print*,'START'
- print*,'-------------------------------------------------------------------'
  time     = 0.
  call setup(xall, vall,np)
- print*,'Ready...'
+ print*,'-------------------------------------------------------------------'
+ print*,' Press ENTER to start...'
+ print*,'-------------------------------------------------------------------'
  read*
 
  angmom = 0.
