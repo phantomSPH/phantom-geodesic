@@ -78,8 +78,10 @@ program test
  call write_xyz(time,xall,np)
  call write_vxyz(time,vall,np)
  call cpu_time(start)
- do i=1,nsteps
 
+ prev_percent = 0
+ 
+ do i=1,nsteps
     angmom =0.
     energy =0.
     do j=1,np
@@ -94,7 +96,6 @@ program test
        angmom = angmom + angmom_i
     enddo
 
-    prev_percent = 0
     if (mod(i,dnout_ev)==0) then
        call write_ev(time,energy-energy_init,angmom-angmom_init)
        call write_xyz(time,xall,np)
@@ -109,6 +110,7 @@ program test
        prev_percent = percentage
        call cpu_time(finish)
     endif
+
     if (mod(i,dnout)==0) then
        call check(x,v,passed)
        call write_out(time,xall,np)
