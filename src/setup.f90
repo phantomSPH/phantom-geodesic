@@ -1,10 +1,10 @@
-module init
+module setup
  implicit none
  real, parameter :: pi = acos(-1.)
 contains
 
 !--- Wrapper subroutine called in main.f90
-subroutine setup(xall,vall,np)
+subroutine setpart(xall,vall,np)
  integer, intent(out) :: np
  real, allocatable, intent(inout), dimension(:,:) :: xall,vall
  integer, parameter :: isetup = 3
@@ -24,7 +24,7 @@ subroutine setup(xall,vall,np)
     call setup_sphere(xall,vall,np)
  end select
 
-end subroutine setup
+end subroutine setpart
 
 !--- Setup up a single body (wrapper to call initialise once)
 subroutine setup_singletype(xall,vall,np)
@@ -356,7 +356,7 @@ subroutine initialise(x,v,type,r0)
  end select
 
  print*,""
- 
+
 end subroutine initialise
 
 !--- Subroutine to compute the 3-vector cross product
@@ -400,4 +400,4 @@ subroutine get_rotation_matrix(angle,rotation_matrix,axis)
 
 end subroutine get_rotation_matrix
 
-end module init
+end module setup

@@ -4,7 +4,7 @@
 !+
 !----------------------------------------------------------------
 program test
- use init,         only: setup
+ use setup,        only: setpart
  use metric,       only: metric_type
  use metric_tools, only: coordinate_sys
  use force_gr,     only: get_sourceterms
@@ -51,7 +51,7 @@ program test
  dnout    = int(dtout/dt)
  dnout_ev = int(dtout_ev/dt)
  time     = 0.
- call setup(xall, vall,np)
+ call setpart(xall, vall,np)
  print*,'-------------------------------------------------------------------'
  print*,' Press ENTER to start...'
  print*,'-------------------------------------------------------------------'
