@@ -5,7 +5,19 @@
 #
 #----------------------------------
 FC=gfortran
-FFLAGS=-O3 -Wall -Wextra -g -pedantic -std=f2008 -fcheck=all -fdefault-real-8 -fdefault-double-8 -Wno-compare-reals #-freal-4-real-16 #
+
+### Old flags:
+# FFLAGS=-O3 -Wall -Wextra -g -pedantic -std=f2008 -fcheck=all -Wno-compare-reals -fdefault-real-8 -fdefault-double-8#-freal-4-real-16#
+
+### Phantom flags (+ a couple of extra):
+FFLAGS= -O3 -Wall -Wextra -Wno-compare-reals -Wno-unused-dummy-argument -frecord-marker=4 -gdwarf-2 \
+        -finline-functions-called-once -finline-limit=1500 -funroll-loops -ftree-vectorize \
+        -std=f2008 -fall-intrinsics -fdefault-real-8 -fdefault-double-8
+DEBUGFLAG= -g -fcheck=all -ffpe-trap=invalid,zero,overflow -finit-real=nan -finit-integer=nan -fbacktrace
+ifeq ($(DEBUG), yes)
+    FFLAGS += ${DEBUGFLAG}
+    FFLAGS := $(FFLAGS:-O3=-O0)
+endif
 
 VPATH= ../src
 
