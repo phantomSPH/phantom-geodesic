@@ -51,6 +51,7 @@ end subroutine setup_multitypes
 
 !--- Setup a proxy for a sphere of particles
 subroutine setup_sphere(xall,vall,np)
+ use utils, only: get_rotation_matrix
  integer, intent(out) :: np
  real, allocatable, intent(inout), dimension(:,:) :: xall,vall
  real :: dlayer, dr, rotate_y(3,3)
@@ -91,6 +92,7 @@ end subroutine setup_sphere
 
 !--- Setup multiple spheres of particles
 subroutine setup_multisphere(xall,vall,np)
+ use utils, only: get_rotation_matrix
  integer, intent(out) :: np
  real, allocatable, intent(inout), dimension(:,:) :: xall,vall
  real, allocatable, dimension(:,:) :: x1,v1,x2,v2,x3,v3
@@ -130,6 +132,7 @@ end subroutine setup_multisphere
 
 !--- Setup a stick-figure person
 subroutine setup_dude(xall,vall,np)
+ use utils, only: cross_product, get_rotation_matrix
  integer, intent(out) :: np
  real, allocatable, intent(inout), dimension(:,:) :: xall,vall
  integer :: i,index,nleg,nbody,narm,nhead
@@ -197,6 +200,7 @@ subroutine initialise(x,v,type,r0)
  use metric_tools, only: coordinate_sys
  use force_gr, only: get_sourceterms
  use utils_gr, only: get_u0
+ use utils,    only: get_rotation_matrix
  real, intent(in), optional  :: r0
  real, intent(out) :: x(3), v(3)
  real :: r, vy, x1
@@ -358,46 +362,5 @@ subroutine initialise(x,v,type,r0)
  print*,""
 
 end subroutine initialise
-
-!--- Subroutine to compute the 3-vector cross product
-subroutine cross_product(a,b,c)
- real, dimension(3), intent(in) :: a,b
- real, dimension(3), intent(out) :: c
-
- c(1) = a(2)*b(3) - a(3)*b(2)
- c(2) = a(3)*b(1) - a(1)*b(3)
- c(3) = a(1)*b(2) - a(2)*b(1)
-
-end subroutine cross_product
-
-!--- Subroutine to return a rotation matrix, given some angle, about
-!    one of the cartesian axes.
-subroutine get_rotation_matrix(angle,rotation_matrix,axis)
- real, intent(in)  :: angle
- character(len=*), intent(in) :: axis
- real, intent(out) ::  rotation_matrix(3,3)
- real, dimension(3,3) :: rotate_x,rotate_y,rotate_z
-
- select case(axis)
- case('x')
-    rotate_x(1,:) = (/1. , 0.        , 0.        /)
-    rotate_x(2,:) = (/0. , cos(angle),-sin(angle)/)
-    rotate_x(3,:) = (/0. , sin(angle), cos(angle)/)
-    rotation_matrix = rotate_x
-
- case('y')
-    rotate_y(1,:) = (/ cos(angle), 0. , sin(angle)/)
-    rotate_y(2,:) = (/ 0.        , 1. , 0.        /)
-    rotate_y(3,:) = (/-sin(angle), 0. , cos(angle)/)
-    rotation_matrix = rotate_y
-
- case('z')
-    rotate_z(1,:) = (/cos(angle),-sin(angle),0./)
-    rotate_z(2,:) = (/sin(angle), cos(angle),0./)
-    rotate_z(3,:) = (/0.        ,0.         ,1./)
-    rotation_matrix = rotate_z
- end select
-
-end subroutine get_rotation_matrix
 
 end module setup
