@@ -1,4 +1,4 @@
-CODE_DIR  = ~/phantom-grtest
+CODE_DIR  = ~/grtest
 BUILD_DIR = $(CODE_DIR)/build
 CODE_NAME = grtest
 
