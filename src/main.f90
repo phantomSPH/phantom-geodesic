@@ -24,6 +24,8 @@ real    :: time, energy_init, angmom_init, energy, angmom, energy_i, angmom_i
 integer :: nsteps, i,j, dnout, dnout_ev
 logical :: passed
 real    :: start, finish, frac_done, twall_elapsed
+real    :: tminus
+integer :: percentage,prev_percent
 
    print*,'-------------------------------------------------------------------'
    print*,'GR-TEST'
@@ -82,14 +84,19 @@ real    :: start, finish, frac_done, twall_elapsed
          angmom = angmom + angmom_i
       enddo
 
+      prev_percent = 0
       if (mod(i,dnout_ev)==0) then
          call write_ev(time,energy-energy_init,angmom-angmom_init)
          call write_xyz(time,xall,np)
          call write_vxyz(time,vall,np)
          twall_elapsed = finish-start
          frac_done     = time/tmax
-         write(*,'(i4.1,a,f10.2,a,f10.2)') &
-         & nint(frac_done*100.),'%   t =', time,'      t-minus (s):',(1.-frac_done)/frac_done*twall_elapsed
+         percentage    = nint(frac_done*100.)
+         tminus        = (1.-frac_done)/frac_done*twall_elapsed
+         if (percentage == prev_percent + 1) then
+            write(*,'(i4.1,a,f10.2,a,f10.2)') percentage,'%   t =', time,'      t-minus (s):',tminus
+         endif
+         prev_percent = percentage
          call cpu_time(finish)
       endif
       if (mod(i,dnout)==0) then
