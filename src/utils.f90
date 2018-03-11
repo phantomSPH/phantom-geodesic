@@ -44,4 +44,13 @@ subroutine get_rotation_matrix(angle,rotation_matrix,axis)
 
 end subroutine get_rotation_matrix
 
+subroutine timer(time)
+ real, intent(out) :: time
+ integer :: cc,cr,cm
+
+ call system_clock(count=cc,count_rate=cr,count_max=cm)
+ time = real(cc)/real(cr)
+
+end subroutine timer
+
 end module utils
