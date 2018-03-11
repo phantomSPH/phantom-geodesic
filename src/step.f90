@@ -30,14 +30,12 @@ character(len=10) function stepname(i)
 
 end function stepname
 
-subroutine timestep(time,dt,x,v)
+subroutine timestep(dt,x,v)
  use force_gr, only: get_sourceterms
  real, dimension(3), intent(inout) :: x,v
  real, intent(in)    :: dt
- real, intent(inout) :: time
  real, dimension(3)  :: fterm
 
- time = time + dt
  call get_sourceterms(x,v,fterm)
 
  select case(steptype)

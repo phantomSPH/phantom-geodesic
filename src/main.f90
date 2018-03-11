@@ -4,7 +4,7 @@
 !+
 !----------------------------------------------------------------
 program test
- use setup,        only: setpart
+ use init,         only: initialise
  use metric,       only: metric_type
  use metric_tools, only: coordinate_sys
  use force_gr,     only: get_sourceterms
@@ -16,8 +16,7 @@ program test
  use prompting,    only: prompt
  implicit none
 
- integer, parameter :: ndumps=1500
- real :: dt, tmax, dtout_ev, dtout
+ real :: dt, tmax, dtout
 
  real, allocatable, dimension(:,:) :: xall,vall
  real, dimension(3) :: x,v
@@ -32,6 +31,8 @@ program test
  steptype = ilnro5
  dt       = 2390./1.e4  !10^4 steps per orbit (precessing orbit)
  tmax     = 2390.*4
+ dnout_ev = 30
+ dtout    = -1.
 
  print*,'-------------------------------------------------------------------'
  print*,'GR-TEST'
@@ -39,34 +40,23 @@ program test
  print*,               'Metric type       = ',metric_type
  print*,               'Coord. sys. type  = ',coordinate_sys
 
- call setpart(xall, vall,np)
- angmom = 0.
- energy = 0.
- do i=1,np
-    x = xall(:,i)
-    v = vall(:,i)
-    call check(x,v,passed)
-    if (.not. passed) then
-      STOP "Bad initial conditions!"
-    endif
-    call get_ev(x,v,energy_i,angmom_i)
-    energy = energy + energy_i
-    angmom = angmom + angmom_i
- enddo
- print*,'Setup OK'
- print*,''
+ ! Set particles and perform checks
+ call initialise(xall,vall,np,energy,angmom)
 
  call prompt(" Enter step type (1 = Leapfrog  |  2 = RK2  |  3 = Euler  |  4 = Heun's  |  5 = L&R05) ",steptype)
  call prompt(" Enter dt  ",dt,0.)
  call prompt(" Enter tmax",tmax,dt)
- dtout_ev = tmax/ndumps
- dtout    = dtout_ev*1000.
+ call prompt(" Enter dtout (-ve don't write dumps)",dtout)
+ call prompt(" Write to ev file every how many steps? ",dnout_ev,0)
+
+ nsteps  = int(tmax/dt)
+ dnout   = int(dtout/dt)
 
  print*,''
  print*,               'Timestepping used = ',trim(stepname(steptype))
  write(*,'(a,f10.2)') ' dt                = ',dt
  write(*,'(a,f10.2)') ' tmax              = ',tmax
- write(*,'(a,f10.2)') ' dtout_ev          = ',dtout_ev
+ write(*,'(a,i10)')   ' dnout_ev          = ',dnout_ev
 
  print*,'-------------------------------------------------------------------'
  print*,' Press ENTER to start...'
@@ -74,41 +64,49 @@ program test
  read*
  print*,'Go...!'
 
- nsteps   = int(tmax/dt)
- dnout    = int(dtout/dt)
- dnout_ev = int(dtout_ev/dt)
  time     = 0.
-
  energy_init = energy
  angmom_init = angmom
 
- call write_out(time,xall,np)
- call write_ev(time,energy-energy_init,angmom-angmom_init)
- call write_xyz(time,xall,np)
- call write_vxyz(time,vall,np)
- call timer(start)
+ if (dtout>0) call write_out(time,xall,np)
+ if (dnout_ev>0) then
+    call write_ev(time,energy-energy_init,angmom-angmom_init)
+    call write_xyz(time,xall,np)
+    call write_vxyz(time,vall,np)
+    call timer(start)
+ endif
 
  prev_percent = 0
  do i=1,nsteps
     angmom =0.
     energy =0.
+
+    time = time + dt
+    !$omp parallel default(none) &
+    !$omp shared(i,np,xall,vall,dt,dnout,dtout) &
+    !$omp private(j,x,v,passed,energy_i,angmom_i) &
+    !$omp reduction(+:energy,angmom)
+    !$omp do
     do j=1,np
        x = xall(:,j)
        v = vall(:,j)
-       call timestep(time,dt,x,v)
-       if (mod(i,dnout)==0) call check(x,v,passed)
+       call timestep(dt,x,v)
+       if (mod(i,dnout)==0 .and. dtout>0) call check(x,v,passed)
        xall(:,j) = x
        vall(:,j) = v
        call get_ev(x,v,energy_i,angmom_i)
        energy = energy + energy_i
        angmom = angmom + angmom_i
     enddo
+    !$omp enddo
+    !$omp end parallel
 
-    if (mod(i,dnout)==0) then
+    if (mod(i,dnout)==0 .and. dtout>0) then
       call check(x,v,passed)
       call write_out(time,xall,np)
     endif
 
+    if (dnout_ev>0) then
     if (mod(i,dnout_ev)==0) then
        call write_ev(time,energy-energy_init,angmom-angmom_init)
        call write_xyz(time,xall,np)
@@ -127,6 +125,7 @@ program test
           endif
        endif
        prev_percent = percentage
+    endif
     endif
 
  enddo
