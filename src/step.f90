@@ -139,7 +139,7 @@ subroutine step_landr05(x,v,fterm,dt)
  iterations_x = 0
  iterations_pmom = 0
 
- tol  = 1.e-30
+ tol  = 1.e-15
  xtol = tol
  ptol = tol
 
