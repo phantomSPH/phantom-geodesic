@@ -15,7 +15,7 @@ FFLAGS= -O3 -Wall -Wextra -Wno-compare-reals -Wno-unused-dummy-argument -frecord
         -std=f2008 -fall-intrinsics -fdefault-real-8 -fdefault-double-8
 DEBUGFLAG= -g -fcheck=all -ffpe-trap=invalid,zero,overflow -finit-real=nan -finit-integer=nan -fbacktrace
 OMPFLAGS = -fopenmp
-OPENMP=yes
+OPENMP=no
 ifeq ($(OPENMP), yes)
     FFLAGS += ${OMPFLAGS}
 endif
