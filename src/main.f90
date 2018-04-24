@@ -24,7 +24,7 @@ program test
  integer :: np
  real    :: time, energy_init, angmom_init, energy, angmom, energy_i, angmom_i
  integer :: nsteps,i,j,dnout,dnout_ev
- logical :: passed
+ logical :: passed,write_pos_vel
  real    :: start,finish,tminus,frac_done,twall_elapsed,twallmax_approx
  integer :: percentage,prev_percent
 
@@ -34,6 +34,7 @@ program test
  tmax     = 2390.*4
  dnout_ev = 30
  dtout    = -1.
+ write_pos_vel = .true.
 
  print*,'-------------------------------------------------------------------'
  print*,'GR-TEST'
@@ -49,6 +50,10 @@ program test
  call prompt(" Enter tmax",tmax,dt)
  call prompt(" Enter dtout (-ve don't write dumps)",dtout)
  call prompt(" Write to ev file every how many steps? ",dnout_ev,0)
+ if (np>1) then
+    write_pos_vel = .false.
+    call prompt(" Write positions and velocities to one file?",write_pos_vel)
+ endif
 
  nsteps  = int(tmax/dt)
  dnout   = int(dtout/dt)
@@ -72,8 +77,10 @@ program test
  if (dtout>0) call write_out(time,xall,np)
  if (dnout_ev>0) then
     call write_ev(time,energy-energy_init,angmom-angmom_init)
-    call write_xyz(time,xall,np)
-    call write_vxyz(time,vall,np)
+    if (write_pos_vel) then
+       call write_xyz(time,xall,np)
+       call write_vxyz(time,vall,np)
+    endif
     call timer(start)
  endif
 
@@ -109,8 +116,10 @@ program test
     if (dnout_ev>0) then
     if (mod(i,dnout_ev)==0) then
        call write_ev(time,energy-energy_init,angmom-angmom_init)
-       call write_xyz(time,xall,np)
-       call write_vxyz(time,vall,np)
+       if (write_pos_vel) then
+          call write_xyz(time,xall,np)
+          call write_vxyz(time,vall,np)
+       endif
        call timer(finish)
        twall_elapsed = finish-start
        frac_done     = time/tmax
