@@ -56,6 +56,11 @@ for i in range(n):
     v = abs(velr[:,i])
     vexact = vr(r,r[0])
     # print(r[0])
+    cond = r>2.001
+    rnanfree = r[cond]
+    vnanfree = v[cond]
+    vexactnanfree = vexact[cond]
+    print('r0 = ',r[0],' L2 = ',np.sqrt(np.sum(abs(vnanfree-vexactnanfree)**2)/len(rnanfree)),'vmin = ',vnanfree[-1])
 
     if i==0:
         # plt.subplot(211)
