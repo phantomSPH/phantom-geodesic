@@ -43,6 +43,7 @@ for d in directories:
     plt.figure(1)
     # p = plt.plot(r,omegaz,'x')
     p = plt.errorbar(r,omegaz,yerr=df/2,fmt='.')
+    print(df/2/omegaz_exact)
     c = p[0].get_color()
     # rfine=np.linspace(r[0],r[-1],250)
     r0 = isco(a)
