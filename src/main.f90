@@ -9,7 +9,8 @@ program test
  use metric_tools, only: coordinate_sys
  use force_gr,     only: get_sourceterms
  use step,         only: timestep, stepname, steptype, ilnro5
- use utils_gr,     only: get_ev, get_rderivs
+ use energies,     only: get_ev
+ use utils_gr,     only: get_rderivs
  use output,       only: write_out, write_ev, write_xyz, write_vxyz
  use checks,       only: check,sanity_checks
  use utils,        only: timer

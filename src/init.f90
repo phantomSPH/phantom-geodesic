@@ -1,7 +1,7 @@
 module init
  use setup,    only:setpart
  use checks,   only:check
- use utils_gr, only:get_ev
+ use energies, only:get_ev
  implicit none
 
 contains

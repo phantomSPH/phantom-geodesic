@@ -49,11 +49,11 @@ else
 endif
 
 SRC=prompting.f90 utils.f90 inverse4x4.f90 $(METRIC_FILE) metric_tools.f90 io.f90 utils_testsuite.f90 utils_gr.f90 eos.f90 \
-force_gr.f90 $(SETUP_FILES) cons2prim.f90 step.f90 output.f90 test_metric.f90 checks.f90 test_cons2prim.f90 init.f90 main.f90
+force_gr.f90 $(SETUP_FILES) cons2prim.f90 energies.f90 step.f90 output.f90 test_metric.f90 checks.f90 test_cons2prim.f90 init.f90 main.f90
 
 ifeq ($(NEWTONIAN), yes)
 	SRC=prompting.f90 utils.f90 inverse4x4.f90 metric_minkowski.f90 metric_tools.f90 io.f90 utils_testsuite.f90 utils_gr.f90 \
-	eos.f90 force_gr_newtonian.f90 $(SETUP_FILES) cons2prim_newtonian.f90 step.f90 output.f90 test_metric.f90 checks.f90 \
+	eos.f90 force_gr_newtonian.f90 $(SETUP_FILES) cons2prim_newtonian.f90 energies.f90 step.f90 output.f90 test_metric.f90 checks.f90 \
 	test_cons2prim.f90 init.f90 main.f90
 endif
 
