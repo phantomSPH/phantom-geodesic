@@ -58,6 +58,7 @@ for d in directories:
     plt.figure(1)
     # p = plt.plot(r,k,'x')
     p = plt.errorbar(r,k,yerr=df/2,fmt='.')
+    print(df/2./k_exact)
     c = p[0].get_color()
     # plt.plot(r,k_exact,label="a = "+str(a),color=c)
     r0 = kappa_r0(a)
