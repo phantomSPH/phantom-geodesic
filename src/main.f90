@@ -103,7 +103,6 @@ program test
     !$omp end parallel
 
     if (mod(i,dnout)==0 .and. dtout>0) then
-      call check(x,v,passed)
       call write_out(time,xall,np)
     endif
 
