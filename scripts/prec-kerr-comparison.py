@@ -4,7 +4,10 @@ Plots the precessing orbit when positions.dat is in spherical coordinates
 
 import numpy as np
 import matplotlib.pyplot as plt
-plt.style.use('paper')
+import matplotlib as mpl
+
+mpl.rc('font', size=19)
+mpl.rc('legend', fontsize=15)
 
 colormap = plt.cm.terrain
 cblue = colormap(0.)
@@ -35,7 +38,9 @@ plt.xlabel(r'$x$')
 plt.ylabel(r'$y$')
 plt.ylim([-110,110])
 plt.xlim([-110,110])
-plt.legend(frameon=False,loc='upper right')
+plt.yticks([-100,0,100])
+plt.legend(frameon=False,loc='upper left')
+plt.tight_layout()
 plt.savefig('python_plot_a.pdf',bbox_inches='tight')
 # plt.tight_layout()
 
@@ -48,7 +53,9 @@ plt.xlabel(r'$x$')
 plt.ylabel(r'$y$')
 plt.ylim([-110,110])
 plt.xlim([-110,110])
-plt.legend(frameon=False,loc='upper right')
+plt.yticks([-100,0,100])
+plt.legend(frameon=False,loc='upper left')
+plt.tight_layout()
 plt.savefig('python_plot_b.pdf',bbox_inches='tight')
 
-plt.show()
+# plt.show()

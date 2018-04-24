@@ -5,7 +5,9 @@ for the kerr metric with spin +1.0, and therefore event horizon = 1 + sqrt(1 - a
 
 import numpy as np
 import matplotlib.pyplot as plt
-plt.style.use('paper')
+import matplotlib as mpl
+
+mpl.rc('font', size=18)
 
 colormap = plt.cm.terrain
 cblue = colormap(0.)
@@ -15,7 +17,6 @@ spin = 1.0
 rh = 1. + np.sqrt(1.-spin**2)
 
 t,r,theta,phi=np.loadtxt('positions.dat',skiprows=3,unpack=True)
-plt.style.use('paper')
 circle1=plt.Circle((0,0),rh,color='Black')
 
 x = r*np.sin(theta)*np.cos(phi)
@@ -38,6 +39,7 @@ plt.xlim([-11,11])
 plt.ylim([-11,11])
 plt.xlabel(r'$x$')
 plt.ylabel(r'$y$')
-plt.legend(frameon=False,loc='upper right')
+plt.tight_layout()
+plt.legend(frameon=False,loc='upper right',fontsize='x-small')
 plt.savefig('python_plot.pdf',bbox_inches='tight')
 plt.show()

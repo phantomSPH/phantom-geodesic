@@ -4,7 +4,10 @@ from scipy.signal import periodogram
 from oneDpowerspec import powerspec,peak_freq#,plot_powerspec
 from oscillation_frequencies import kappa
 from scipy.interpolate import interp1d
+import matplotlib as mpl
 plt.style.use('paper')
+
+mpl.rc('font', size=30)
 
 colormap = plt.cm.terrain
 cblue = colormap(0.)
@@ -32,7 +35,7 @@ ax1.plot(time,rad_i,lw=1,color=cblue)
 ax1.set_xlabel(r'$t$')
 ax1.set_ylabel(r'$r$')
 plt.xlim([0,max(time)])
-plt.ylim([rad_i[0]-0.002,rad_i[0]+0.003])
+plt.ylim([rad_i[0]-0.001,rad_i[0]+0.002])
 plt.savefig('python_plot_a.pdf',bbox_inches='tight')
 
 freqs,power = powerspec(time,rad_i)

@@ -5,11 +5,14 @@ for the Schwarzschild metric where event horizon = 2M
 
 import numpy as np
 import matplotlib.pyplot as plt
-plt.style.use('paper')
+import matplotlib as mpl
+
+mpl.rc('font', size=18)
 
 colormap = plt.cm.terrain
 cblue = colormap(0.)
 cgreen= colormap(0.25)
+
 
 t,r,theta,phi = np.loadtxt('positions.dat',skiprows=3,unpack=True)
 circle1 = plt.Circle((0,0),2,color='Black')
@@ -30,10 +33,11 @@ ax.add_artist(circle1)
 # plt.plot(x,y,'k',label='Simulation')
 plt.plot(x_exact,y_exact,lw=2,color=cgreen,label='Exact')
 plt.plot(x,y,lw=0.5,color=cblue,label='Simulation')
-plt.xlim([-13,13])
-plt.ylim([-13,13])
+plt.xlim([-11,11])
+plt.ylim([-11,11])
 plt.xlabel(r'$x$')
 plt.ylabel(r'$y$')
-plt.legend(frameon=False,loc='upper right')
+plt.tight_layout()
+# plt.legend(frameon=False,loc='upper right',fontsize='smaller')
 plt.savefig('python_plot.pdf',bbox_inches='tight')
 plt.show()
