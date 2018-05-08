@@ -5,7 +5,7 @@
 !----------------------------------------------------------------
 program test
  use init,         only: initialise
- use metric,       only: metric_type
+ use metric,       only: metric_type,a
  use metric_tools, only: coordinate_sys
  use force_gr,     only: get_sourceterms
  use step,         only: timestep, stepname, steptype, ilnro5
@@ -39,8 +39,9 @@ program test
  print*,'-------------------------------------------------------------------'
  print*,'GR-TEST'
  print*,'-------------------------------------------------------------------'
- print*,               'Metric type       = ',metric_type
- print*,               'Coord. sys. type  = ',coordinate_sys
+ print*,              'Metric type       = ',metric_type
+ print*,              'Coord. sys. type  = ',coordinate_sys
+ write(*,'(a,f5.3)') ' Black hole spin   = ',a
 
  ! Set particles and perform checks
  call initialise(xall,vall,np,energy,angmom)
