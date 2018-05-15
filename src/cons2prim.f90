@@ -153,12 +153,12 @@ subroutine get_v_from_p(pmom,v,x)
  real :: en, rho, P, u, dens
  integer :: ierr
 
- en  = 1.
+ en  = 0.
  rho = 0.
  P   = 0.
  u   = 0.
  dens= 0.
- call conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr,'energy')
+ call conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr,'entropy')
 
 
 end subroutine get_v_from_p
@@ -172,7 +172,7 @@ subroutine get_p_from_v(pmom,v,x)
  dens = 0.
  u    = 0.
  P    = 0.
- call primitive2conservative(x,v,dens,u,P,rho,pmom,en,'energy')
+ call primitive2conservative(x,v,dens,u,P,rho,pmom,en,'entropy')
 
 
 end subroutine get_p_from_v
