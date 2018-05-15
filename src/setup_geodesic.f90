@@ -1,5 +1,5 @@
 module setup
- use set_geodesic, only:setgeodesic
+ use set_geodesic, only:setgeodesic,gtypelist,ngtypes,print_geodesic_choices,iprec
  use prompting,    only:prompt
 
  implicit none
@@ -11,13 +11,14 @@ contains
 subroutine setpart(xall,vall,np)
  integer, intent(out) :: np
  real, allocatable, intent(inout), dimension(:,:) :: xall,vall
- character(len=20) :: gtype
+ integer :: gtype
  np = 1
  allocate(xall(3,np),vall(3,np))
 
- gtype = 'precession'
+ call print_geodesic_choices
+ gtype = iprec
  call prompt(' Enter geodesic choice:',gtype)
- call setgeodesic(xall(:,1),vall(:,1),trim(gtype))
+ call setgeodesic(xall(:,1),vall(:,1),gtype)
 end subroutine setpart
 
 end module setup

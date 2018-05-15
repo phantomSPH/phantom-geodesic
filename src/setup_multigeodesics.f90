@@ -1,5 +1,5 @@
 module setup
- use set_geodesic, only:setgeodesic
+ use set_geodesic, only:setgeodesic,iprec
  use prompting,    only:prompt
 
  implicit none
@@ -12,8 +12,7 @@ subroutine setpart(xall,vall,np)
  integer, intent(out) :: np
  real, allocatable, intent(inout), dimension(:,:) :: xall,vall
  real :: r0,r1,dr
- integer :: i
- character(len=20) :: gtype
+ integer :: i, gtype
 
  !
  ! Defaults
@@ -21,7 +20,7 @@ subroutine setpart(xall,vall,np)
  np = 10
  r1 = 4.
  dr = 4.
- gtype = 'radial'
+ gtype = iprec
 
  call prompt(' Enter number of particles',np,0)
  call prompt(' Enter starting r1',r1,0.)
