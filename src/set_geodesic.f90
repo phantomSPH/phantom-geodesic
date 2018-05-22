@@ -170,6 +170,7 @@ subroutine setgeodesic(x,v,type,r0)
        x = (/r,0.5*pi,0./)
        v = (/0.,0.,fac*omega/)
     end select
+    print*,'period =',2*pi/omega
 
  case(ivert)
     print*,'#--- Small vertical-oscillation from circular orbit in x-y plane, anticlockwise ---#'
