@@ -2,7 +2,7 @@ module set_geodesic
  implicit none
 
  real, parameter    :: pi = acos(-1.)
- integer, parameter :: ngtypes = 7
+ integer, parameter :: ngtypes = 8
  character(len=*), parameter  :: &
   gtypelist(ngtypes) = (/&
                        'circular             ',&
@@ -11,7 +11,8 @@ module set_geodesic
                        'precession inclined  ',&
                        'epicycle             ',&
                        'vertical-oscillation ',&
-                       'circular-inclined    ' &
+                       'circular-inclined    ',&
+                       'custom               ' &
                        /)
 
  integer, parameter :: &
@@ -21,7 +22,8 @@ module set_geodesic
                        iprecinc = 4,       &
                        iepi     = 5,       &
                        ivert    = 6,       &
-                       icircinc = 7
+                       icircinc = 7,       &
+                       icustom  = 8
 
 contains
 
@@ -238,6 +240,27 @@ subroutine setgeodesic(x,v,type,r0)
     print*,'period =',2*pi/abs(omega)
     print*,'Press ENTER to continue:'
     read*
+
+ case (icustom) ! custom setup
+    x1 = 0.
+    y1 = 0.
+    z1 = 0.
+    vx = 0.
+    vy = 0.
+    vz = 0.
+    call prompt('x',x1)
+    call prompt('y',y1)
+    call prompt('z',z1)
+    call prompt('vx',vx)
+    call prompt('vy',vy)
+    call prompt('vz',vz)
+    select case(coordinate_sys)
+    case('Cartesian')
+      x = (/x1,y1,z1/)
+      v = (/vx,vy,vz/)
+    case('Spherical')
+      STOP 'Need to be in cartesian'
+    end select
 
  end select
 
