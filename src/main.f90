@@ -49,12 +49,9 @@ program test
  write(*,'(a,f10.2)') ' dt                = ',dt
  write(*,'(a,f10.2)') ' tmax              = ',tmax
  write(*,'(a,i10)')   ' dnout_ev          = ',dnout_ev
-
  print*,'-------------------------------------------------------------------'
- print*,' Press ENTER to start...'
+ print*,'Start:'
  print*,'-------------------------------------------------------------------'
- read*
- print*,'Go...!'
 
  time     = 0.
  energy_init = energy
