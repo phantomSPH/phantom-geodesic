@@ -39,8 +39,8 @@ program test
  print*,'-------------------------------------------------------------------'
  print*,'GR-TEST'
  print*,'-------------------------------------------------------------------'
- print*,              'Metric type       = ',metric_type
- print*,              'Coord. sys. type  = ',coordinate_sys
+ print*,              'Metric type       = ',trim(metric_type)
+ print*,              'Coord. sys. type  = ',trim(coordinate_sys)
  write(*,'(a,f5.3)') ' Black hole spin   = ',a
 
  ! Set particles and perform checks
