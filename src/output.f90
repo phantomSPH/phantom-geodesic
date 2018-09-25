@@ -156,16 +156,38 @@ subroutine write_vxyz(time,vall,np)
  use metric,       only: metric_type
  integer, intent(in) :: np
  real,    intent(in) :: time, vall(3,np)
- integer, save       :: j
+ logical, save       :: first = .true.
  integer, parameter  :: iu = 70
+ integer :: i,i1,i2
+ character(len=11) :: ihead1,ihead2,ihead3,column_labels(np*3)
+ character(len=30) :: fmt
+ character(len=6)  :: nstring
 
- if (j==0) then
+ if (first) then
     open(unit=iu, file='velocities.dat',status='replace')
     write(iu,*) '# Number of particles'
     write(iu,*) np
-    write(iu,*) '# First Column = Time. Subsequent columns (e.g. cartesian) =  vx(1),vy(1),vz(1),...,vx(n),vy(n),vz(n)'
+
+    !-- Create an array of strings for the column labels
+    do i=1,np
+      write(ihead1,'("vx",i0)') i
+      write(ihead2,'("vy",i0)') i
+      write(ihead3,'("vz",i0)') i
+      i1 = (i-1)*3+1
+      i2 = i1 + 2
+      column_labels(i1:i2) = [ihead1,ihead2,ihead3]
+    enddo
+
+    !-- Create the format string for column labels
+    write(nstring,'(i0)') np*3
+    fmt = '("# Time",'//trim(nstring)//'a30)'
+
+    !-- Write column labels to the file
+    write(iu,fmt) column_labels(:)
+
+    !-- Write some other info to the file
     write(iu,*) '# Coordinate system: ',coordinate_sys,' Metric: ',metric_type
-    j = j+1
+    first = .false.
  else
     open(unit=iu, file='velocities.dat',position='append')
  endif
