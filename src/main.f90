@@ -8,33 +8,24 @@ program test
  use metric,       only: metric_type,a
  use metric_tools, only: coordinate_sys
  use force_gr,     only: get_sourceterms
- use step,         only: timestep, stepname, steptype, ilnro5
+ use step,         only: timestep, stepname, steptype
  use energies,     only: get_ev
  use utils_gr,     only: get_rderivs
  use output,       only: write_out, write_ev, write_xyz, write_vxyz
  use checks,       only: check,sanity_checks
  use utils,        only: timer
  use prompting,    only: prompt
+ use options,      only: dt, tmax, dtout, dnout_ev, write_pos_vel
  implicit none
-
- real :: dt, tmax, dtout
 
  real, allocatable, dimension(:,:) :: xall,vall
  real, dimension(3) :: x,v
  integer :: np
  real    :: time, energy_init, angmom_init, energy, angmom, energy_i, angmom_i
- integer :: nsteps,i,j,dnout,dnout_ev
- logical :: passed,write_pos_vel
+ integer :: nsteps,i,j,dnout
+ logical :: passed
  real    :: start,finish,tminus,frac_done,twall_elapsed,twallmax_approx
  integer :: percentage,prev_percent
-
- ! Defaults
- steptype = ilnro5
- dt       = 2390./1.e4  !10^4 steps per orbit (precessing orbit)
- tmax     = 2390.*4
- dnout_ev = 30
- dtout    = -1.
- write_pos_vel = .true.
 
  print*,'-------------------------------------------------------------------'
  print*,'GR-TEST'

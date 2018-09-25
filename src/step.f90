@@ -1,14 +1,15 @@
 module step
  implicit none
 
- integer :: steptype
-
  integer, parameter :: &
          ileapfrog = 1, &
          irk2      = 2, &
          ieuler    = 3, &
          iheuns    = 4, &
          ilnro5    = 5
+
+ !-- Default timestepping method
+ integer :: steptype = ilnro5
 
 contains
 
