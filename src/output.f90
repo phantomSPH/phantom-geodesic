@@ -67,30 +67,31 @@ subroutine write_xyz(time,xall,np)
  integer, intent(in) :: np
  real, dimension(1:3,np), intent(in) :: xall
  real, dimension(1:3,np) :: x
+ integer, parameter :: iunit = 66
  integer, save :: j=0
  integer :: i
  logical, parameter :: write_cartesian = .true.
 
  if (j==0) then
-    open(unit=66, file='positions.dat',status='replace')
-    write(66,*) '# Number of particles (n)'
-    write(66,*) np
-    write(66,*) '# First Column = Time. Subsequent columns (e.g. cartesian) =  x(1),y(1),z(1),.....,x(n),y(n),z(n).'
-    write(66,*) '# Coordinate system: ',coordinate_sys,'. Metric: ',metric_type,'. Written to file in cartesian:',write_cartesian
+    open(unit=iunit, file='positions.dat',status='replace')
+    write(iunit,*) '# Number of particles (n)'
+    write(iunit,*) np
+    write(iunit,*) '# First Column = Time. Subsequent columns (e.g. cartesian) =  x(1),y(1),z(1),.....,x(n),y(n),z(n).'
+    write(iunit,*) '# Coordinate system: ',coordinate_sys,'. Metric: ',metric_type,'. Written to file in cartesian:',write_cartesian
     j = j+1
  else
-    open(unit=66, file='positions.dat',position='append')
+    open(unit=iunit, file='positions.dat',position='append')
  endif
 
  ! Write to positions.dat file in cartesian
  if (write_cartesian) then
     if (coordinate_sys == 'Cartesian') then
-       write(66,*) time, xall(1:3,:)
+       write(iunit,*) time, xall(1:3,:)
     else if (coordinate_sys == 'Spherical') then
        do i = 1,np
           call spherical2cartesian(xall(:,i),x(:,i))
        enddo
-       write(66,*) time, x(1:3,:)
+       write(iunit,*) time, x(1:3,:)
     else
        STOP "Please pick a coordinate system that I can write to file in"
     endif
@@ -98,18 +99,18 @@ subroutine write_xyz(time,xall,np)
     ! Write to positions.dat file in spherical
  else if (.not. write_cartesian) then
     if (coordinate_sys == 'Spherical') then
-       write(66,*) time, xall(1:3,:)
+       write(iunit,*) time, xall(1:3,:)
     else if (coordinate_sys == 'Cartesian') then
        do i=1,np
           call cartesian2spherical(xall(:,i),x(:,i))
        enddo
-       write(66,*) time, x(1:3,:)
+       write(iunit,*) time, x(1:3,:)
     else
        STOP "Please pick a coordinate system that I can write to file in"
     endif
 
  endif
- close(66)
+ close(iunit)
 end subroutine write_xyz
 
 !----------------------------------------------------------------
