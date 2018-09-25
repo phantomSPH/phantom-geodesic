@@ -209,7 +209,7 @@ end subroutine
 subroutine step_heuns(x,v,fterm,dt)
  use force_gr, only: get_sourceterms
  use cons2prim, only: get_p_from_v, get_v_from_p
- real, dimension(3), intent(in) :: fterm
+ real, dimension(3), intent(inout) :: fterm
  real, dimension(3), intent(inout) :: x,v
  real, dimension(3) :: pmom, fterm_old, v_old, pmom_guess, x_guess, fterm_new
  real, intent(in) :: dt
@@ -224,6 +224,8 @@ subroutine step_heuns(x,v,fterm,dt)
  pmom = pmom + 0.5*dt*(fterm_new + fterm_old )
  x    = x    + 0.5*dt*(v + v_old)
  call get_v_from_p(pmom,v,x)
+
+ call get_sourceterms(x,v,fterm)
 
 end subroutine
 
@@ -250,6 +252,8 @@ subroutine step_rk2(x,v,fterm,dt)
  pmom     = pmom + dt*fterm
  ! EXIT
  call get_v_from_p(pmom,v,x)
+
+ call get_sourceterms(x,v,fterm)
 
 end subroutine step_rk2
 end module step
