@@ -72,17 +72,46 @@ subroutine write_xyz(time,xall,np)
  integer, intent(in) :: np
  real, dimension(1:3,np), intent(in) :: xall
  real, dimension(1:3,np) :: x
+ character(len=6) :: nstring
  integer, parameter :: iu = 66
- integer, save :: j=0
- integer :: i
+ logical, save :: first = .true.
+ integer :: i,i1,i2
+ character(len=11) :: ihead1,ihead2,ihead3,column_labels(np*3)
+ character(len=30) :: fmt
 
- if (j==0) then
+ if (first) then
     open(unit=iu, file='positions.dat',status='replace')
     write(iu,*) '# Number of particles (n)'
     write(iu,*) np
-    write(iu,*) '# First Column = Time. Subsequent columns (e.g. cartesian) =  x(1),y(1),z(1),.....,x(n),y(n),z(n).'
+
+    !-- Create an array of strings for the column labels
+    do i=1,np
+      select case(coordinate_sys)
+      case('Cartesian')
+         write(ihead1,'("x",i0)') i
+         write(ihead2,'("y",i0)') i
+         write(ihead3,'("z",i0)') i
+      case('Spherical')
+         write(ihead1,'("r",i0)') i
+         write(ihead2,'("theta",i0)') i
+         write(ihead3,'("phi",i0)') i
+      end select
+      i1 = (i-1)*3+1
+      i2 = i1 + 2
+      column_labels(i1:i2) = [ihead1,ihead2,ihead3]
+    enddo
+
+    !-- Create the format string for column labels
+    write(nstring,'(i0)') np*3
+    fmt = '("# Time",'//trim(nstring)//'a30)'
+
+    !-- Write column labels to the file
+    write(iu,fmt) column_labels(:)
+
+    !-- Write some other info to file
     write(iu,*) '# Coordinate system: ',coordinate_sys,'. Metric: ',metric_type,'. Written to file in cartesian:',write_cartesian
-    j = j+1
+
+    first = .false.
  else
     open(unit=iu, file='positions.dat',position='append')
  endif
