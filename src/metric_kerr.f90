@@ -48,6 +48,7 @@ pure subroutine get_metric_cartesian(position,gcov,gcon,sqrtg)
     gphiphi   = sintheta2*(a2 + r2 + (a2*r*rs*sintheta2)/rho2)
     gtphi     = -((a*r*rs*sintheta2)/rho2)
 
+!--- My cartesian
     gcov(0,0) = -1. + (r*rs)/rho2
     gcov(1,0) = -((gtphi*y)/(x2 + y2))
     gcov(2,0) = (gtphi*x)/(x2 + y2)
@@ -64,6 +65,24 @@ pure subroutine get_metric_cartesian(position,gcov,gcon,sqrtg)
     gcov(1,3) = ((a2 + r2)*x*z)/(delta*rho2) - (x*z*(1. - ((a2 + r2)*z2)/(r2*rho2)))/(r2 - z2)
     gcov(2,3) = ((a2 + r2)*y*z)/(delta*rho2) - (y*z*(1. - ((a2 + r2)*z2)/(r2*rho2)))/(r2 - z2)
     gcov(3,3) = ((a2 + r2)**2*z2)/(delta*r2*rho2) + (rho2*(1. - ((a2 + r2)*z2)/(r2*rho2))**2)/(r2 - z2)
+
+!--- Tejedas cartesian
+    ! gcov(0,0) = -1. + (r*rs)/rho2
+    ! gcov(1,0) = (a*r*rs*y)/((a2 + r2)*rho2)
+    ! gcov(2,0) = -((a*r*rs*x)/((a2 + r2)*rho2))
+    ! gcov(3,0) = 0.
+    ! gcov(0,1) = (a*r*rs*y)/((a2 + r2)*rho2)
+    ! gcov(1,1) = 1. + (r**3*(a2 + r2)*rs*x2 + a2*delta*r*rs*y2)/(delta*(a2 + r2)**2*rho2)
+    ! gcov(2,1) = (r*(r**4 + a2*(-delta + r2))*rs*x*y)/(delta*(a2 + r2)**2*rho2)
+    ! gcov(3,1) = (r*rs*x*z)/(delta*rho2)
+    ! gcov(0,2) = -((a*r*rs*x)/((a2 + r2)*rho2))
+    ! gcov(1,2) = (r*(r**4 + a2*(-delta + r2))*rs*x*y)/(delta*(a2 + r2)**2*rho2)
+    ! gcov(2,2) = 1. + (a2*delta*r*rs*x2 + r**3*(a2 + r2)*rs*y2)/(delta*(a2 + r2)**2*rho2)
+    ! gcov(3,2) = (r*rs*y*z)/(delta*rho2)
+    ! gcov(0,3) = 0.
+    ! gcov(1,3) = (r*rs*x*z)/(delta*rho2)
+    ! gcov(2,3) = (r*rs*y*z)/(delta*rho2)
+    ! gcov(3,3) = 1. + ((a2 + r2)*rs*z2)/(delta*r*rho2)
 
     gcon(0,0) = gphiphi/(-gtphi**2 + gphiphi*gtt)
     gcon(1,0) = -((gtphi*y)/(gtphi**2 - gphiphi*gtt))
