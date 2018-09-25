@@ -6,6 +6,21 @@ implicit none
 
 contains
 
+subroutine init_infile(filename)
+ character(len=*), intent(in) :: filename
+ integer :: ierr
+ logical :: iexist
+
+ inquire(file=filename,exist=iexist)
+ if (iexist) call read_paramsfile(filename,ierr)
+ if (.not. iexist .or. ierr /= 0) then
+    call write_paramsfile(filename)
+    print*,' Edit '//trim(filename)//' and rerun code'
+    stop
+ endif
+
+end subroutine init_infile
+
 !
 !---Read/write setup file--------------------------------------------------
 !
@@ -25,7 +40,7 @@ subroutine write_paramsfile(filename)
 
  write(iunit,'(/,"#",30("-"),a,30("-"))') ' Output '
  call write_inopt(dtout,'dtout',"output between dump files (-ve don't write dumps)",iunit)
- call write_inopt(write_pos_vel,'write_pos_vel'," write positions and velocities to one file (logical)",iunit)
+ call write_inopt(write_pos_vel,'write_pos_vel',"write positions and velocities to one file (logical)",iunit)
  call write_inopt(dnout_ev,'dnout_ev',"frequency of writing to ev file (number of steps)",iunit)
 
  close(iunit)

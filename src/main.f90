@@ -16,6 +16,7 @@ program test
  use utils,        only: timer
  use prompting,    only: prompt
  use options,      only: dt, tmax, dtout, dnout_ev, write_pos_vel
+ use infile,       only: init_infile
  implicit none
 
  real, allocatable, dimension(:,:) :: xall,vall
@@ -34,18 +35,11 @@ program test
  print*,              'Coord. sys. type  = ',trim(coordinate_sys)
  write(*,'(a,f5.3)') ' Black hole spin   = ',a
 
+ ! Read options from infile
+ call init_infile('grtest.in')
+
  ! Set particles and perform checks
  call initialise(xall,vall,np,energy,angmom)
-
- call prompt(" Enter step type (1 = Leapfrog  |  2 = RK2  |  3 = Euler  |  4 = Heun's  |  5 = L&R05) ",steptype)
- call prompt(" Enter dt  ",dt,0.)
- call prompt(" Enter tmax",tmax,dt)
- call prompt(" Enter dtout (-ve don't write dumps)",dtout)
- call prompt(" Write to ev file every how many steps? ",dnout_ev,0)
- if (np>1) then
-    write_pos_vel = .false.
-    call prompt(" Write positions and velocities to one file?",write_pos_vel)
- endif
 
  nsteps  = int(tmax/dt)
  dnout   = int(dtout/dt)
