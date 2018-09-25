@@ -4,7 +4,7 @@ module metric
  character(len=*), parameter :: frame = 'Schwarzschild'
 
  real, parameter, public :: mass1 = 1.       ! mass of central object
- real, parameter, public :: a     = 0.0
+ real,            public :: a     = 0.0
  real, parameter, public :: rs    = 2.*mass1
 
 contains

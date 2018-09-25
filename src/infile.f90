@@ -2,6 +2,7 @@ module infile
 use options,      only:dt,tmax,dnout_ev,dtout,write_pos_vel
 use step,         only:steptype
 use metric_tools, only:coordinate_sys
+use metric,       only:metric_type,a
 
 implicit none
 
@@ -33,6 +34,11 @@ subroutine write_paramsfile(filename)
  print "(a)",' writing setup options file '//trim(filename)
  open(unit=iunit,file=filename,status='replace',form='formatted')
  write(iunit,"(a)") '# input file'
+
+ if (metric_type == 'Kerr') then
+    write(iunit,'(/,"#",30("-"),a,30("-"))') ' Kerr metric options '
+    call write_inopt(a,'a',"black hole spin parameter",iunit)
+ endif
 
  write(iunit,'(/,"#",30("-"),a,30("-"))') ' Timestepping '
  call write_inopt(steptype,'steptype',"(1 = Leapfrog  |  2 = RK2  |  3 = Euler  |  4 = Heun's  |  5 = L&R05)",iunit)
@@ -71,6 +77,7 @@ subroutine read_paramsfile(filename,ierr)
  call read_inopt(write_pos_vel,'write_pos_vel',db,errcount=nerr)
  call read_inopt(dnout_ev,'dnout_ev',db,min=0,errcount=nerr)
  call read_inopt(coordinate_sys,'coordinate_sys',db,errcount=nerr)
+ if (metric_type=='Kerr') call read_inopt(a,'a',db,min=-1.,max=1.,errcount=nerr)
 
  call close_db(db)
  if (nerr > 0) then

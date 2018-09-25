@@ -4,7 +4,7 @@ module metric
  character(len=*), parameter :: frame = 'Boyer-Lindquist'
 
  real, parameter, public :: mass1 = 1.       ! mass of central object
- real, public            :: a     = 1.       ! spin of central object
+ real,            public :: a     = 1.       ! spin of central object
  real, parameter, public :: rs    = 2.*mass1
 
 contains
