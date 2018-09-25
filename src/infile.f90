@@ -1,6 +1,7 @@
 module infile
-use options, only:dt,tmax,dnout_ev,dtout,write_pos_vel
-use step,    only:steptype
+use options,      only:dt,tmax,dnout_ev,dtout,write_pos_vel
+use step,         only:steptype
+use metric_tools, only:coordinate_sys
 
 implicit none
 
@@ -43,6 +44,9 @@ subroutine write_paramsfile(filename)
  call write_inopt(write_pos_vel,'write_pos_vel',"write positions and velocities to one file (logical)",iunit)
  call write_inopt(dnout_ev,'dnout_ev',"frequency of writing to ev file (number of steps)",iunit)
 
+ write(iunit,'(/,"#",30("-"),a,30("-"))') ' Coordinates'
+ call write_inopt(coordinate_sys,'coordinate_sys',"'Cartesian' or 'Spherical'",iunit)
+
  close(iunit)
 
 end subroutine write_paramsfile
@@ -66,6 +70,7 @@ subroutine read_paramsfile(filename,ierr)
  call read_inopt(dtout,'dtout',db,errcount=nerr)
  call read_inopt(write_pos_vel,'write_pos_vel',db,errcount=nerr)
  call read_inopt(dnout_ev,'dnout_ev',db,min=0,errcount=nerr)
+ call read_inopt(coordinate_sys,'coordinate_sys',db,errcount=nerr)
 
  call close_db(db)
  if (nerr > 0) then
