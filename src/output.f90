@@ -1,5 +1,8 @@
 module output
  implicit none
+
+ logical :: write_cartesian = .true.
+
 contains
 
 !----------------------------------------------------------------
@@ -70,7 +73,6 @@ subroutine write_xyz(time,xall,np)
  real, dimension(1:3,np), intent(in) :: xall
  real, dimension(1:3,np) :: x
  integer, parameter :: iu = 66
- logical, parameter :: write_cartesian = .true.
  integer, save :: j=0
  integer :: i
 

@@ -8,7 +8,7 @@ module metric_tools
 !      - Numerical metric derivatives
 !      - Tensor transformations
 !
- character(len=*), parameter :: coordinate_sys = 'Cartesian'
+ character(len=9) :: coordinate_sys = 'Cartesian'
 
 contains
 
