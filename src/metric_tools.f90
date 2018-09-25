@@ -29,6 +29,8 @@ subroutine get_metric(position,gcov,gcon,sqrtg)
     call get_metric_cartesian(position,gcov,gcon,sqrtg)
  case('Spherical')
     call get_metric_spherical(position,gcov,gcon,sqrtg)
+ case default
+    STOP 'Bad choice of coordinate_sys.'
  end select
 
  if (useinv4x4) call inv4x4(gcov,gcon,det)
