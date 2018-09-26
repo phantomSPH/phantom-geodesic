@@ -3,6 +3,7 @@ use options,      only:dt,tmax,dnout_ev,dtout,write_pos_vel
 use step,         only:steptype
 use metric_tools, only:coordinate_sys
 use metric,       only:metric_type,a
+use output,       only:write_cartesian
 
 implicit none
 
@@ -49,6 +50,7 @@ subroutine write_paramsfile(filename)
  call write_inopt(dtout,'dtout',"output between dump files (-ve don't write dumps)",iunit)
  call write_inopt(write_pos_vel,'write_pos_vel',"write positions and velocities to one file (logical)",iunit)
  call write_inopt(dnout_ev,'dnout_ev',"frequency of writing to ev file (number of steps)",iunit)
+ call write_inopt(write_cartesian,'write_cartesian',"write to positions.dat file in cartesian coordinates (logical)",iunit)
 
  write(iunit,'(/,"#",30("-"),a,30("-"))') ' Coordinates'
  call write_inopt(coordinate_sys,'coordinate_sys',"'Cartesian' or 'Spherical'",iunit)
@@ -76,6 +78,7 @@ subroutine read_paramsfile(filename,ierr)
  call read_inopt(dtout,'dtout',db,errcount=nerr)
  call read_inopt(write_pos_vel,'write_pos_vel',db,errcount=nerr)
  call read_inopt(dnout_ev,'dnout_ev',db,min=0,errcount=nerr)
+ call read_inopt(write_cartesian,'write_cartesian',db,errcount=nerr)
  call read_inopt(coordinate_sys,'coordinate_sys',db,errcount=nerr)
  if (metric_type=='Kerr') call read_inopt(a,'a',db,min=-1.,max=1.,errcount=nerr)
 
