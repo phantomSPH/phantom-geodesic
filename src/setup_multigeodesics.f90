@@ -36,7 +36,7 @@ end subroutine setpart
 
 subroutine init_setupfile(filename)
  use prompting,    only:prompt
- use set_geodesic, only:iprec,ngtypes
+ use set_geodesic, only:iprec,ngtypes,print_geodesic_choices
  character(len=*), intent(in) :: filename
  integer :: ierr
  logical :: iexist
@@ -45,8 +45,8 @@ subroutine init_setupfile(filename)
  ! Defaults
  !
  npart = 10
- r1 = 4.
- dr = 4.
+ r1    = 4.
+ dr    = 4.
  gtype = iprec
 
  inquire(file=filename,exist=iexist)
@@ -56,6 +56,7 @@ subroutine init_setupfile(filename)
     call prompt(' Enter number of particles',npart,0)
     call prompt(' Enter starting r1',r1,0.)
     call prompt(' Enter starting dr',dr,0.)
+    call print_geodesic_choices()
     call prompt(' Enter geodesic choice:',gtype,1,ngtypes)
 
     call write_setupfile(filename)
