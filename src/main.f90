@@ -31,12 +31,13 @@ program test
  print*,'-------------------------------------------------------------------'
  print*,'GR-TEST'
  print*,'-------------------------------------------------------------------'
- print*,              'Metric type       = ',trim(metric_type)
- print*,              'Coord. sys. type  = ',trim(coordinate_sys)
- write(*,'(a,f5.3)') ' Black hole spin   = ',a
 
  ! Read options from infile
  call init_infile('grtest.in')
+
+ print*,              'Metric type       = ',trim(metric_type)
+ print*,              'Coord. sys. type  = ',trim(coordinate_sys)
+ write(*,'(a,f5.3)') ' Black hole spin   = ',a
 
  ! Set particles and perform checks
  call initialise(xall,vall,np,energy,angmom)
