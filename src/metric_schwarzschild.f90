@@ -292,39 +292,82 @@ subroutine get_jacobian(position,dxdx)
  end select
 end subroutine get_jacobian
 
-subroutine cartesian2spherical(xcart,xspher)
- real, intent(in) :: xcart(3)
- real, intent(out) ::xspher(3)
+subroutine cartesian2spherical(xcart,xspher,vcart,vspher)
+ real, intent(in)  :: xcart(3)
+ real, intent(out) :: xspher(3)
+ real, intent(in),  optional :: vcart(3)
+ real, intent(out), optional :: vspher(3)
  real :: x,y,z
  real :: r,theta,phi
+ real :: vx,vy,vz,vr,x2,y2
+
+ if (present(vcart).and..not.present(vspher)) print*,'Warning: cartesian2spherical not converting velocity'
+ if (present(vspher).and..not.present(vcart)) print*,'Warning: cartesian2spherical not converting velocity'
+
  select case(frame)
  case('Schwarzschild')
     x  = xcart(1)
     y  = xcart(2)
     z  = xcart(3)
+    x2 = x**2
+    y2 = y**2
 
-    r  = sqrt(x**2+y**2+z**2)
+    r  = sqrt(x2+y2+z**2)
     theta = acos(z/r)
     phi   = atan2(y,x)
 
     xspher   = (/r,theta,phi/)
+
+    if (present(vcart).and.present(vspher)) then
+      vx        = vcart(1)
+      vy        = vcart(2)
+      vz        = vcart(3)
+      vr        = (x*vx + y*vy + z*vz)/r
+      vspher(1) = vr
+      vspher(2) = (z*vr - vz*r)/(r*sqrt(x2+y2))
+      vspher(3) = (x*vy - y*vx)/(x2+y2)
+    endif
+
  end select
 end subroutine cartesian2spherical
 
-subroutine spherical2cartesian(xspher,xcart)
- real, intent(in) :: xspher(3)
+subroutine spherical2cartesian(xspher,xcart,vspher,vcart)
+ real, intent(in)  :: xspher(3)
  real, intent(out) :: xcart(3)
+ real, intent(in),  optional :: vspher(3)
+ real, intent(out), optional :: vcart(3)
  real :: x,y,z,r,theta,phi
+ real :: sintheta,costheta,sinphi,cosphi,vr,vtheta,vphi
+
+ if (present(vcart).and..not.present(vspher)) print*,'Warning: spherical2cartesian not converting velocity'
+ if (present(vspher).and..not.present(vcart)) print*,'Warning: spherical2cartesian not converting velocity'
+
  select case(frame)
  case('Schwarzschild')
     r     = xspher(1)
     theta = xspher(2)
     phi   = xspher(3)
-    x = r*sin(theta)*cos(phi)
-    y = r*sin(theta)*sin(phi)
-    z = r*cos(theta)
+
+    sintheta = sin(theta)
+    costheta = cos(theta)
+    sinphi   = sin(phi)
+    cosphi   = cos(phi)
+
+    x = r*sintheta*cosphi
+    y = r*sintheta*sinphi
+    z = r*costheta
 
     xcart = (/x,y,z/)
+
+    if (present(vspher).and.present(vcart)) then
+       vr     = vspher(1)
+       vtheta = vspher(2)
+       vphi   = vspher(3)
+       vcart(1) = sintheta*cosphi*vr + r*(costheta*cosphi*vtheta - sintheta*sinphi*vphi)
+       vcart(2) = sintheta*sinphi*vr + r*(costheta*sinphi*vtheta + sintheta*cosphi*vphi)
+       vcart(3) = costheta*vr - r*sintheta*vtheta
+    endif
+
  end select
 end subroutine spherical2cartesian
 

@@ -321,11 +321,18 @@ subroutine get_jacobian(position,dxdx)
 end subroutine get_jacobian
 
 !--- Boyer-Lindquist coordinate transformations from CARTEISAN to SPHERICAL
-subroutine cartesian2spherical(xcart,xspher)
- real, intent(in) :: xcart(3)
- real, intent(out) ::xspher(3)
+subroutine cartesian2spherical(xcart,xspher,vcart,vspher)
+ real, intent(in)  :: xcart(3)
+ real, intent(out) :: xspher(3)
+ real, intent(in),  optional :: vcart(3)
+ real, intent(out), optional :: vspher(3)
  real :: x,y,z,x2,y2,z2,a2,r2spherical,r2,r
  real :: theta,phi
+ real :: vx,vy,vz,rho2
+
+ if (present(vcart).and..not.present(vspher)) print*,'Warning: cartesian2spherical not converting velocity'
+ if (present(vspher).and..not.present(vcart)) print*,'Warning: cartesian2spherical not converting velocity'
+
  select case(frame)
  case('Boyer-Lindquist')
     x  = xcart(1)
@@ -341,16 +348,32 @@ subroutine cartesian2spherical(xcart,xspher)
     theta     = acos(z/r)
     phi       = atan2(y,x)
     xspher   = (/r,theta,phi/)
+    if (present(vcart).and.present(vspher)) then
+       vx   = vcart(1)
+       vy   = vcart(2)
+       vz   = vcart(3)
+       rho2 = r2 + a2*(z2/r2)
+       vspher(1) = (r*(x*vx + y*vy + z*vz) + a2*z*vz/r)/rho2
+       vspher(2) = (z*(x*vx + y*vy + z*vz) - r2*vz)/(rho2*sqrt(r2-z2))
+       vspher(3) = (x*vy - y*vx)/(x2+y2)
+    endif
  case('Kerr-Schild')
     STOP 'No cartesian2spherical implemented for Kerr-Schild'
  end select
 end subroutine cartesian2spherical
 
 !--- Boyer-Lindquist coordinate transformations from SPHERICAL to CARTEISAN
-subroutine spherical2cartesian(xspher,xcart)
- real, intent(in) :: xspher(3)
+subroutine spherical2cartesian(xspher,xcart,vspher,vcart)
+ real, intent(in)  :: xspher(3)
  real, intent(out) :: xcart(3)
+ real, intent(in),  optional :: vspher(3)
+ real, intent(out), optional :: vcart(3)
  real :: x,y,z,r,theta,phi,r2,a2
+ real :: vr,vtheta,vphi,term,sintheta,costheta,sinphi,cosphi
+
+ if (present(vcart).and..not.present(vspher)) print*,'Warning: spherical2cartesian not converting velocity'
+ if (present(vspher).and..not.present(vcart)) print*,'Warning: spherical2cartesian not converting velocity'
+
  select case(frame)
  case('Boyer-Lindquist')
     a2 = a**2
@@ -358,10 +381,28 @@ subroutine spherical2cartesian(xspher,xcart)
     r2 = r**2
     theta = xspher(2)
     phi   = xspher(3)
-    x = sqrt(r2+a2)*sin(theta)*cos(phi)
-    y = sqrt(r2+a2)*sin(theta)*sin(phi)
-    z = r*cos(theta)
+
+    term  = sqrt(r2+a2)
+    sintheta = sin(theta)
+    costheta = cos(theta)
+    sinphi   = sin(phi)
+    cosphi   = cos(phi)
+
+    x = term*sintheta*cosphi
+    y = term*sintheta*sinphi
+    z = r*costheta
+
     xcart = (/x,y,z/)
+
+   if (present(vspher).and.present(vcart)) then
+       vr     = vspher(1)
+       vtheta = vspher(2)
+       vphi   = vspher(3)
+       vcart(1) = r/term * sintheta*cosphi*vr + term*(costheta*cosphi*vtheta - sintheta*sinphi*vphi)
+       vcart(2) = r/term * sintheta*sinphi*vr + term*(costheta*sinphi*vtheta + sintheta*cosphi*vphi)
+       vcart(3) = costheta*vr - r*sintheta*vtheta
+   endif
+
  case('Kerr-Schild')
     STOP 'No spherical2cartesian implemented for Kerr-Schild'
  end select
