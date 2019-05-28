@@ -17,7 +17,7 @@ subroutine initialise(xall,vall,np,energy,angmom)
  if (command_argument_count()==0) then
     call setpart(xall,vall,np)
  else
-    call read_phantom_ascii_dump(xall,vall,np)
+    call read_dump(xall,vall,np)
  endif
 
  ! Check setup and compute total energy and angular momentum
@@ -40,20 +40,61 @@ subroutine initialise(xall,vall,np,energy,angmom)
 
 end subroutine initialise
 
-subroutine read_phantom_ascii_dump(xall,vall,np)
+subroutine read_grtest_dump(iunit,xall,vall,np)
+ use metric_tools, only: coordinate_sys
+ use metric,       only: cartesian2spherical
+ integer, intent(in) :: iunit
  real, allocatable, intent(inout), dimension(:,:) :: xall,vall
  integer, intent(out) :: np
- character(len=32) :: start_dump
  character(len=1) :: hash
- integer :: i,nn(5)
- integer, parameter :: iunit=256
- real :: pmass,hsmooth,dens
+ integer :: i
+ real :: x(3),v(3)
 
- call get_command_argument(1,start_dump)
- print*,'Trying to start from dump file: ',start_dump
- open(unit=iunit,file=start_dump,status='old',action='read')
+ np = -1
 
- nn = -1
+!
+! Header tag and time
+!
+ do i=1,2
+    read(iunit,*)
+ enddo
+
+!
+! Number of particles
+!
+ read(iunit,'(a,i20)') hash,np
+ allocate(xall(3,np),vall(3,np))
+
+!
+! Column labels
+!
+ read (iunit,*)
+
+!
+! Particle positions and velocities (assumed to be in cartesian coordinates)
+!
+ do i = 1,np
+    read(iunit,*) x,v
+    if (coordinate_sys == 'Spherical') then
+       call cartesian2spherical(x,xall(:,i),v,vall(:,i))
+    else
+       xall(1:3,i) = x
+       vall(1:3,i) = v
+    endif
+ enddo
+
+end subroutine read_grtest_dump
+
+subroutine read_phantom_ascii_dump(iunit,xall,vall,np)
+ use metric_tools, only: coordinate_sys
+ use metric,       only: cartesian2spherical
+ integer, intent(in) :: iunit
+ real, allocatable, intent(inout), dimension(:,:) :: xall,vall
+ integer, intent(out) :: np
+ character(len=1) :: hash
+ integer :: i
+ real :: x(3),pmass,hsmooth,dens,v(3)
+
  np = -1
 
 !
@@ -77,15 +118,44 @@ subroutine read_phantom_ascii_dump(xall,vall,np)
  enddo
 
 !
-! Particle positions and velocities
+! Particle positions and velocities (assumed to be in cartesian coordinates)
 !
  do i = 1,np
-    read(iunit,*) xall(1:3,i),pmass,hsmooth,dens,vall(1:3,i)
+    read(iunit,*) x,pmass,hsmooth,dens,v
+    if (coordinate_sys == 'Spherical') then
+      call cartesian2spherical(x,xall(:,i),v,vall(:,i))
+    else
+      xall(1:3,i) = x
+      vall(1:3,i) = v
+    endif
  enddo
+
+end subroutine read_phantom_ascii_dump
+
+subroutine read_dump(xall,vall,np)
+ real, allocatable, intent(inout), dimension(:,:) :: xall,vall
+ integer, intent(out) :: np
+ character(len=19)    :: tag
+ character(len=32)    :: start_dump
+ integer, parameter   :: iunit=256
+
+ call get_command_argument(1,start_dump)
+ print*,'Trying to start from dump file: ',start_dump
+
+ open(unit=iunit,file=start_dump,status='old',action='read')
+ read(iunit,'(a)') tag
+ close(iunit)
+
+ open(unit=iunit,file=start_dump,status='old',action='read')
+
+ if (tag=='# grtest dumpfile') then
+    call read_grtest_dump(iunit,xall,vall,np)
+ else
+    call read_phantom_ascii_dump(iunit,xall,vall,np)
+ endif
 
  close(iunit)
 
-
-end subroutine read_phantom_ascii_dump
+end subroutine read_dump
 
 end module init
