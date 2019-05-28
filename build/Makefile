@@ -32,7 +32,14 @@ VPATH= ../src
 
 # Default metric type
 METRIC=kerr
-METRIC_FILE=metric_$(METRIC).f90
+
+ifeq ($(METRIC),bh)
+    METRIC_FILE=metric_schwarzschild.f90
+else ifeq ($(METRIC),flat)
+    METRIC_FILE=metric_minkowski.f90
+else
+    METRIC_FILE=metric_$(METRIC).f90
+endif
 
 SETUP=geodesic
 
