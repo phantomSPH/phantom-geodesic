@@ -80,6 +80,7 @@ subroutine test_metric_i(x,v,ntests,npass)
  enddo
 
  n_error = 0
+ errmax  = 0.
  call checkvalbuf(sum,4.,tol,'[F]: gddgUU ',n_error,ncheck,errmax)
  nerrors = nerrors+n_error
  if (n_error>0) then
