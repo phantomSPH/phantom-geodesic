@@ -58,7 +58,7 @@ program test
  energy_init = energy
  angmom_init = angmom
 
- if (dtout>0.) call write_out(time,xall,np)
+ if (dtout>0.) call write_out(time,xall,vall,np)
  if (dnout_ev>0) then
     call write_ev(time,energy-energy_init,angmom-angmom_init)
     if (write_pos_vel) then
@@ -94,7 +94,7 @@ program test
     !$omp end parallel
 
     if (dtout>0. .and. mod(i,dnout)==0) then
-      call write_out(time,xall,np)
+      call write_out(time,xall,vall,np)
     endif
 
     if (dnout_ev>0) then

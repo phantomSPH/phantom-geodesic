@@ -11,28 +11,34 @@ contains
 !  (This is useful for plotting in splash, so output is always in cartesian coordinates.)
 !+
 !----------------------------------------------------------------
-subroutine write_out(time,xall,np)
+subroutine write_out(time,xall,vall,np)
  use utils_gr,     only: dot_product_gr
  use metric,       only: spherical2cartesian
  use metric_tools, only: coordinate_sys
  real,    intent(in) :: time
  integer, intent(in) :: np
- real,    intent(in) :: xall(3,np)
+ real,    intent(in) :: xall(3,np),vall(3,np)
  integer, parameter :: iu = 50
  integer, save      :: ifile = -1
  character(len=40)  :: filename
- real    :: x(3)
+ real    :: x(3),v(3)
  integer :: i
 
  ifile = ifile+1
  write(filename,"(a,i5.5,a)") 'output_',ifile,'.dat'
  open(unit=iu, file=filename, status='replace')
+ write(iu,*) '# grtest dumpfile'
  write(iu,*) time
- write(iu,"(6a26)") 'x','y','z'
+ write(iu,*) '#',np
+ if (coordinate_sys == 'Spherical') then
+    write(iu,"('#',6a26)") 'r','theta','phi','vr','vtheta','vphi'
+ else
+    write(iu,"('#',6a26)") 'x','y','z','vx','vy','vz'
+ endif
  do i=1,np
     x = xall(:,i)
-    if (coordinate_sys == 'Spherical') call spherical2cartesian(xall(:,i),x)
-    write(iu,"(3e26.16)") x
+    if (coordinate_sys == 'Spherical') call spherical2cartesian(xall(:,i),x,vall(:,i),v)
+    write(iu,"(6e26.16)") x,v
  enddo
  close(iu)
 end subroutine write_out
