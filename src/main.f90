@@ -57,7 +57,7 @@ program test
  energy_init = energy
  angmom_init = angmom
 
- if (dtout>0) call write_out(time,xall,np)
+ if (dtout>0.) call write_out(time,xall,np)
  if (dnout_ev>0) then
     call write_ev(time,energy-energy_init,angmom-angmom_init)
     if (write_pos_vel) then
@@ -82,7 +82,7 @@ program test
        x = xall(:,j)
        v = vall(:,j)
        call timestep(dt,x,v)
-       if (mod(i,dnout)==0 .and. dtout>0) call check(x,v,passed)
+       if (dtout>0. .and. mod(i,dnout)==0) call check(x,v,passed)
        xall(:,j) = x
        vall(:,j) = v
        call get_ev(x,v,energy_i,angmom_i)
@@ -92,7 +92,7 @@ program test
     !$omp enddo
     !$omp end parallel
 
-    if (mod(i,dnout)==0 .and. dtout>0) then
+    if (dtout>0. .and. mod(i,dnout)==0) then
       call write_out(time,xall,np)
     endif
 
