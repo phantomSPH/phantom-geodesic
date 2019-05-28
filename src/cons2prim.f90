@@ -60,7 +60,13 @@ subroutine primitive2conservative(x,v,dens,u,P,rho,pmom,en,en_type)
  enddo
  en = U0*enth*gvv + (1.+u)/U0
 
- if (en_type == "entropy") en = P/(dens**gam)
+ if (en_type == "entropy") then
+    if (P<epsilon(P)) then
+       en = 0.
+    else
+       en = P/(dens**gam)
+    endif
+ endif
 
 end subroutine primitive2conservative
 
@@ -103,8 +109,20 @@ subroutine conservative2primitive(x,v,dens,u,P,rho,pmom,en,ierr,en_type)
     f = enth-enth_old
 
     !This line is unique to the equation of state
-    df= -1.+(gam/(gam-1.))*(1.-pmom2*p/(enth_old**3*lorentz_LEO**2*dens))
-    if (en_type == 'entropy') df = -1. + (gam*pmom2*P)/(lorentz_LEO**2 * enth_old**3 * dens)
+
+    if (en_type == 'entropy') then
+       if (P<epsilon(P)) then
+          df = -1.
+       else
+          df = -1. + (gam*pmom2*P)/(lorentz_LEO**2 * enth_old**3 * dens)
+       endif
+    else
+       if (P<epsilon(P)) then
+          df = -1.+(gam/(gam-1.))
+       else
+          df = -1.+(gam/(gam-1.))*(1.-pmom2*p/(enth_old**3*lorentz_LEO**2*dens))
+       endif
+    endif
 
     enth = enth_old - f/df
 
