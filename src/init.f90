@@ -6,7 +6,9 @@ module init
 
 contains
 
-subroutine initialise(xall,vall,np,energy,angmom)
+subroutine initialise(time,xall,vall,np,energy,angmom)
+ use output, only:write_out
+ real, intent(in) :: time
  real, allocatable, intent(inout), dimension(:,:) :: xall,vall
  integer, intent(out) :: np
  real,    intent(out) :: energy,angmom
@@ -37,6 +39,13 @@ subroutine initialise(xall,vall,np,energy,angmom)
  enddo
  print*,'Setup OK'
  print*,''
+
+ if (command_argument_count()==0) then
+    print*,'Writing to starting dump: output_00000.dat'
+    call write_out(time,xall,vall,np)
+    print*,'edit grtest.in file and run ./grtest output_00000.dat'
+    STOP
+ endif
 
 end subroutine initialise
 

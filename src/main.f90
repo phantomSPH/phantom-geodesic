@@ -32,6 +32,8 @@ program test
  print*,'GR-TEST'
  print*,'-------------------------------------------------------------------'
 
+ time = 0.
+
  ! Read options from infile
  call init_infile('grtest.in')
 
@@ -40,7 +42,7 @@ program test
  write(*,'(a,f5.3)') ' Black hole spin   = ',a
 
  ! Set particles and perform checks
- call initialise(xall,vall,np,energy,angmom)
+ call initialise(time,xall,vall,np,energy,angmom)
 
  nsteps  = int(tmax/dt)
  dnout   = int(dtout/dt)
@@ -54,7 +56,6 @@ program test
  print*,'Start:'
  print*,'-------------------------------------------------------------------'
 
- time     = 0.
  energy_init = energy
  angmom_init = angmom
 
