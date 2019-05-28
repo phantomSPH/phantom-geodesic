@@ -31,7 +31,7 @@ OMP_STACKSIZE=1024m
 VPATH= ../src
 
 # Default metric type
-METRIC=schwarzschild
+METRIC=kerr
 METRIC_FILE=metric_$(METRIC).f90
 
 SETUP=geodesic
