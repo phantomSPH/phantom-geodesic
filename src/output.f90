@@ -30,11 +30,7 @@ subroutine write_out(time,xall,vall,np)
  write(iu,*) '# grtest dumpfile'
  write(iu,*) time
  write(iu,*) '#',np
- if (coordinate_sys == 'Spherical') then
-    write(iu,"('#',6a26)") 'r','theta','phi','vr','vtheta','vphi'
- else
-    write(iu,"('#',6a26)") 'x','y','z','vx','vy','vz'
- endif
+ write(iu,"('#',6a26)") 'x','y','z','vx','vy','vz'
  do i=1,np
     x = xall(:,i)
     if (coordinate_sys == 'Spherical') call spherical2cartesian(xall(:,i),x,vall(:,i),v)
