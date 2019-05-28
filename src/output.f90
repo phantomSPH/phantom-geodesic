@@ -27,12 +27,13 @@ subroutine write_out(time,xall,vall,np)
  ifile = ifile+1
  write(filename,"(a,i5.5,a)") 'output_',ifile,'.dat'
  open(unit=iu, file=filename, status='replace')
- write(iu,*) '# grtest dumpfile'
+ write(iu,"('#',a)") ' grtest dumpfile'
  write(iu,*) time
- write(iu,*) '#',np
+ write(iu,"('#',i20)") np
  write(iu,"('#',6a26)") 'x','y','z','vx','vy','vz'
  do i=1,np
     x = xall(:,i)
+    v = vall(:,i)
     if (coordinate_sys == 'Spherical') call spherical2cartesian(xall(:,i),x,vall(:,i),v)
     write(iu,"(6e26.16)") x,v
  enddo

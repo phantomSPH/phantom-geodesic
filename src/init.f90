@@ -135,7 +135,7 @@ end subroutine read_phantom_ascii_dump
 subroutine read_dump(xall,vall,np)
  real, allocatable, intent(inout), dimension(:,:) :: xall,vall
  integer, intent(out) :: np
- character(len=19)    :: tag
+ character(len=32)    :: tag
  character(len=32)    :: start_dump
  integer, parameter   :: iunit=256
 
