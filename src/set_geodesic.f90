@@ -2,7 +2,7 @@ module set_geodesic
  implicit none
 
  real, parameter    :: pi = acos(-1.)
- integer, parameter :: ngtypes = 8
+ integer, parameter :: ngtypes = 10
  character(len=*), parameter  :: &
   gtypelist(ngtypes) = (/&
                        'circular             ',&
@@ -12,7 +12,9 @@ module set_geodesic
                        'epicycle             ',&
                        'vertical-oscillation ',&
                        'circular-inclined    ',&
-                       'custom               ' &
+                       'custom               ',&
+                       'ellipse              ',&
+                       'parabola             ' &
                        /)
 
  integer, parameter :: &
@@ -23,7 +25,9 @@ module set_geodesic
                        iepi     = 5,       &
                        ivert    = 6,       &
                        icircinc = 7,       &
-                       icustom  = 8
+                       icustom  = 8,       &
+                       iellipse = 9,       &
+                       iparabola = 10
 
 contains
 
@@ -52,6 +56,8 @@ subroutine setgeodesic(x,v,type,r0)
  real :: ra,va,omega,fac
  real :: rotate_y(3,3), inclination
  real :: theta,phi,m,q,rho2,y1,z1,vx,vz,rdot,thetadot
+ real :: ecc,semia,rp
+ real :: vhat(3),vmag
 
  print*,""
 
@@ -261,6 +267,53 @@ subroutine setgeodesic(x,v,type,r0)
     case('Spherical')
       STOP 'Need to be in cartesian'
     end select
+
+ case(iellipse)
+    ecc = 0.8
+    rp  = 47.131 ! Tidal radius for solar type star around 1e6 Msun black hole
+    inclination = 45.
+    call prompt('eccentricity',ecc)
+    call prompt('r pericentre',rp)
+    call prompt('inclination (deg)',inclination)
+    inclination = inclination/180. * pi
+    semia = rp/(1.-ecc)
+    r  = semia*(1.+ecc)
+    vy = sqrt((1.-ecc)/r)
+    x  = (/r,0.,0./)
+    v  = (/0.,vy,0./)
+    call get_rotation_matrix(-inclination,rotate_y,'y')
+    x = matmul(rotate_y,x)
+
+    print*,'Period of orbit = ',2.*pi*sqrt(semia**3/1.)
+    print*,'Suggested dt: ',(2.*pi*sqrt(rp**3))/100.
+    print*,'Press ENTER to continue'
+    read*
+
+ case(iparabola)
+    rp  = 47.131 ! Tidal radius for solar type star around 1e6 Msun black hole
+    r = 500. !2.*rp
+    call prompt('r pericentre',rp)
+    if (r < 2.*rp) then
+       r = 2.*rp
+    endif
+
+    y1 = -2.*rp + r
+    x1 = sqrt(r**2 - y1**2)
+    x  = (/x1,y1,0./)
+    vmag = sqrt(2.*1./r)
+    vhat = (/-2.*rp,-x1,0./)/sqrt(4.*rp**2 + x1**2)
+    v    = vmag*vhat
+
+    inclination = 45.
+    call prompt('inclination (deg)',inclination)
+    inclination = inclination/180. * pi
+    call get_rotation_matrix(-inclination,rotate_y,'y')
+    x = matmul(rotate_y,x)
+    v = matmul(rotate_y,v)
+
+   print*,'Suggested dt: ',(2.*pi*sqrt(rp**3))/100.
+   print*,'Press ENTER to continue'
+   read*
 
  end select
 
