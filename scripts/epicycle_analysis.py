@@ -38,8 +38,19 @@ for i in range(n):
     k[i]  = peak_freq(freqs,power)
     k_approx = k[i]
     k_exact  = kappa(rad_i[0],a)
-    print(k_approx,k_exact,k_approx-k_exact)
-    # plot_powerspec(freqs,power)
+
+    amp = (max(rad_i)-r0[i])/2
+    rexact = -amp*np.cos(k_exact*time) + r0[i] + amp
+
+    err = np.sum((rexact-rad_i)**2)
+    err = err/(n*np.max(rad_i))
+    err = np.sqrt(err)
+    print('Simulation  kappa: ',k_approx)
+    print('Exact       kappa: ',k_exact)
+    print('kappa       error: ',k_approx-k_exact)
+    print('kappa frac. error: ',(k_approx-k_exact)/k_exact)
+    print('L2 theta(t) error: ',err)
+    print('------------------------------------------------------------------------------------------------------')
 
 # plt.show()
 

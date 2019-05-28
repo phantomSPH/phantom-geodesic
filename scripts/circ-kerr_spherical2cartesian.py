@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-mpl.rc('font', size=18)
+mpl.rc('font', size=12)
 
 colormap = plt.cm.terrain
 cblue = colormap(0.)
@@ -27,7 +27,7 @@ phi_exact = np.linspace(0,2.*np.pi,100)
 x_exact = 2.*np.cos(phi_exact)
 y_exact = 2.*np.sin(phi_exact)
 
-fig = plt.figure(1)
+fig = plt.figure(1,figsize=(3,3))
 ax = fig.add_subplot(111,aspect='equal', adjustable='box-forced')
 ax.add_artist(circle1)
 # ax.axis('equal')

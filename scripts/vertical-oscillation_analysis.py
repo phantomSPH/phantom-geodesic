@@ -21,12 +21,24 @@ theta =data[:,2:s[1]:3]
 
 r0      = radius[0,:]
 omegaz  = np.zeros(n)
+amp = 0.00001*np.pi/2
 for i in range(n):
-    freqs,power=powerspec(time,theta[:,i])
+    thetai = theta[:,i]
+    freqs,power=powerspec(time,thetai)
     omegaz[i] = peak_freq(freqs,power)
     omegazapprox = omegaz[i]
     omegazexact  = omega_z(r0[i],a)
-    print(omegazapprox,omegazexact,omegazapprox-omegazexact)
+    y = amp*np.cos(omegazexact*time) + np.pi/2
+    err = np.sum((y-thetai)**2)
+    err = err/(n*np.max(y))
+    err = np.sqrt(err)
+
+    print('Simulation  omega: ',omegazapprox)
+    print('Exact       omega: ',omegazexact)
+    print('Omega       error: ',omegazapprox-omegazexact)
+    print('Omega frac. error: ',(omegazapprox-omegazexact)/omegazexact)
+    print('L2 theta(t) error: ',err)
+    print('------------------------------------------------------------------------------------------------------')
 
 
 fs=30
@@ -43,7 +55,7 @@ plt.savefig('python_plot.pdf')
 plt.show()
 
 df = freqs[1]-freqs[0]
-print(df)
+print('df = ',df)
 np.savetxt('omega-z.dat',np.column_stack((r0,omegaz,omega_z(r0,a))),header=str(a)+'\n'+str(df))
 
 # plt.figure()

@@ -7,7 +7,7 @@ from scipy.interpolate import interp1d
 import matplotlib as mpl
 plt.style.use('paper')
 
-mpl.rc('font', size=30)
+mpl.rc('font', size=15)
 
 colormap = plt.cm.terrain
 cblue = colormap(0.)
