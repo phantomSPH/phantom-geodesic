@@ -106,7 +106,7 @@ subroutine write_xyz(time,xall,np)
 
     !-- Create the format string for column labels
     write(nstring,'(i0)') np*3
-    fmt = '("# Time",'//trim(nstring)//'a30)'
+    fmt = '("# ",'//trim(nstring)//'a30," Time")'
 
     !-- Write column labels to the file
     write(iu,fmt) column_labels(:)
@@ -122,12 +122,13 @@ subroutine write_xyz(time,xall,np)
  ! Write to positions.dat file in cartesian
  if (write_cartesian) then
     if (coordinate_sys == 'Cartesian') then
-       write(iu,*) time, xall(1:3,:)
+       write(iu,*) xall(1:3,:),time
     else if (coordinate_sys == 'Spherical') then
        do i = 1,np
           call spherical2cartesian(xall(:,i),x(:,i))
        enddo
-       write(iu,*) time, x(1:3,:)
+!       write(iu,*) time, x(1:3,:)
+       write(iu,*) x(1:3,:),time
     else
        STOP "Please pick a coordinate system that I can write to file in"
     endif
@@ -135,12 +136,12 @@ subroutine write_xyz(time,xall,np)
     ! Write to positions.dat file in spherical
  else if (.not. write_cartesian) then
     if (coordinate_sys == 'Spherical') then
-       write(iu,*) time, xall(1:3,:)
+       write(iu,*) xall(1:3,:),time
     else if (coordinate_sys == 'Cartesian') then
        do i=1,np
           call cartesian2spherical(xall(:,i),x(:,i))
        enddo
-       write(iu,*) time, x(1:3,:)
+       write(iu,*) x(1:3,:),time
     else
        STOP "Please pick a coordinate system that I can write to file in"
     endif
