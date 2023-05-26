@@ -28,7 +28,9 @@ module set_geodesic
                        icustom  = 8,       &
                        iellipse = 9,       &
                        iparabola = 10
-
+ real :: rp_newton, &
+         inc_parabola
+ integer :: gtype
 contains
 
 subroutine print_geodesic_choices()
@@ -56,18 +58,23 @@ subroutine setgeodesic(x,v,type,r0)
  real :: ra,va,omega,fac
  real :: rotate_y(3,3), inclination
  real :: theta,phi,m,q,rho2,y1,z1,vx,vz,rdot,thetadot
- real :: ecc,semia,rp
+ real :: ecc,semia,rp,beta,rt
  real :: vhat(3),vmag
+ real :: pos_mag,vel_mag,eng
+ character(len=120)      :: filename
+ integer                 :: ierr
+ logical                 :: iexist
 
  print*,""
+ print*,"We are using option: ",type
 
  if (present(r0)) then
     r = r0
     write(*,'(a,f6.2)') ' Using init with r = ',r0
  endif
-
+ 
  select case(type)
-
+ 
  case(icirc)
     print*,'#--- Circular velocity in x-y plane, anticlockwise ---#'
     if (.not. present(r0)) then
@@ -290,35 +297,80 @@ subroutine setgeodesic(x,v,type,r0)
     read*
 
  case(iparabola)
-    rp  = 47.131 ! Tidal radius for solar type star around 1e6 Msun black hole
-    r = 500. !2.*rp
-    call prompt('r pericentre',rp)
-    if (r < 2.*rp) then
-       r = 2.*rp
+    !default values
+    rp_newton  = 47.131
+    inc_parabola = 45.
+    r = 1.e5
+    filename = 'orbit'//'.params'                               
+    inquire(file=filename,exist=iexist)
+    if (iexist) call read_setupfile(filename,ierr)
+    if (.not. iexist .or. ierr /= 0) then
+       call write_setupfile(filename)
+       print*,' Edit '//trim(filename)//' and rerun'
+       stop
     endif
 
-    y1 = -2.*rp + r
+    print*,rp_newton,"rp newton"
+    y1 = -2.*rp_newton + r
     x1 = sqrt(r**2 - y1**2)
     x  = (/x1,y1,0./)
     vmag = sqrt(2.*1./r)
-    vhat = (/-2.*rp,-x1,0./)/sqrt(4.*rp**2 + x1**2)
+    vhat = (/-2.*rp_newton,-x1,0./)/sqrt(4.*rp_newton**2 + x1**2)
     v    = vmag*vhat
-
-    inclination = 45.
-    call prompt('inclination (deg)',inclination)
-    inclination = inclination/180. * pi
-    call get_rotation_matrix(-inclination,rotate_y,'y')
+    inc_parabola = inc_parabola/180. * pi
+    call get_rotation_matrix(-inc_parabola,rotate_y,'y')
     x = matmul(rotate_y,x)
     v = matmul(rotate_y,v)
 
-   print*,'Suggested dt: ',(2.*pi*sqrt(rp**3))/100.
-   print*,'Press ENTER to continue'
-   read*
+   print*,'Suggested dt: ',(2.*pi*sqrt(rp_newton**3))/100.
 
  end select
 
  print*,""
 
+
 end subroutine setgeodesic
+
+!
+!---Read/write setup file--------------------------------------------------
+!
+subroutine write_setupfile(filename)
+ use infile_utils, only:write_inopt
+ character(len=*), intent(in) :: filename
+ integer, parameter :: iunit = 20
+ integer :: i
+
+ print "(a)",' writing setup options file '//trim(filename)
+ open(unit=iunit,file=filename,status='replace',form='formatted')
+ write(iunit,"(a)") '# tde setup file'
+
+ call write_inopt(rp_newton,'rp_newton','newtonian rp',iunit)
+ call write_inopt(inc_parabola,'inc_parabola','inc of orbit',iunit)
+ close(iunit)
+
+end subroutine write_setupfile
+
+subroutine read_setupfile(filename,ierr)
+ use infile_utils, only:open_db_from_file,inopts,read_inopt,close_db
+ character(len=*), intent(in)  :: filename
+ integer,          intent(out) :: ierr
+ integer, parameter :: iunit = 21
+ integer :: nerr
+ type(inopts), allocatable :: db(:)
+
+ print "(a)",'reading setup options from '//trim(filename)
+ nerr = 0
+ ierr = 0
+ call open_db_from_file(db,filename,iunit,ierr)
+
+ call read_inopt(rp_newton,'rp_newton',db,min=0.,errcount=nerr)
+ call read_inopt(inc_parabola,'inc_parabola',db,min=0.,errcount=nerr)
+ call close_db(db)
+ if (nerr > 0) then
+     print "(1x,i2,a)",nerr,' error(s) during read of setup file: re-writing...'
+     ierr = nerr
+ endif
+  print*,rp_newton,"rp_newton in readsetup"
+end subroutine read_setupfile
 
 end module set_geodesic
