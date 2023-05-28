@@ -81,9 +81,19 @@ subroutine write_xyz(time,xall,np)
  integer :: i,i1,i2
  character(len=11) :: ihead1,ihead2,ihead3,column_labels(np*3)
  character(len=30) :: fmt
+ character(len=120)   :: positions_file
+ CHARACTER(len=120)   :: file_input
+
+ call  get_environment_variable("positions_file", file_input)
+
+ IF (LEN_TRIM(file_input) > 0) THEN
+        positions_file=trim(file_input)
+ else
+        positions_file=trim('positions.dat')
+ endif
 
  if (first) then
-    open(unit=iu, file='positions.dat',status='replace')
+    open(unit=iu, file=positions_file,status='replace')
     write(iu,*) '# Number of particles (n)'
     write(iu,*) np
 
@@ -116,7 +126,7 @@ subroutine write_xyz(time,xall,np)
 
     first = .false.
  else
-    open(unit=iu, file='positions.dat',position='append')
+    open(unit=iu, file=positions_file,position='append')
  endif
 
  ! Write to positions.dat file in cartesian
@@ -166,9 +176,19 @@ subroutine write_vxyz(time,vall,np)
  character(len=11) :: ihead1,ihead2,ihead3,column_labels(np*3)
  character(len=30) :: fmt
  character(len=6)  :: nstring
+ character(len=120)   :: velocities_file 
+ CHARACTER(len=120)   :: file_input
 
+ call  get_environment_variable("velocities_file", file_input)
+ 
+ IF (LEN_TRIM(file_input) > 0) THEN
+        velocities_file=trim(file_input)  
+ else 
+        velocities_file=trim('velocities.dat')
+ endif 
+ 
  if (first) then
-    open(unit=iu, file='velocities.dat',status='replace')
+    open(unit=iu, file=velocities_file,status='replace')
     write(iu,*) '# Number of particles'
     write(iu,*) np
 
@@ -193,7 +213,7 @@ subroutine write_vxyz(time,vall,np)
     write(iu,*) '# Coordinate system: ',coordinate_sys,' Metric: ',metric_type
     first = .false.
  else
-    open(unit=iu, file='velocities.dat',position='append')
+    open(unit=iu, file=velocities_file,position='append')
  endif
  write(iu,*) time, vall(1:3,:)
  close(iu)
