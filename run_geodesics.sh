@@ -51,14 +51,18 @@ for ((i=0; i<${#rp_newton_values[@]}; i++)); do
 
     echo " *******************************************************************"
     echo "Newtonian pericentre distance: ${rp_newton} code units"
+    # Create unique filenames for each parallel run
+    positions_file="positions_${i}.dat"
+    velocities_file="velocities_${i}.dat"
 
+   
     # Run grtest with orbit.params file
     ./grtest < orbit.params
-    ./grtest output_00000.dat 
+    ./grtest output_00000.dat < ${positions_file} ${velocities_file} 
 
     # Move positions and velocities.dat files to output_geodesics
-    mv positions.dat "${output_geodesics}/positions_${i}.dat"
-    mv velocities.dat "${output_geodesics}/velocities_${i}.dat"
+    mv ${positions_file} "${output_geodesics}/positions_${i}.dat"
+    mv ${velocities_file} "${output_geodesics}/velocities_${i}.dat"
 
     # Write rp_newton and filename to a file
     echo "${rp_newton}, positions_${i}.dat" >> "${output_geodesics}/rp_position_mapping.txt"

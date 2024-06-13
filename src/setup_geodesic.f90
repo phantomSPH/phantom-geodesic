@@ -14,7 +14,8 @@ subroutine setpart(xall,vall,np)
  character(len=120)      :: filename
  integer                 :: ierr
  logical                 :: iexist
- np = 1
+ ! We use two particles now
+ np = 2
  allocate(xall(3,np),vall(3,np))
 
  call print_geodesic_choices

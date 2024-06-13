@@ -52,7 +52,7 @@ subroutine setgeodesic(x,v,type,r0)
  use utils,        only:get_rotation_matrix
  use prompting,    only:prompt
  real, intent(in), optional  :: r0
- real, intent(out) :: x(3), v(3)
+ real, intent(out) :: x(3,2), v(3,2)
  integer, intent(in) :: type
  real :: r, vy, x1
  real :: ra,va,omega,fac
@@ -72,9 +72,9 @@ subroutine setgeodesic(x,v,type,r0)
     r = r0
     write(*,'(a,f6.2)') ' Using init with r = ',r0
  endif
- 
+
  select case(type)
- 
+
  case(icirc)
     print*,'#--- Circular velocity in x-y plane, anticlockwise ---#'
     if (.not. present(r0)) then
@@ -95,11 +95,11 @@ subroutine setgeodesic(x,v,type,r0)
     endif
     select case(coordinate_sys)
     case('Cartesian')
-       x = (/x1,0.,0./)
-       v = (/0.,vy,0./)
+       x(1:3,1) = (/x1,0.,0./)
+       v(1:3,1) = (/0.,vy,0./)
     case('Spherical')
-       x = (/r,0.5*pi,0./)
-       v = (/0.,0.,omega/)
+       x(1:3,1) = (/r,0.5*pi,0./)
+       v(1:3,1) = (/0.,0.,omega/)
     end select
     print*,'period =',2*pi/omega
     print*,'Press ENTER to continue:'
@@ -114,11 +114,11 @@ subroutine setgeodesic(x,v,type,r0)
     select case(coordinate_sys)
     case('Cartesian')
        x1 = sqrt(r**2 + a**2)
-       x = (/x1,0.,0./)
+       x(1:3,1) = (/x1,0.,0./)
     case('Spherical')
-       x = (/r,0.5*pi,0./)
+       x(1:3,1) = (/r,0.5*pi,0./)
     end select
-    v = (/0.,0.,0./)
+    v(1:3,1) = (/0.,0.,0./)
 
  case(iprec) ! Clement's orbit
     ra = 90.
@@ -130,11 +130,11 @@ subroutine setgeodesic(x,v,type,r0)
     endif
     select case(coordinate_sys)
     case('Cartesian')
-       x = (/ra,0.,0./)
-       v = (/0.,va,0./)
+       x(1:3,1) = (/ra,0.,0./)
+       v(1:3,1) = (/0.,va,0./)
     case('Spherical')
-       x = (/ra,0.5*pi,0./)
-       v = (/0.,0.,va/ra /)
+       x(1:3,1) = (/ra,0.5*pi,0./)
+       v(1:3,1) = (/0.,0.,va/ra /)
        if (.not. metric_type=='Schwarzschild') STOP 'Only have precession setup for spherical in Schwarzschild'
     end select
 
@@ -152,10 +152,10 @@ subroutine setgeodesic(x,v,type,r0)
        read*
     endif
     if (.not. coordinate_sys=='Cartesian') STOP "Haven't tested 'precession inclined' for Spherical coordinates"
-    x = (/ra,0.,0./)
-    v = (/0.,va,0./)
+    x(1:3,1) = (/ra,0.,0./)
+    v(1:3,1) = (/0.,va,0./)
     call get_rotation_matrix(inclination,rotate_y,'y')
-    x = matmul(rotate_y,x)
+    x(1:3,1) = matmul(rotate_y,x(1:3,1))
 
  case(iepi)
     print*,'#--- Radial epicyclic motion in x-y plane, anticlockwise ---#'
@@ -179,11 +179,11 @@ subroutine setgeodesic(x,v,type,r0)
     fac = 1.00001
     select case(coordinate_sys)
     case('Cartesian')
-       x = (/x1,0.,0./)
-       v = (/0.,fac*vy,0./)
+       x(1:3,1) = (/x1,0.,0./)
+       v(1:3,1) = (/0.,fac*vy,0./)
     case('Spherical')
-       x = (/r,0.5*pi,0./)
-       v = (/0.,0.,fac*omega/)
+       x(1:3,1) = (/r,0.5*pi,0./)
+       v(1:3,1) = (/0.,0.,fac*omega/)
     end select
     print*,'period =',2*pi/omega
 
@@ -209,11 +209,11 @@ subroutine setgeodesic(x,v,type,r0)
     fac = 1.00001
     select case(coordinate_sys)
     case('Cartesian')
-       x = (/x1,0.,0.+(fac-1.)/)
-       v = (/0.,vy,0./)
+       x(1:3,1) = (/x1,0.,0.+(fac-1.)/)
+       v(1:3,1) = (/0.,vy,0./)
     case('Spherical')
-       x = (/r,0.5*pi*fac,0./)
-       v = (/0.,0.,omega/)
+       x(1:3,1) = (/r,0.5*pi*fac,0./)
+       v(1:3,1) = (/0.,0.,omega/)
     end select
 
  case(icircinc)
@@ -244,11 +244,11 @@ subroutine setgeodesic(x,v,type,r0)
 
     select case(coordinate_sys)
     case('Cartesian')
-       x = (/x1,y1,z1/)
-       v = (/vx,vy,vz/)
+       x(1:3,1) = (/x1,y1,z1/)
+       v(1:3,1) = (/vx,vy,vz/)
     case('Spherical')
-       x = (/r,theta,phi/)
-       v = (/rdot,thetadot,omega/)
+       x(1:3,1) = (/r,theta,phi/)
+       v(1:3,1) = (/rdot,thetadot,omega/)
     end select
     print*,'period =',2*pi/abs(omega)
     print*,'Press ENTER to continue:'
@@ -269,8 +269,8 @@ subroutine setgeodesic(x,v,type,r0)
     call prompt('vz',vz)
     select case(coordinate_sys)
     case('Cartesian')
-      x = (/x1,y1,z1/)
-      v = (/vx,vy,vz/)
+      x(1:3,1) = (/x1,y1,z1/)
+      v(1:3,1) = (/vx,vy,vz/)
     case('Spherical')
       STOP 'Need to be in cartesian'
     end select
@@ -286,10 +286,10 @@ subroutine setgeodesic(x,v,type,r0)
     semia = rp/(1.-ecc)
     r  = semia*(1.+ecc)
     vy = sqrt((1.-ecc)/r)
-    x  = (/r,0.,0./)
-    v  = (/0.,vy,0./)
+    x(1:3,1)  = (/r,0.,0./)
+    v(1:3,1)  = (/0.,vy,0./)
     call get_rotation_matrix(-inclination,rotate_y,'y')
-    x = matmul(rotate_y,x)
+    x(1:3,1) = matmul(rotate_y,x(1:3,1))
 
     print*,'Period of orbit = ',2.*pi*sqrt(semia**3/1.)
     print*,'Suggested dt: ',(2.*pi*sqrt(rp**3))/100.
@@ -301,7 +301,8 @@ subroutine setgeodesic(x,v,type,r0)
     rp_newton  = 47.131
     inc_parabola = 45.
     r = 1.e5
-    filename = 'orbit'//'.params'                               
+    r = 100
+    filename = 'orbit'//'.params'
     inquire(file=filename,exist=iexist)
     if (iexist) call read_setupfile(filename,ierr)
     if (.not. iexist .or. ierr /= 0) then
@@ -313,14 +314,17 @@ subroutine setgeodesic(x,v,type,r0)
     print*,rp_newton,"rp newton"
     y1 = -2.*rp_newton + r
     x1 = sqrt(r**2 - y1**2)
-    x  = (/x1,y1,0./)
+    x(1:3,1)  = (/x1,y1,0./)
     vmag = sqrt(2.*1./r)
     vhat = (/-2.*rp_newton,-x1,0./)/sqrt(4.*rp_newton**2 + x1**2)
-    v    = vmag*vhat
+    v(1:3,1)    = vmag*vhat
     inc_parabola = inc_parabola/180. * pi
     call get_rotation_matrix(-inc_parabola,rotate_y,'y')
-    x = matmul(rotate_y,x)
-    v = matmul(rotate_y,v)
+    x(1:3,1) = matmul(rotate_y,x(1:3,1))
+    v(1:3,1) = matmul(rotate_y,v(1:3,1))
+
+    x(1:3,2) = matmul(rotate_y,x(1:3,1))
+    v(1:3,2) = matmul(rotate_y,v(1:3,1))
 
    print*,'Suggested dt: ',(2.*pi*sqrt(rp_newton**3))/100.
 

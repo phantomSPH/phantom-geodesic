@@ -8,8 +8,7 @@ program test
  use metric,       only: metric_type,a
  use metric_tools, only: coordinate_sys
  use force_gr,     only: get_sourceterms
- use step,         only: timestep, stepname, steptype
- use energies,     only: get_ev
+ use step,         only: stepname, steptype
  use utils_gr,     only: get_rderivs
  use output,       only: write_out, write_ev, write_xyz, write_vxyz
  use checks,       only: check,sanity_checks
@@ -17,12 +16,12 @@ program test
  use prompting,    only: prompt
  use options,      only: dt, tmax, dtout, dnout_ev, write_pos_vel
  use infile,       only: init_infile
+ use step_all,     only: timestep_all
  implicit none
 
  real, allocatable, dimension(:,:) :: xall,vall
- real, dimension(3) :: x,v
  integer :: np
- real    :: time, energy_init, angmom_init, energy, angmom, energy_i, angmom_i
+ real    :: time, energy_init, angmom_init, energy, angmom
  integer :: nsteps,i,j,dnout
  logical :: passed
  real    :: start,finish,tminus,frac_done,twall_elapsed,twallmax_approx
@@ -71,28 +70,13 @@ program test
 
  prev_percent = 0
  do i=1,nsteps
-    angmom =0.
-    energy =0.
 
     time = time + dt
-    !$omp parallel default(none) &
-    !$omp shared(i,np,xall,vall,dt,dnout,dtout) &
-    !$omp private(j,x,v,passed,energy_i,angmom_i) &
-    !$omp reduction(+:energy,angmom)
-    !$omp do
+    call timestep_all(xall,vall,np,energy,angmom,dt)
+
     do j=1,np
-       x = xall(:,j)
-       v = vall(:,j)
-       call timestep(dt,x,v)
-       if (dtout>0. .and. mod(i,dnout)==0) call check(x,v,passed)
-       xall(:,j) = x
-       vall(:,j) = v
-       call get_ev(x,v,energy_i,angmom_i)
-       energy = energy + energy_i
-       angmom = angmom + angmom_i
+       if (dtout>0. .and. mod(i,dnout)==0) call check(xall(:,j),vall(:,j),passed)
     enddo
-    !$omp enddo
-    !$omp end parallel
 
     if (dtout>0. .and. mod(i,dnout)==0) then
       call write_out(time,xall,vall,np)
