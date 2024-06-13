@@ -1,0 +1,13 @@
+*.o
+*.mod 
+*.dat
+build/grtest
+*.in
+*.params
+*.defaults
+*.limits
+*.units
+*.png
+*pycache*
+grtest
+
