@@ -21,6 +21,8 @@ subroutine get_forcegr(x,v,dens,u,p,fterm)
  real    :: v4(0:3), term(0:3,0:3)
  real    :: enth, uzero
  integer :: i,j
+
+ fterm(:) = 0.
  ! Note to self: try with potential from Tejeda, Rosswog  2013
  call get_metric(x,gcov,gcon,sqrtg)
  call get_metric_derivs(x,dgcovdx1, dgcovdx2, dgcovdx3)
@@ -60,11 +62,68 @@ subroutine get_sourceterms(x,v,fterm)
  real, intent(in)  :: x(3),v(3)
  real, intent(out) :: fterm(3)
  real :: dens,u,p
-
  P = 0.
  u = 0.
  dens = 1. ! this value does not matter (will cancel in the momentum equation)
  call get_forcegr(x,v,dens,u,p,fterm)
 end subroutine get_sourceterms
+
+! This subroutine determines the gravitational force between the particles
+subroutine get_newtonian_force(np,xall,fterm_new,mall)
+  real, dimension(:,:), intent(in) :: xall
+  real, dimension(:), intent(in) :: mall
+  integer, intent(in) :: np
+  real, dimension(3,np), intent(inout) :: fterm_new
+  real, dimension(3) :: x,x_other,x_rel
+  real :: rr,ddr
+  integer :: i,j
+
+  do i = 1,np
+    ! fterm_new(:,i) = 0.
+    ! we determine the force on each particle
+    x = xall(:,i)
+    do j = 1,np
+      if (i .ne. j) then
+        ! determine relative position
+        x_other = xall(:,j)
+        x_rel = x - x_other
+        rr = sqrt(dot_product(x_rel,x_rel))
+        ddr = 1.0 / rr**3
+        ! determine the force components in vector form
+        fterm_new(:,i) = fterm_new(:,i) - ddr*x_rel*mall(j)
+
+      endif
+    enddo
+  enddo
+end subroutine get_newtonian_force
+
+! This subroutine determines the gravitational force between the particles
+subroutine get_newtonian_force_new(np,xall,fterm_new,mall,i)
+  real, dimension(:,:), intent(in) :: xall
+  real, dimension(:), intent(in) :: mall
+  integer, intent(in) :: np,i
+  real, dimension(3), intent(inout) :: fterm_new
+  real, dimension(3) :: x,x_other,x_rel
+  real :: rr,ddr
+  integer :: j
+
+    ! fterm_new(:,i) = 0.
+    ! we determine the force on each particle
+    x = xall(:,i)
+    do j = 1,np
+      if (i .ne. j) then
+        ! determine relative position
+        x_other = xall(:,j)
+        x_rel = x - x_other
+        rr = sqrt(dot_product(x_rel,x_rel))
+        ddr = 1.0 / rr**3
+        ! determine the force components in vector form
+        fterm_new(:) = fterm_new(:) - ddr*x_rel*mall(j)
+
+
+      endif
+    enddo
+
+end subroutine get_newtonian_force_new
 
 end module force_gr

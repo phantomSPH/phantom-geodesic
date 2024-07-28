@@ -2,7 +2,7 @@ module set_geodesic
  implicit none
 
  real, parameter    :: pi = acos(-1.)
- integer, parameter :: ngtypes = 10
+ integer, parameter :: ngtypes = 11
  character(len=*), parameter  :: &
   gtypelist(ngtypes) = (/&
                        'circular             ',&
@@ -14,7 +14,8 @@ module set_geodesic
                        'circular-inclined    ',&
                        'custom               ',&
                        'ellipse              ',&
-                       'parabola             ' &
+                       'parabola             ',&
+                       'binary               '&
                        /)
 
  integer, parameter :: &
@@ -27,7 +28,8 @@ module set_geodesic
                        icircinc = 7,       &
                        icustom  = 8,       &
                        iellipse = 9,       &
-                       iparabola = 10
+                       iparabola = 10,     &
+                       ibinary  = 11
  real :: rp_newton, &
          inc_parabola
  integer :: gtype
@@ -44,7 +46,7 @@ subroutine print_geodesic_choices()
 end subroutine print_geodesic_choices
 
 !--- Several types of single particle geodesics
-subroutine setgeodesic(x,v,type,r0)
+subroutine setgeodesic(x,v,mall,np,type,r0)
  use metric,       only:metric_type, a!,rs
  use metric_tools, only:coordinate_sys
  use force_gr,     only:get_sourceterms
@@ -52,15 +54,18 @@ subroutine setgeodesic(x,v,type,r0)
  use utils,        only:get_rotation_matrix
  use prompting,    only:prompt
  real, intent(in), optional  :: r0
- real, intent(out) :: x(3,2), v(3,2)
- integer, intent(in) :: type
+ ! real, intent(out) :: x(3,2), v(3,2)
+ integer, intent(in) :: type,np
+ real, intent(in)    :: mall(np)
+ real, intent(inout) :: x(3,np), v(3,np)
  real :: r, vy, x1
+ ! real :: m1, m2
  real :: ra,va,omega,fac
  real :: rotate_y(3,3), inclination
  real :: theta,phi,m,q,rho2,y1,z1,vx,vz,rdot,thetadot
  real :: ecc,semia,rp,beta,rt
- real :: vhat(3),vmag
- real :: pos_mag,vel_mag,eng
+ real :: vhat(3),vmag,dx(3),dv(3),mtot
+ real :: pos_mag,vel_mag,eng,semi_major,vel_orbit
  character(len=120)      :: filename
  integer                 :: ierr
  logical                 :: iexist
@@ -68,6 +73,7 @@ subroutine setgeodesic(x,v,type,r0)
  print*,""
  print*,"We are using option: ",type
 
+ print*,x,"x",v,"v in set_geodesic"
  if (present(r0)) then
     r = r0
     write(*,'(a,f6.2)') ' Using init with r = ',r0
@@ -95,11 +101,11 @@ subroutine setgeodesic(x,v,type,r0)
     endif
     select case(coordinate_sys)
     case('Cartesian')
-       x(1:3,1) = (/x1,0.,0./)
-       v(1:3,1) = (/0.,vy,0./)
+       x(1:3,np) = (/x1,0.,0./)
+       v(1:3,np) = (/0.,vy,0./)
     case('Spherical')
-       x(1:3,1) = (/r,0.5*pi,0./)
-       v(1:3,1) = (/0.,0.,omega/)
+       x(1:3,np) = (/r,0.5*pi,0./)
+       v(1:3,np) = (/0.,0.,omega/)
     end select
     print*,'period =',2*pi/omega
     print*,'Press ENTER to continue:'
@@ -114,11 +120,11 @@ subroutine setgeodesic(x,v,type,r0)
     select case(coordinate_sys)
     case('Cartesian')
        x1 = sqrt(r**2 + a**2)
-       x(1:3,1) = (/x1,0.,0./)
+       x(1:3,np) = (/x1,0.,0./)
     case('Spherical')
-       x(1:3,1) = (/r,0.5*pi,0./)
+       x(1:3,np) = (/r,0.5*pi,0./)
     end select
-    v(1:3,1) = (/0.,0.,0./)
+    v(1:3,np) = (/0.,0.,0./)
 
  case(iprec) ! Clement's orbit
     ra = 90.
@@ -130,11 +136,11 @@ subroutine setgeodesic(x,v,type,r0)
     endif
     select case(coordinate_sys)
     case('Cartesian')
-       x(1:3,1) = (/ra,0.,0./)
-       v(1:3,1) = (/0.,va,0./)
+       x(1:3,np) = (/ra,0.,0./)
+       v(1:3,np) = (/0.,va,0./)
     case('Spherical')
-       x(1:3,1) = (/ra,0.5*pi,0./)
-       v(1:3,1) = (/0.,0.,va/ra /)
+       x(1:3,np) = (/ra,0.5*pi,0./)
+       v(1:3,np) = (/0.,0.,va/ra /)
        if (.not. metric_type=='Schwarzschild') STOP 'Only have precession setup for spherical in Schwarzschild'
     end select
 
@@ -152,8 +158,8 @@ subroutine setgeodesic(x,v,type,r0)
        read*
     endif
     if (.not. coordinate_sys=='Cartesian') STOP "Haven't tested 'precession inclined' for Spherical coordinates"
-    x(1:3,1) = (/ra,0.,0./)
-    v(1:3,1) = (/0.,va,0./)
+    x(1:3,np) = (/ra,0.,0./)
+    v(1:3,np) = (/0.,va,0./)
     call get_rotation_matrix(inclination,rotate_y,'y')
     x(1:3,1) = matmul(rotate_y,x(1:3,1))
 
@@ -179,11 +185,11 @@ subroutine setgeodesic(x,v,type,r0)
     fac = 1.00001
     select case(coordinate_sys)
     case('Cartesian')
-       x(1:3,1) = (/x1,0.,0./)
-       v(1:3,1) = (/0.,fac*vy,0./)
+       x(1:3,np) = (/x1,0.,0./)
+       v(1:3,np) = (/0.,fac*vy,0./)
     case('Spherical')
-       x(1:3,1) = (/r,0.5*pi,0./)
-       v(1:3,1) = (/0.,0.,fac*omega/)
+       x(1:3,np) = (/r,0.5*pi,0./)
+       v(1:3,np) = (/0.,0.,fac*omega/)
     end select
     print*,'period =',2*pi/omega
 
@@ -209,11 +215,11 @@ subroutine setgeodesic(x,v,type,r0)
     fac = 1.00001
     select case(coordinate_sys)
     case('Cartesian')
-       x(1:3,1) = (/x1,0.,0.+(fac-1.)/)
-       v(1:3,1) = (/0.,vy,0./)
+       x(1:3,np) = (/x1,0.,0.+(fac-1.)/)
+       v(1:3,np) = (/0.,vy,0./)
     case('Spherical')
-       x(1:3,1) = (/r,0.5*pi*fac,0./)
-       v(1:3,1) = (/0.,0.,omega/)
+       x(1:3,np) = (/r,0.5*pi*fac,0./)
+       v(1:3,np) = (/0.,0.,omega/)
     end select
 
  case(icircinc)
@@ -244,11 +250,11 @@ subroutine setgeodesic(x,v,type,r0)
 
     select case(coordinate_sys)
     case('Cartesian')
-       x(1:3,1) = (/x1,y1,z1/)
-       v(1:3,1) = (/vx,vy,vz/)
+       x(1:3,np) = (/x1,y1,z1/)
+       v(1:3,np) = (/vx,vy,vz/)
     case('Spherical')
-       x(1:3,1) = (/r,theta,phi/)
-       v(1:3,1) = (/rdot,thetadot,omega/)
+       x(1:3,np) = (/r,theta,phi/)
+       v(1:3,np) = (/rdot,thetadot,omega/)
     end select
     print*,'period =',2*pi/abs(omega)
     print*,'Press ENTER to continue:'
@@ -269,8 +275,8 @@ subroutine setgeodesic(x,v,type,r0)
     call prompt('vz',vz)
     select case(coordinate_sys)
     case('Cartesian')
-      x(1:3,1) = (/x1,y1,z1/)
-      v(1:3,1) = (/vx,vy,vz/)
+      x(1:3,np) = (/x1,y1,z1/)
+      v(1:3,np) = (/vx,vy,vz/)
     case('Spherical')
       STOP 'Need to be in cartesian'
     end select
@@ -286,8 +292,8 @@ subroutine setgeodesic(x,v,type,r0)
     semia = rp/(1.-ecc)
     r  = semia*(1.+ecc)
     vy = sqrt((1.-ecc)/r)
-    x(1:3,1)  = (/r,0.,0./)
-    v(1:3,1)  = (/0.,vy,0./)
+    x(1:3,np)  = (/r,0.,0./)
+    v(1:3,np)  = (/0.,vy,0./)
     call get_rotation_matrix(-inclination,rotate_y,'y')
     x(1:3,1) = matmul(rotate_y,x(1:3,1))
 
@@ -300,8 +306,7 @@ subroutine setgeodesic(x,v,type,r0)
     !default values
     rp_newton  = 47.131
     inc_parabola = 45.
-    r = 1.e5
-    r = 100
+    r = 500
     filename = 'orbit'//'.params'
     inquire(file=filename,exist=iexist)
     if (iexist) call read_setupfile(filename,ierr)
@@ -314,19 +319,50 @@ subroutine setgeodesic(x,v,type,r0)
     print*,rp_newton,"rp newton"
     y1 = -2.*rp_newton + r
     x1 = sqrt(r**2 - y1**2)
-    x(1:3,1)  = (/x1,y1,0./)
+    x(1:3,np)  = (/x1,y1,0./)
     vmag = sqrt(2.*1./r)
     vhat = (/-2.*rp_newton,-x1,0./)/sqrt(4.*rp_newton**2 + x1**2)
-    v(1:3,1)    = vmag*vhat
+    v(1:3,np)    = vmag*vhat
     inc_parabola = inc_parabola/180. * pi
     call get_rotation_matrix(-inc_parabola,rotate_y,'y')
-    x(1:3,1) = matmul(rotate_y,x(1:3,1))
-    v(1:3,1) = matmul(rotate_y,v(1:3,1))
-
-    x(1:3,2) = matmul(rotate_y,x(1:3,1))
-    v(1:3,2) = matmul(rotate_y,v(1:3,1))
+    x(1:3,np) = matmul(rotate_y,x(1:3,np))
+    v(1:3,np) = matmul(rotate_y,v(1:3,np))
 
    print*,'Suggested dt: ',(2.*pi*sqrt(rp_newton**3))/100.
+
+ case(ibinary)
+    mtot = sum(mall)
+    call prompt('eccentricity',ecc)
+    call prompt('semi-major',semia)
+
+    ! set binary at apastron
+    dx = (/semia*(1. + ecc),0.,0./)
+    dv = (/0.,sqrt(semia*(1.-ecc**2)*mtot)/dx(1),0./)
+
+    x(1:3,1) = -dx*mall(2)/mtot + (/10000000.,0.,0./)
+    x(1:3,2) =  dx*mall(1)/mtot + (/10000000.,0.,0./)
+    !
+    ! x(1:3,1) = -dx*mall(2)/mtot + (/0.,0.,0./)
+    ! x(1:3,2) =  dx*mall(1)/mtot + (/0.,0.,0./)
+
+    ! velocities
+    v(1:3,1) = -dv*mall(2)/mtot
+    v(1:3,2) =  dv*mall(1)/mtot
+
+    ! x(1:3,1) = (/4780.0478062 , 1237.71021012,   -0./)
+    ! x(1:3,2) = (/4777.22595736, 1238.43914902,    0./)
+    !
+    ! v(1:3,1) = (/-0.01985366, -0.00214272, -0./)
+    ! v(1:3,2) = (/-0.02006069, -0.00294487,  0./)
+
+    ! x(1:3,1) = (/22170.50316413,  6506.44584756,    -0./)
+    ! x(1:3,2) = (/22163.56404343,  6494.1490515 ,     0./)
+    !
+    ! v(1:3,1) = (/-0.00937932, -0.00118909, -0./)
+    ! v(1:3,2) = (/-0.00903958, -0.00145593,  0./)
+
+
+    print*,x,"x",v,"v in set geodesic, mtot" , mtot,"mtot"
 
  end select
 

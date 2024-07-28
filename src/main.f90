@@ -20,12 +20,16 @@ program test
  implicit none
 
  real, allocatable, dimension(:,:) :: xall,vall
+ real, allocatable, dimension(:)   :: mall
  integer :: np
  real    :: time, energy_init, angmom_init, energy, angmom
  integer :: nsteps,i,j,dnout
  logical :: passed
  real    :: start,finish,tminus,frac_done,twall_elapsed,twallmax_approx
  integer :: percentage,prev_percent
+ logical :: use_self_gravity
+
+ use_self_gravity = .true.
 
  print*,'-------------------------------------------------------------------'
  print*,'GR-TEST'
@@ -41,11 +45,9 @@ program test
  write(*,'(a,f5.3)') ' Black hole spin   = ',a
 
  ! Set particles and perform checks
- call initialise(time,xall,vall,np,energy,angmom)
-
+ call initialise(time,xall,vall,np,energy,angmom,mall)
  nsteps  = int(tmax/dt)
  dnout   = int(dtout/dt)
-
  print*,''
  print*,               'Timestepping used = ',trim(stepname(steptype))
  write(*,'(a,f10.2)') ' dt                = ',dt
@@ -54,11 +56,10 @@ program test
  print*,'-------------------------------------------------------------------'
  print*,'Start:'
  print*,'-------------------------------------------------------------------'
-
+ print*,              'Metric type       = ',trim(metric_type)
  energy_init = energy
  angmom_init = angmom
-
- if (dtout>0.) call write_out(time,xall,vall,np)
+ if (dtout>0.) call write_out(time,xall,vall,np,mall)
  if (dnout_ev>0) then
     call write_ev(time,energy-energy_init,angmom-angmom_init)
     if (write_pos_vel) then
@@ -70,16 +71,14 @@ program test
 
  prev_percent = 0
  do i=1,nsteps
-
     time = time + dt
-    call timestep_all(xall,vall,np,energy,angmom,dt)
-
+    call timestep_all(xall,vall,np,energy,angmom,dt,use_self_gravity,mall)
     do j=1,np
        if (dtout>0. .and. mod(i,dnout)==0) call check(xall(:,j),vall(:,j),passed)
     enddo
 
     if (dtout>0. .and. mod(i,dnout)==0) then
-      call write_out(time,xall,vall,np)
+      call write_out(time,xall,vall,np,mall)
     endif
 
     if (dnout_ev>0) then
