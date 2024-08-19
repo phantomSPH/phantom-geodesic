@@ -61,17 +61,18 @@ program test
  angmom_init = angmom
  if (dtout>0.) call write_out(time,xall,vall,np,mall)
  if (dnout_ev>0) then
-    call write_ev(time,energy-energy_init,angmom-angmom_init)
+    call write_ev(time,energy-energy_init,angmom-angmom_init,energy_init,angmom_init)
     if (write_pos_vel) then
        call write_xyz(time,xall,np)
        call write_vxyz(time,vall,np)
     endif
     call timer(start)
  endif
-
+ dt = 100
  prev_percent = 0
  do i=1,nsteps
     time = time + dt
+    print*,"dt ,",dt
     call timestep_all(xall,vall,np,energy,angmom,dt,use_self_gravity,mall)
     do j=1,np
        if (dtout>0. .and. mod(i,dnout)==0) call check(xall(:,j),vall(:,j),passed)
@@ -83,7 +84,7 @@ program test
 
     if (dnout_ev>0) then
     if (mod(i,dnout_ev)==0) then
-       call write_ev(time,energy-energy_init,angmom-angmom_init)
+       call write_ev(time,energy-energy_init,angmom-angmom_init,energy_init,angmom_init)
        if (write_pos_vel) then
           call write_xyz(time,xall,np)
           call write_vxyz(time,vall,np)

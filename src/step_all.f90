@@ -75,11 +75,35 @@ contains
 
   !----------------------------------------------------------------
   !+
+  !  Euler Method (1st order)
+  !+
+  !----------------------------------------------------------------
+  subroutine step_1(x,v,fterm,dt,np,mall)
+   use cons2prim, only: get_p_from_v, get_v_from_p
+   integer, intent(in) :: np
+   real, dimension(3,np), intent(in) :: fterm
+   real, dimension(3,np), intent(inout) :: x,v
+   real, dimension(np), intent(in) :: mall
+   real :: pmom(3,np)
+   real, intent(in) :: dt
+   integer :: i
+
+   do i = 1,np
+      call get_p_from_v(pmom(:,i),v(:,i),x(:,i))
+      pmom(:,i) = pmom(:,i) + dt*fterm(:,i)
+      x(:,i)    = x(:,i)    + dt*v(:,i)
+     call get_v_from_p(pmom(:,i),v(:,i),x(:,i))
+  enddo
+
+  end subroutine
+
+  !----------------------------------------------------------------
+  !+
   !  Heuns's Method (2nd Order)
   !+
   !----------------------------------------------------------------
   subroutine step_heuns_all(x,v,fterm,dt,np,mall)
-   use force_gr, only: get_sourceterms,get_newtonian_force
+   use force_gr, only: get_sourceterms,get_newtonian_force_new
    use cons2prim, only: get_p_from_v, get_v_from_p
    integer, intent(in) :: np
    real, dimension(3,np), intent(inout) :: fterm
@@ -88,33 +112,26 @@ contains
    real, dimension(3,np) :: pmom, fterm_old, v_old, pmom_guess, x_guess, fterm_new
    real, intent(in) :: dt
    integer :: i
-    real :: angmom,rvcross(3),mag_rv
-    angmom = 0.
 
 
    do i=1,np
       call get_p_from_v(pmom(:,i),v(:,i),x(:,i))
-      !print*,v(:,i),"initial velocity", pmom(:,i),"initial momentum"
       v_old(:,i)  = v(:,i)
       fterm_old(:,i)  = fterm(:,i)
       pmom_guess(:,i) = pmom(:,i) + dt*fterm(:,i)
       x_guess(:,i)    = x(:,i)    + dt*v(:,i)
       call get_v_from_p(pmom_guess(:,i),v(:,i),x_guess(:,i))
       call get_sourceterms(x_guess(:,i),v(:,i),fterm_new(:,i))
+      call get_newtonian_force_new(np,x,fterm_new(:,i),mall,i)
    enddo
-
-   call get_newtonian_force(np,x_guess,fterm_new,mall)
-   !print*,fterm_new,"fterm_new"
 
    do i=1,np
       pmom(:,i) = pmom(:,i) + 0.5*dt*(fterm_new(:,i) + fterm_old(:,i) )
       x(:,i)    = x(:,i)    + 0.5*dt*(v(:,i) + v_old(:,i))
       call get_v_from_p(pmom(:,i),v(:,i),x(:,i))
-      !print*,v(:,i),"final velocity", pmom(:,i),"final momentum"
       call get_sourceterms(x(:,i),v(:,i),fterm(:,i))
+      call get_newtonian_force_new(np,x,fterm_star(:,i),mall,i)
    end do
-
-   call get_newtonian_force(np,x,fterm,mall)
 
 
  end subroutine step_heuns_all
@@ -198,9 +215,8 @@ enddo
     &                                 maxval(abs(xprev(:,i)-x(:,i))), iterations_x
 
     call get_sourceterms(x(:,i),v(:,i),fterm(:,i))
+    call get_newtonian_force_new(np,x,fterm(:,i),mall,i)
  enddo
-
- call get_newtonian_force(np,x,fterm,mall)
 
  do i = 1,np
     pmom(:,i) = pmom(:,i) + 0.5*dt*fterm(:,i)  ! Half step in position
@@ -211,38 +227,46 @@ end subroutine step_landr05_all
 
 !----------------------------------------------------------------
 !+
-!  COM frame of binary
+!  RK2 Method (2nd Order)
 !+
 !----------------------------------------------------------------
-subroutine get_COM_angular_mom(x,v,mall,angmom,np)
-  use utils,    only:cross_product
+subroutine step_rk2(x,v,fterm,dt,np,mall)
+ use force_gr, only: get_sourceterms
+ use cons2prim, only: get_p_from_v, get_v_from_p
 
-  integer, intent(in) :: np
-  real, dimension(3,np), intent(in) :: x,v
-  real, dimension(np), intent(in) :: mall
-  real, intent(out) :: angmom
+ integer, intent(in) :: np
+ real, dimension(3,np), intent(inout) :: fterm
+ real, dimension(3,np), intent(inout) :: x,v
+ real, dimension(np), intent(in) :: mall
+ real, intent(in) :: dt
+ real :: pmomstar(3,np),xstar(3,np),vstar(3,np),pmom(3,np)
+ integer :: i
 
-  real :: x_com(3), v_com(3), xrel(3), vrel(3), angmomg3(3)
-  real :: angmom_i
-  integer :: i
+ do i = 1, np
+    call get_p_from_v(pmom(:,i),v(:,i),x(:,i))
+    ! ENTRY
+    xstar(:,i)    = x(;,i)    + 0.5*dt*v(:,i)
+    pmomstar(:,i) = pmom(:,i) + 0.5*dt*fterm(:,i)
+    call get_v_from_p(pmomstar(:,i),vstar(:,i),xstar(:,i))
+ enddo
 
-  x_com = (x(:,1) + x(:,2))*0.5
-  v_com = (v(:,1) + v(:,2))*0.5
+ do i = 1,np
+    call get_sourceterms(xstar(:,i),vstar(:,i),fterm(:,i))
+    call get_newtonian_force_new(np,x,fterm(:,i),mall,i)
+ enddo
 
-  ! angmom = 0.
-  angmom_i = 0.
-  angmomg3 = 0.
+ do i = 1,np
+    x(:,i)        = x(:,i)    + dt*vstar(:,i)
+    pmom(:,i)     = pmom(:,i) + dt*fterm(:,i)
+ enddo
 
-  do i = 1, np
-    xrel(:) = x(:,i) - x_com
-    vrel(:) = v(:,i) - v_com
-    call cross_product(xrel,vrel,angmomg3)
-    angmom_i = sqrt(dot_product(angmomg3,angmomg3))
-    print*,angmom_i,"angmom of np",i
-    angmom = angmom + angmom_i
-    !print*,angmom,"angmom in the COM frame"
-  enddo
-  print*,angmom,"angmom total"
+ do i = 1,np
+    ! EXIT
+    call get_v_from_p(pmom(:,i),v(:,i),x(:,i))
+    call get_sourceterms(x(:,i),v(:,i),fterm(:,i))
+    call get_newtonian_force_new(np,x,fterm(:,i),mall,i)
+ enddo
 
-end subroutine get_COM_angular_mom
+end subroutine step_rk2
+
 end module step_all
