@@ -174,10 +174,13 @@ subroutine step_landr05_all(x,v,fterm,dt,np,mall)
 
     if (.not. converged_pmom) print*, 'WARNING: implicit timestep did not & converge! pmom-pmom_prev =',&
     &                                    pmom(:,i)-pmom_prev(:,i)
-    call get_v_from_p(pmom(:,i),v(:,i),x(:,i)) ! Get v(phalf,x0)
-    x(:,i) = x(:,i) + dt*v(:,i)
  enddo
 
+ do i = 1, np
+   call get_v_from_p(pmom(:,i),v(:,i),x(:,i)) ! Get v(phalf,x0)
+   x(:,i) = x(:,i) + dt*v(:,i)
+ enddo
+ 
  do i = 1, np
     converged_x = .false.
     iterations_x = 0
