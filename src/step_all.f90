@@ -119,7 +119,6 @@ contains
 
  end subroutine step_heuns_all
 
-
 !----------------------------------------------------------------
 !+
 !  Modified leapfrog (2nd order) from Leimkuhler & Reich (2005)
@@ -157,7 +156,8 @@ subroutine step_landr05_all(x,v,fterm,dt,np,mall)
     iterations_pmom = 0
 
     call get_p_from_v(pmom(:,i),v(:,i),x(:,i)) ! primitive to conservative
-    pmom(:,i) = pmom(:,i) + 0.5*dt*fterm(:,i)  !pmom_star
+    pmom(:,i) = pmom(:,i) + 0.5*dt*(fterm(:,i))  !pmom_star
+
 
     ! Converge to p
     do while (.not. converged_pmom .and. iterations_pmom < max_iterations)
@@ -166,21 +166,22 @@ subroutine step_landr05_all(x,v,fterm,dt,np,mall)
        call get_v_from_p(pmom(:,i),v(:,i),x(:,i))                ! Get vstar from pmom_star
        call get_sourceterms(x(:,i),v(:,i),fterm_star(:,i))       ! Get fterm(pmom_star,x1)=fterm_star !!This will need to be get_forces
        call get_newtonian_force_new(np,x,fterm_star(:,i),mall,i)
-
+       ! fterm_star(:,i) = fterm(:,i)
        pmom(:,i) = pmom_prev(:,i) + 0.5*dt*(fterm_star(:,i) - fterm(:,i))
+
        if (maxval(abs(pmom_prev(:,i)-pmom(:,i)))<=ptol) converged_pmom = .true.
        fterm(:,i) = fterm_star(:,i)
     enddo
 
+
     if (.not. converged_pmom) print*, 'WARNING: implicit timestep did not & converge! pmom-pmom_prev =',&
     &                                    pmom(:,i)-pmom_prev(:,i)
+enddo
+ do i = 1, np
+    call get_v_from_p(pmom(:,i),v(:,i),x(:,i)) ! Get v(phalf,x0)
+    x(:,i) = x(:,i) + dt*v(:,i)
  enddo
 
- do i = 1, np
-   call get_v_from_p(pmom(:,i),v(:,i),x(:,i)) ! Get v(phalf,x0)
-   x(:,i) = x(:,i) + dt*v(:,i)
- enddo
- 
  do i = 1, np
     converged_x = .false.
     iterations_x = 0
