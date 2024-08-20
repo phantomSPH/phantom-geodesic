@@ -119,8 +119,6 @@ subroutine get_newtonian_force_new(np,xall,fterm_new,mall,i)
         ddr = 1.0 / rr**3
         ! determine the force components in vector form
         fterm_new(:) = fterm_new(:) - ddr*x_rel*mall(j)
-
-
       endif
     enddo
 

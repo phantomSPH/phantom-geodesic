@@ -44,20 +44,28 @@ end subroutine write_out
 !  Write one output file containing the time evolution of total energy and  total angular momentum.
 !+
 !----------------------------------------------------------------
-subroutine write_ev(time,energy,angmom)
- real, intent(in) :: time, energy, angmom
+subroutine write_ev(time,energy,energy_init,angmom,angmom_init)
+ real, intent(in) :: time,energy,energy_init,angmom,angmom_init
  integer, save :: i=0
  integer, parameter :: iu = 55
+ real :: diff_en, diff_angmom
+ real :: d_en, d_ang
+
+ diff_en = energy - energy_init
+ diff_angmom = angmom - angmom_init
+
+ d_en = abs(diff_en) / energy_init
+ d_ang = abs(diff_angmom) / angmom_init
 
  if (i==0) then
     open(unit=iu, file='ev.dat',status='replace')
-    write(iu,*) '# Time, Energy, Angular momentum'
+    write(iu,*) '# Time, Energy, dE, Angular momentum, dL'
     i = i+1
  else
     open(unit=iu, file='ev.dat',position='append')
  endif
 
- write(iu,*) time, energy, angmom
+ write(iu,*) time, diff_en, d_en, diff_angmom, d_ang 
  close(iu)
 
 end subroutine write_ev

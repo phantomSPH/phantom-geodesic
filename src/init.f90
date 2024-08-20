@@ -2,7 +2,6 @@ module init
  use setup,    only:setpart,get_binary_mass
  use checks,   only:check
  use energies, only:get_ev,get_newtonian_energy
- use step_all, only:get_COM_angular_mom
  implicit none
 
 contains
