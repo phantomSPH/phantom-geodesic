@@ -339,10 +339,11 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
     dx = (/semia*(1. + ecc),0.,0./)
     dv = (/0.,sqrt(semia*(1.-ecc**2)*mtot)/dx(1),0./)
 
-    print*,dx,"dx",dv,"dv"
-
-    x(1:3,1) = -dx*mall(2)/mtot + (/10000000.,0.,0./)
-    x(1:3,2) =  dx*mall(1)/mtot + (/10000000.,0.,0./)
+    ! x(1:3,1) = -dx*mall(2)/mtot + (/10000000.,0.,0./)
+    ! x(1:3,2) =  dx*mall(1)/mtot + (/10000000.,0.,0./)
+    !
+    x(1:3,1) = -dx*mall(2)/mtot
+    x(1:3,2) =  dx*mall(1)/mtot
 
     ! velocities
     v(1:3,1) = -dv*mall(2)/mtot
@@ -364,6 +365,7 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
     print*,x,"x",v,"v in set geodesic, mtot" , mtot,"mtot"
 
  end select
+
 
  print*,""
 
