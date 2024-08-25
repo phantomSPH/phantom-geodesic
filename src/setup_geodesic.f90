@@ -18,8 +18,6 @@ subroutine setpart(xall,vall,np,mall)
 
  call print_geodesic_choices
  gtype = iprec
- print*,gtype,"gtype initial"
- ! call prompt(' Enter geodesic choice:',gtype)
  filename = 'grtest'//'.params'                                ! moddump should really know about the output file prefix...
  inquire(file=filename,exist=iexist)
  if (iexist) call read_option(filename,np,ierr)
@@ -32,7 +30,7 @@ subroutine setpart(xall,vall,np,mall)
  if (gtype == 11) then
       call get_binary_mass(np, mall)
  endif
- 
+
  allocate(xall(3,np),vall(3,np))
  call setgeodesic(xall,vall,mall,np,gtype)
 
@@ -52,9 +50,8 @@ subroutine get_binary_mass(np, mall)
  inquire(file=filename_binary,exist=iexist)
  if (iexist) call read_binary_option(filename_binary,np,mall,ierr)
  if (.not. iexist .or. ierr /= 0) then
-    print*,iexist,"iexist",ierr,"ierr"
     call write_binary_option(filename_binary,np,mall)
-    print*,' Edit '//trim(filename_binary)//' and rerun'
+    print*,' Edit with mass of stars '//trim(filename_binary)//' and rerun'
     stop
  endif
 

@@ -54,12 +54,10 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
  use utils,        only:get_rotation_matrix
  use prompting,    only:prompt
  real, intent(in), optional  :: r0
- ! real, intent(out) :: x(3,2), v(3,2)
  integer, intent(in) :: type,np
  real, intent(in)    :: mall(np)
  real, intent(inout) :: x(3,np), v(3,np)
  real :: r, vy, x1
- ! real :: m1, m2
  real :: ra,va,omega,fac
  real :: rotate_y(3,3), inclination
  real :: theta,phi,m,q,rho2,y1,z1,vx,vz,rdot,thetadot
@@ -73,7 +71,6 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
  print*,""
  print*,"We are using option: ",type
 
- print*,x,"x",v,"v in set_geodesic"
  if (present(r0)) then
     r = r0
     write(*,'(a,f6.2)') ' Using init with r = ',r0
@@ -339,22 +336,14 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
     dx = (/semia*(1. + ecc),0.,0./)
     dv = (/0.,sqrt(semia*(1.-ecc**2)*mtot)/dx(1),0./)
 
-    ! x(1:3,1) = -dx*mall(2)/mtot + (/10000000.,0.,0./)
-    ! x(1:3,2) =  dx*mall(1)/mtot + (/10000000.,0.,0./)
-    !
-    x(1:3,1) = -dx*mall(2)/mtot
-    x(1:3,2) =  dx*mall(1)/mtot
+    x(1:3,1) = -dx*mall(2)/mtot + (/10000000.,0.,0./)
+    x(1:3,2) =  dx*mall(1)/mtot + (/10000000.,0.,0./)
 
     ! velocities
     v(1:3,1) = -dv*mall(2)/mtot
     v(1:3,2) =  dv*mall(1)/mtot
 
-    ! x(1:3,1) = (/4780.0478062 , 1237.71021012,   -0./)
-    ! x(1:3,2) = (/4777.22595736, 1238.43914902,    0./)
-    !
-    ! v(1:3,1) = (/-0.01985366, -0.00214272, -0./)
-    ! v(1:3,2) = (/-0.02006069, -0.00294487,  0./)
-
+    ! The following parameters are a test collision case from Monte Carlo code of Alexander Heger
     ! x(1:3,1) = (/22170.50316413,  6506.44584756,    -0./)
     ! x(1:3,2) = (/22163.56404343,  6494.1490515 ,     0./)
     !
@@ -362,10 +351,7 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
     ! v(1:3,2) = (/-0.00903958, -0.00145593,  0./)
 
 
-    print*,x,"x",v,"v in set geodesic, mtot" , mtot,"mtot"
-
  end select
-
 
  print*,""
 

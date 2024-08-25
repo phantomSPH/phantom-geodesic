@@ -65,7 +65,7 @@ subroutine write_ev(time,energy,energy_init,angmom,angmom_init)
     open(unit=iu, file='ev.dat',position='append')
  endif
 
- write(iu,*) time, diff_en, d_en, diff_angmom, d_ang 
+ write(iu,*) time, diff_en, d_en, diff_angmom, d_ang
  close(iu)
 
 end subroutine write_ev
@@ -143,7 +143,6 @@ subroutine write_xyz(time,xall,np)
 
  do i=1,np
     write(positions_file,"(a,i3.3,a)") 'positions-',i,'.dat'
-    print*,'opening ',positions_file
 
     if (first) then
        open(unit=iu, file=positions_file,status='replace')

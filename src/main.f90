@@ -71,7 +71,6 @@ program test
  prev_percent = 0
  do i=1,nsteps
     time = time + dt
-    print*,"dt ,",dt
     call timestep_all(xall,vall,np,energy,angmom,dt,use_self_gravity,mall)
     do j=1,np
        if (dtout>0. .and. mod(i,dnout)==0) call check(xall(:,j),vall(:,j),passed)

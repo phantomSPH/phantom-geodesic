@@ -1,3 +1,4 @@
+! New file for timestepping
 module step
   implicit none
 
@@ -34,7 +35,7 @@ module step
   subroutine timestep_all(xall,vall,np,energy,angmom,dt,gravity_between_particles,mall)
     use step_old,     only: timestep
     use energies,     only: get_ev,get_newtonian_energy
-    use force_gr,     only: get_sourceterms,get_newtonian_force,get_newtonian_force_new
+    use force_gr,     only: get_sourceterms,get_newtonian_force_new
 
     real, allocatable, dimension(:,:), intent(inout) :: xall,vall
     real, allocatable, dimension(:), intent(inout) :: mall
@@ -50,48 +51,34 @@ module step
 
     angmom = 0.
     energy = 0.
+    ! loop over all the particles and determine the force term, fterm for each
+    do i = 1,np
+       x = xall(:,i)
+       v = vall(:,i)
+       call get_sourceterms(x,v,ftermone)
+       call get_newtonian_force_new(np,xall,ftermone,mall,i)
+       fterm(:,i) = ftermone(:)
+    enddo
 
-    ! if (gravity_between_particles) then
+    select case(steptype)
+      case(ileapfrog)
+    call step_leapfrog(xall,vall,fterm,dt,np,mall)
+      case(irk2)
+    call step_rk2(xall,vall,fterm,dt,np,mall)
+      case(ieuler)
+    call step_1(xall,vall,fterm,dt,np,mall)
+      case(iheuns)
+    call step_heuns(xall,vall,fterm,dt,np,mall)
+      case(ilnro5)
+    call step_landr05(xall,vall,fterm,dt,np,mall)
+    end select
 
-       ! loop over all the particles and determine the force term, fterm for each
-       do i = 1,np
-         x = xall(:,i)
-         v = vall(:,i)
-         call get_sourceterms(x,v,ftermone)
-         call get_newtonian_force_new(np,xall,ftermone,mall,i)
-         fterm(:,i) = ftermone(:)
-       enddo
-
-
-       ! Next we call the modified timestepping alogorithm
-       !call step_heuns_all(xall,vall,fterm,dt,np,mall)
-       !call step_landr05_all(xall,vall,fterm,dt,np,mall)
-       ! call step_1(xall,vall,fterm,dt,np,mall)
-
-       print*,"steptype",steptype
-       select case(steptype)
-       case(ileapfrog)
-          call step_leapfrog(xall,vall,fterm,dt,np,mall)
-       case(irk2)
-          call step_rk2(xall,vall,fterm,dt,np,mall)
-       case(ieuler)
-          call step_1(xall,vall,fterm,dt,np,mall)
-       case(iheuns)
-          call step_heuns(xall,vall,fterm,dt,np,mall)
-       case(ilnro5)
-          call step_landr05(xall,vall,fterm,dt,np,mall)
-       end select
-
-       do j = 1, np
-
-         call get_ev(xall(:,j),vall(:,j),energy_i,angmom_i)
-         energy = energy + energy_i
-         angmom = angmom + angmom_i
-
-       enddo
-
-       call get_newtonian_energy(np,xall,vall,energy,mall)
-
+    do j = 1, np
+      call get_ev(xall(:,j),vall(:,j),energy_i,angmom_i)
+      energy = energy + energy_i
+      angmom = angmom + angmom_i
+    enddo
+    call get_newtonian_energy(np,xall,vall,energy,mall)
 
     ! else
     !    !$omp parallel default(none) &
@@ -186,7 +173,7 @@ end subroutine step_1
 !+
 !----------------------------------------------------------------
 subroutine step_landr05(x,v,fterm,dt,np,mall)
- use force_gr, only: get_sourceterms,get_newtonian_force_new,get_newtonian_force
+ use force_gr, only: get_sourceterms,get_newtonian_force_new
  use cons2prim, only: get_p_from_v, get_v_from_p
 
  integer, intent(in) :: np
@@ -200,18 +187,15 @@ subroutine step_landr05(x,v,fterm,dt,np,mall)
  logical :: converged_x, converged_pmom
  integer :: iterations_x, iterations_pmom, i
  integer, parameter :: max_iterations = 10000
- real :: angmom,rvcross(3),mag_rv,x_rel(3,2),v_rel(3,2)
 
  converged_x = .false.
  converged_pmom = .false.
  iterations_x = 0
  iterations_pmom = 0
- angmom = 0
-
  tol  = 1.e-15
  xtol = tol
  ptol = tol
- print*,"USING LR05"
+
  do i = 1, np
     converged_pmom = .false.
     iterations_pmom = 0
@@ -274,7 +258,7 @@ end subroutine step_landr05
 !+
 !----------------------------------------------------------------
 subroutine step_leapfrog(x,v,fterm,dt,np,mall)
- use force_gr, only: get_sourceterms,get_newtonian_force_new,get_newtonian_force
+ use force_gr, only: get_sourceterms,get_newtonian_force_new
  use cons2prim, only: get_p_from_v, get_v_from_p
 
  integer, intent(in) :: np
