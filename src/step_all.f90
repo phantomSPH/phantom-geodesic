@@ -35,7 +35,9 @@ module step
   subroutine timestep_all(xall,vall,np,energy,angmom,dt,gravity_between_particles,mall)
     use step_old,     only: timestep
     use energies,     only: get_ev,get_newtonian_energy
-    use force_gr,     only: get_sourceterms,get_newtonian_force_new
+    use force_gr,     only: get_sourceterms
+    use metric,       only: rs
+    use forces,       only: get_newtonian_force_new
 
     real, allocatable, dimension(:,:), intent(inout) :: xall,vall
     real, allocatable, dimension(:), intent(inout) :: mall
@@ -46,7 +48,7 @@ module step
     logical :: gravity_between_particles
     real, dimension(3,np) :: fterm
 
-    real :: energy_i, angmom_i
+    real :: energy_i, angmom_i, dis
     integer :: j,i
 
     angmom = 0.
@@ -58,6 +60,13 @@ module step
        call get_sourceterms(x,v,ftermone)
        call get_newtonian_force_new(np,xall,ftermone,mall,i)
        fterm(:,i) = ftermone(:)
+
+       dis = norm2(x)
+       if (dis < rs) then
+         print*, "STAR NUMBER: ",i
+         STOP "STAR ENTERED THE SCHWARZSCHILD RADIUS"
+       endif
+
     enddo
 
     select case(steptype)
@@ -72,7 +81,7 @@ module step
       case(ilnro5)
     call step_landr05(xall,vall,fterm,dt,np,mall)
     end select
-
+    ! specific energy and angular momentum
     do j = 1, np
       call get_ev(xall(:,j),vall(:,j),energy_i,angmom_i)
       energy = energy + energy_i
@@ -134,7 +143,8 @@ end subroutine step_1
   !+
   !----------------------------------------------------------------
   subroutine step_heuns(x,v,fterm,dt,np,mall)
-   use force_gr, only: get_sourceterms,get_newtonian_force_new
+   use force_gr, only: get_sourceterms
+   use forces,       only: get_newtonian_force_new
    use cons2prim, only: get_p_from_v, get_v_from_p
    integer, intent(in) :: np
    real, dimension(3,np), intent(inout) :: fterm
@@ -173,7 +183,8 @@ end subroutine step_1
 !+
 !----------------------------------------------------------------
 subroutine step_landr05(x,v,fterm,dt,np,mall)
- use force_gr, only: get_sourceterms,get_newtonian_force_new
+ use force_gr, only: get_sourceterms
+ use forces,       only: get_newtonian_force_new
  use cons2prim, only: get_p_from_v, get_v_from_p
 
  integer, intent(in) :: np
@@ -211,7 +222,6 @@ subroutine step_landr05(x,v,fterm,dt,np,mall)
        call get_v_from_p(pmom(:,i),v(:,i),x(:,i))                ! Get vstar from pmom_star
        call get_sourceterms(x(:,i),v(:,i),fterm_star(:,i))       ! Get fterm(pmom_star,x1)=fterm_star !!This will need to be get_forces
        call get_newtonian_force_new(np,x,fterm_star(:,i),mall,i)
-       ! fterm_star(:,i) = fterm(:,i)
        pmom(:,i) = pmom_prev(:,i) + 0.5*dt*(fterm_star(:,i) - fterm(:,i))
 
        if (maxval(abs(pmom_prev(:,i)-pmom(:,i)))<=ptol) converged_pmom = .true.
@@ -222,6 +232,7 @@ subroutine step_landr05(x,v,fterm,dt,np,mall)
     if (.not. converged_pmom) print*, 'WARNING: implicit timestep did not & converge! pmom-pmom_prev =',&
     &                                    pmom(:,i)-pmom_prev(:,i)
 enddo
+
  do i = 1, np
     call get_v_from_p(pmom(:,i),v(:,i),x(:,i)) ! Get v(phalf,x0)
     x(:,i) = x(:,i) + dt*v(:,i)
@@ -258,7 +269,8 @@ end subroutine step_landr05
 !+
 !----------------------------------------------------------------
 subroutine step_leapfrog(x,v,fterm,dt,np,mall)
- use force_gr, only: get_sourceterms,get_newtonian_force_new
+ use force_gr, only: get_sourceterms
+ use forces,       only: get_newtonian_force_new
  use cons2prim, only: get_p_from_v, get_v_from_p
 
  integer, intent(in) :: np
@@ -301,14 +313,18 @@ do i = 1, np
 enddo
 
 do i = 1, np
-  call get_newtonian_force_new(np,x,fterm_star(:,i),mall,i)
-  pmom(:,i) = pmom(:,i) + 0.5*dt*fterm_star(:,i)  !pmom_star
+  pmom(:,i) = pmom(:,i) + 0.5*dt*fterm(:,i)  !pmom_star
+enddo
+
+do i = 1,np
   !Converge to p
   do while (.not. converged_pmom .and. iterations_pmom < max_iterations)
      iterations_pmom = iterations_pmom + 1
      pmom_prev(:,i) = pmom(:,i)
      call get_v_from_p(pmom(:,i),v(:,i),x(:,i))                         ! Get vstar from pmom_star
-     !call get_sourceterms(x(:,i),v(:,i),fterm_star(:,i))                ! Get fterm(pmom_star,x1)=fterm_star !!This will need to be get_forces
+     call get_sourceterms(x(:,i),v(:,i),fterm_star(:,i))                ! Get fterm(pmom_star,x1)=fterm_star !!This will need to be get_forces
+     call get_newtonian_force_new(np,x,fterm_star(:,i),mall,i)
+
      pmom(:,i) = pmom_prev(:,i) + 0.5*dt*(fterm_star(:,i) - fterm(:,i))
      if (maxval(abs(pmom_prev(:,i)-pmom(:,i)))<=ptol) converged_pmom = .true.
      fterm(:,i) = fterm_star(:,i)
@@ -326,7 +342,8 @@ end subroutine step_leapfrog
 !+
 !----------------------------------------------------------------
 subroutine step_rk2(x,v,fterm,dt,np,mall)
- use force_gr, only: get_sourceterms,get_newtonian_force_new
+ use force_gr, only: get_sourceterms
+ use forces,       only: get_newtonian_force_new
  use cons2prim, only: get_p_from_v, get_v_from_p
 
  integer, intent(in) :: np

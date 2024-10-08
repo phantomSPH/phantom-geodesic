@@ -47,7 +47,7 @@ end subroutine print_geodesic_choices
 
 !--- Several types of single particle geodesics
 subroutine setgeodesic(x,v,mall,np,type,r0)
- use metric,       only:metric_type, a!,rs
+ use metric,       only:metric_type, a, mass1 !,rs
  use metric_tools, only:coordinate_sys
  use force_gr,     only:get_sourceterms
  use utils_gr,     only:get_u0
@@ -283,12 +283,15 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
     rp  = 47.131 ! Tidal radius for solar type star around 1e6 Msun black hole
     inclination = 45.
     call prompt('eccentricity',ecc)
-    call prompt('r pericentre',rp)
+    !call prompt('r pericentre',rp)
+    call prompt('semi-major', semia)
     call prompt('inclination (deg)',inclination)
     inclination = inclination/180. * pi
-    semia = rp/(1.-ecc)
+    !semia = rp/(1.-ecc)
+    rp = semia*(1.-ecc)
     r  = semia*(1.+ecc)
-    vy = sqrt((1.-ecc)/r)
+    vy = sqrt(mass1*(1.-ecc)/r)
+    print*,mass1,"mass1"
     x(1:3,np)  = (/r,0.,0./)
     v(1:3,np)  = (/0.,vy,0./)
     call get_rotation_matrix(-inclination,rotate_y,'y')
@@ -350,6 +353,27 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
     ! v(1:3,1) = (/-0.00937932, -0.00118909, -0./)
     ! v(1:3,2) = (/-0.00903958, -0.00145593,  0./)
 
+    ! this is the one we will test for different time step
+    ! x(1:3,1) = (/ 4205172.308006175, 407876.95095306425,0./)
+    ! x(1:3,2) = (/ 4205171.860429131, 407874.317039877, 0./)
+    ! v(1:3,1) = (/  -0.02215735126131465, -0.0009752156643123136,0./)
+    ! v(1:3,2) = (/ -0.021307350537264028, -0.001127753206150499,0./)
+
+    ! x(1:3,1) = (/ 414635., 15098.168012089971,0./)
+    ! x(1:3,2) = (/ 414634., 15100.455024693552, 0./)
+    ! v(1:3,1) = (/ -0.0018125042852483984, 0.00017179484524338824,0./)
+    ! v(1:3,2) = (/ -0.002577916936322562, -0.0002517095306686536,0./)
+
+    ! x(1:3,1) = (/  6480927.435113909, 529582.2122989591,0./)
+    ! x(1:3,2) = (/ 6480925.871844204, 529583.4294852862, 0./)
+    ! v(1:3,1) = (/  -0.017214870274126038, -0.000318381598394309,0./)
+    ! v(1:3,2) = (/ -0.017832134174461018, -0.0011111525441099524,0./)
+
+    ! this one is inclined orbit.
+    x(1:3,1) = (/4205171.490408985, 407876.40192287887, -0.9176798294906736/)
+    v(1:3,1) = (/  -0.02188157081647087, -0.0007900244838645161, 0.0003095389204715863/)
+    x(1:3,2) = (/ 4205172.678026321, 407874.8660700624, 0.9176798294906736/)
+    v(1:3,2) = (/ -0.021583130982107807, -0.0013129443865982967, -0.0003095389204715863/)
 
  end select
 
