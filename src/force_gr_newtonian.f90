@@ -4,13 +4,18 @@ module force_gr
 contains
 
 subroutine get_forcegr(x,v,dens,u,p,fterm)
+ use metric,       only: mass1
  real,    intent(in)  :: x(3),v(3),dens,u,p
  real,    intent(out) :: fterm(3)
  real :: r,r2
 
+ if (mass1 == 0.) then
+   STOP 'Mass of BH is zero. Change it for this calculation'
+ endif
+ 
  r2 = dot_product(x,x)
  r  = sqrt(r2)
- fterm = -x/(r2*r)
+ fterm = -mass1*x/(r2*r)
 
 end subroutine get_forcegr
 

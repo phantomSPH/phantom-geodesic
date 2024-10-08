@@ -47,19 +47,17 @@ end subroutine print_geodesic_choices
 
 !--- Several types of single particle geodesics
 subroutine setgeodesic(x,v,mall,np,type,r0)
- use metric,       only:metric_type, a!,rs
+ use metric,       only:metric_type, a, mass1 !,rs
  use metric_tools, only:coordinate_sys
  use force_gr,     only:get_sourceterms
  use utils_gr,     only:get_u0
  use utils,        only:get_rotation_matrix
  use prompting,    only:prompt
  real, intent(in), optional  :: r0
- ! real, intent(out) :: x(3,2), v(3,2)
  integer, intent(in) :: type,np
  real, intent(in)    :: mall(np)
  real, intent(inout) :: x(3,np), v(3,np)
  real :: r, vy, x1
- ! real :: m1, m2
  real :: ra,va,omega,fac
  real :: rotate_y(3,3), inclination
  real :: theta,phi,m,q,rho2,y1,z1,vx,vz,rdot,thetadot
@@ -73,7 +71,6 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
  print*,""
  print*,"We are using option: ",type
 
- print*,x,"x",v,"v in set_geodesic"
  if (present(r0)) then
     r = r0
     write(*,'(a,f6.2)') ' Using init with r = ',r0
@@ -286,12 +283,15 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
     rp  = 47.131 ! Tidal radius for solar type star around 1e6 Msun black hole
     inclination = 45.
     call prompt('eccentricity',ecc)
-    call prompt('r pericentre',rp)
+    !call prompt('r pericentre',rp)
+    call prompt('semi-major', semia)
     call prompt('inclination (deg)',inclination)
     inclination = inclination/180. * pi
-    semia = rp/(1.-ecc)
+    !semia = rp/(1.-ecc)
+    rp = semia*(1.-ecc)
     r  = semia*(1.+ecc)
-    vy = sqrt((1.-ecc)/r)
+    vy = sqrt(mass1*(1.-ecc)/r)
+    print*,mass1,"mass1"
     x(1:3,np)  = (/r,0.,0./)
     v(1:3,np)  = (/0.,vy,0./)
     call get_rotation_matrix(-inclination,rotate_y,'y')
@@ -341,28 +341,39 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
 
     x(1:3,1) = -dx*mall(2)/mtot + (/10000000.,0.,0./)
     x(1:3,2) =  dx*mall(1)/mtot + (/10000000.,0.,0./)
-    !
-    ! x(1:3,1) = -dx*mall(2)/mtot + (/0.,0.,0./)
-    ! x(1:3,2) =  dx*mall(1)/mtot + (/0.,0.,0./)
 
     ! velocities
     v(1:3,1) = -dv*mall(2)/mtot
     v(1:3,2) =  dv*mall(1)/mtot
 
-    ! x(1:3,1) = (/4780.0478062 , 1237.71021012,   -0./)
-    ! x(1:3,2) = (/4777.22595736, 1238.43914902,    0./)
-    !
-    ! v(1:3,1) = (/-0.01985366, -0.00214272, -0./)
-    ! v(1:3,2) = (/-0.02006069, -0.00294487,  0./)
-
+    ! The following parameters are a test collision case from Monte Carlo code of Alexander Heger
     ! x(1:3,1) = (/22170.50316413,  6506.44584756,    -0./)
     ! x(1:3,2) = (/22163.56404343,  6494.1490515 ,     0./)
     !
     ! v(1:3,1) = (/-0.00937932, -0.00118909, -0./)
     ! v(1:3,2) = (/-0.00903958, -0.00145593,  0./)
 
+    ! this is the one we will test for different time step
+    ! x(1:3,1) = (/ 4205172.308006175, 407876.95095306425,0./)
+    ! x(1:3,2) = (/ 4205171.860429131, 407874.317039877, 0./)
+    ! v(1:3,1) = (/  -0.02215735126131465, -0.0009752156643123136,0./)
+    ! v(1:3,2) = (/ -0.021307350537264028, -0.001127753206150499,0./)
 
-    print*,x,"x",v,"v in set geodesic, mtot" , mtot,"mtot"
+    ! x(1:3,1) = (/ 414635., 15098.168012089971,0./)
+    ! x(1:3,2) = (/ 414634., 15100.455024693552, 0./)
+    ! v(1:3,1) = (/ -0.0018125042852483984, 0.00017179484524338824,0./)
+    ! v(1:3,2) = (/ -0.002577916936322562, -0.0002517095306686536,0./)
+
+    ! x(1:3,1) = (/  6480927.435113909, 529582.2122989591,0./)
+    ! x(1:3,2) = (/ 6480925.871844204, 529583.4294852862, 0./)
+    ! v(1:3,1) = (/  -0.017214870274126038, -0.000318381598394309,0./)
+    ! v(1:3,2) = (/ -0.017832134174461018, -0.0011111525441099524,0./)
+
+    ! this one is inclined orbit.
+    x(1:3,1) = (/4205171.490408985, 407876.40192287887, -0.9176798294906736/)
+    v(1:3,1) = (/  -0.02188157081647087, -0.0007900244838645161, 0.0003095389204715863/)
+    x(1:3,2) = (/ 4205172.678026321, 407874.8660700624, 0.9176798294906736/)
+    v(1:3,2) = (/ -0.021583130982107807, -0.0013129443865982967, -0.0003095389204715863/)
 
  end select
 

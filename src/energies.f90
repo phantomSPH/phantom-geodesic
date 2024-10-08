@@ -35,7 +35,6 @@ subroutine get_ev(x,v,energy,angmom)
   !else if (metric_type == 'Minkowski') then
     energy = 0.5*dot_product(v,v)
     angmom = x(1)*v(2)-x(2)*v(1)
-    print*,angmom,"angmom",energy,"energy"
  else if (metric_type == 'Kerr') then
     energy = -U0*v4(0)*dot_product(gcov(0,:),v4(:))
     if (coordinate_sys=='Spherical') then
@@ -58,14 +57,14 @@ subroutine get_ev(x,v,energy,angmom)
 
 end subroutine get_ev
 
-! This subroutine determines the gravitational force between the particles
+! This subroutine determines the energy due to gravitational force between the particles
 subroutine get_newtonian_energy(np,xall,vall,energy_i,mall)
   real, dimension(:,:), intent(in) :: xall,vall
   real, dimension(:), intent(in) :: mall
   integer, intent(in) :: np
   real, intent(inout) :: energy_i
-  real, dimension(3) :: x,x_other,x_rel,v_other,v_rel,v
-  real :: rr,ddr,vv,ddv
+  real, dimension(3) :: x,x_other,x_rel,v
+  real :: rr,ddr
   integer :: i,j
 
   ! first determine the Potential energy
@@ -79,10 +78,9 @@ subroutine get_newtonian_energy(np,xall,vall,energy_i,mall)
            x_rel = x - x_other
            rr = sqrt(dot_product(x_rel,x_rel))
            ddr = 1.0 / rr
-           energy_i = energy_i - mall(j)*ddr
+           energy_i = energy_i - ddr * mall(j)
        endif
      enddo
-     vv = dot_product(v,v)
   enddo
 
 end subroutine get_newtonian_energy

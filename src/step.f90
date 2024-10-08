@@ -1,4 +1,4 @@
-module step
+module step_old
  implicit none
 
  integer, parameter :: &
@@ -242,7 +242,7 @@ subroutine step_rk2(x,v,fterm,dt)
  real, dimension(3), intent(inout) :: x,v
  real, intent(in) :: dt
  real :: pmomstar(3),xstar(3),vstar(3),pmom(3)
-
+ print*, "rk2 stepname to use"
  call get_p_from_v(pmom,v,x)
  ! ENTRY
  xstar    = x    + 0.5*dt*v
@@ -257,4 +257,4 @@ subroutine step_rk2(x,v,fterm,dt)
  call get_sourceterms(x,v,fterm)
 
 end subroutine step_rk2
-end module step
+end module step_old

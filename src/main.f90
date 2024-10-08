@@ -8,7 +8,6 @@ program test
  use metric,       only: metric_type,a
  use metric_tools, only: coordinate_sys
  use force_gr,     only: get_sourceterms
- use step,         only: stepname, steptype
  use utils_gr,     only: get_rderivs
  use output,       only: write_out, write_ev, write_xyz, write_vxyz
  use checks,       only: check,sanity_checks
@@ -16,7 +15,7 @@ program test
  use prompting,    only: prompt
  use options,      only: dt, tmax, dtout, dnout_ev, write_pos_vel
  use infile,       only: init_infile
- use step_all,     only: timestep_all
+ use step,         only: timestep_all, stepname, steptype
  implicit none
 
  real, allocatable, dimension(:,:) :: xall,vall
@@ -61,7 +60,7 @@ program test
  angmom_init = angmom
  if (dtout>0.) call write_out(time,xall,vall,np,mall)
  if (dnout_ev>0) then
-    call write_ev(time,energy-energy_init,angmom-angmom_init)
+    call write_ev(time,energy,energy_init,angmom,angmom_init)
     if (write_pos_vel) then
        call write_xyz(time,xall,np)
        call write_vxyz(time,vall,np)
@@ -83,7 +82,7 @@ program test
 
     if (dnout_ev>0) then
     if (mod(i,dnout_ev)==0) then
-       call write_ev(time,energy-energy_init,angmom-angmom_init)
+       call write_ev(time,energy,energy_init,angmom,angmom_init)
        if (write_pos_vel) then
           call write_xyz(time,xall,np)
           call write_vxyz(time,vall,np)
