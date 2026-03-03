@@ -88,7 +88,7 @@ program test
        if ((norm2(xall(:,j)) <= 6*mass1) .or. isnan(norm2(xall(:,j))) ) status_in = .true.
     enddo   
 
-    if (status_in .or. status_lim) EXIT
+    if (status_in) EXIT
     call timestep_all(xall,vall,np,energy,angmom,dt,mall,fext)
 
    
