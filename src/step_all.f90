@@ -179,7 +179,7 @@ subroutine step_landr05(x,v,fterm,dt,np,mall)
  integer :: iterations_x, iterations_pmom, i
  integer, parameter :: max_iterations = 10000
 
- tol  = 1.e-7
+ tol  = 1.e-15
  xtol = tol
  ptol = tol
 

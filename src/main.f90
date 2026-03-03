@@ -5,7 +5,7 @@
 !----------------------------------------------------------------
 program test
  use init,         only: initialise
- use metric,       only: metric_type,a
+ use metric,       only: metric_type,a,mass1
  use metric_tools, only: coordinate_sys
  use force_gr,     only: get_sourceterms
  use utils_gr,     only: get_rderivs
@@ -24,9 +24,9 @@ program test
  integer :: np
  real    :: time, energy_init, angmom_init, energy, angmom, x(3), v(3)
  integer :: nsteps,i,j,dnout,k
- logical :: passed
- real    :: start,finish,tminus,frac_done,twall_elapsed,twallmax_approx,rt
+ real    :: start,finish,tminus,frac_done,twall_elapsed,twallmax_approx
  integer :: percentage,prev_percent
+ logical :: passed,status_in
 
  print*,'-------------------------------------------------------------------'
  print*,'GR-TEST'
@@ -70,8 +70,10 @@ program test
  endif
 
  prev_percent = 0
- rt = 1.0130607675019032 * 100
+
  do i=1,nsteps
+    status_in = .false.
+
     time = time + dt
 
     ! calculate initial force term
@@ -81,14 +83,14 @@ program test
        call get_sourceterms(x,v,fext(:,k))
        call get_newtonian_force_new(np,xall,vall,fext(:,k),mall,k)
     enddo
-   !  print*, sqrt(norm2(xall(:,1))), 'r1'
-   !  print*, sqrt(norm2(xall(:,2))), 'r2'
-   !  read(*,*)
-    if (norm2(xall(:,1)) > 150*rt .or. norm2(xall(:,2)) > 150*rt) then
-      EXIT
-    endif
 
+    do j=1,np
+       if ((norm2(xall(:,j)) <= 6*mass1) .or. isnan(norm2(xall(:,j))) ) status_in = .true.
+    enddo   
+
+    if (status_in .or. status_lim) EXIT
     call timestep_all(xall,vall,np,energy,angmom,dt,mall,fext)
+
    
     do j=1,np
        if (dtout>0. .and. mod(i,dnout)==0) call check(xall(:,j),vall(:,j),passed)

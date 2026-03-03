@@ -65,7 +65,7 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
  real, intent(in)    :: mall(np)
  real, intent(inout) :: x(3,np), v(3,np)
  real :: r, vy, x1, x_shift(3), v_shift(3)
- real :: ra,va,omega,fac
+ real :: ra,va,omega,fac,dv_mag
  real :: rotate_y(3,3), inclination
  real :: theta,m,q,rho2,y1,z1,vx,vz,rdot,thetadot
  real :: ecc,semia,rp,rt
@@ -311,7 +311,7 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
 
  case(iparabola)
     !default values
-    rp_newton  = 47.131
+    rp_newton  = 47.151
     inc_parabola = 45.
 
     filename = 'orbit'//'.params'
@@ -322,14 +322,12 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
        print*,' Edit '//trim(filename)//' and rerun'
        stop
     endif
-    r = 50000000.
-    rp_newton = 80406.6866002857
-    inc_parabola = 0.
-    print*,rp_newton,"rp newton"
+    r = 1e5 ! start far away, so that we can set a parabolic orbit with the Newtonian rp = rp_newton in GR
+
     y1 = -2.*rp_newton + r
     x1 = sqrt(r**2 - y1**2)
     x(1:3,np)  = (/x1,y1,0./)
-    vmag = sqrt(2.*1000./r)
+    vmag = sqrt(2.*mass1/r)
     vhat = (/-2.*rp_newton,-x1,0./)/sqrt(4.*rp_newton**2 + x1**2)
     v(1:3,np)    = vmag*vhat
     inc_parabola = inc_parabola/180. * pi
@@ -343,12 +341,12 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
 
  case(ibinary)
     mtot = sum(mall)
-   !  call prompt('eccentricity',ecc)
-   !  call prompt('semi-major',semia)
 
-    semia = 4.71307
-    ecc = 0.01
-   ! ecc = 0.5
+    semia = 4.71307 ! test value
+    ecc = 0.00
+
+    call prompt('eccentricity',ecc)
+    call prompt('semi-major',semia)
 
     beta = 1.0
 
@@ -365,93 +363,35 @@ subroutine setgeodesic(x,v,mall,np,type,r0)
     vhat = (/-2.*rp,-x1,0./)/sqrt(4.*rp**2 + x1**2)
     v_shift(1:3)  = vmag*vhat
 
-    ! set binary at apastron
-    dx = (/0.,semia*(1. + ecc),0./)
-    dv = (/sqrt(semia*(1.-ecc**2)*mtot)/dx(2),0.,0./)
+    ! r_apo = a * (1 + e)
+    dx = (/ 0., semia * (1.0 + ecc), 0. /)
 
-   !  x(1:3,1) = -dx*mall(2)/mtot + x_shift
-   !  x(1:3,2) =  dx*mall(1)/mtot + x_shift
-    
-   !  ! velocities
-   !  v(1:3,1) = -dv*mall(2)/mtot + v_shift
-   !  v(1:3,2) =  dv*mall(1)/mtot + v_shift
+    dv_mag = sqrt( mtot * (1.0 - ecc) / (semia * (1.0 + ecc)) )
+    dv = (/ dv_mag, 0., 0. /)
 
-    x(1:3,1) = -dx*mall(2)/mtot
-    x(1:3,2) =  dx*mall(1)/mtot
+    if (mass1 == 0.) then
+      x(1:3,1) = -dx * mall(2) / mtot
+      x(1:3,2) =  dx * mall(1) / mtot
 
-    ! velocities
-   !  v(1:3,1) =  dv*mall(2)/mtot + (/0.1,0.,0./)
-   !  v(1:3,2) = -dv*mall(1)/mtot+ (/0.1,0.,0./)
+      v(1:3,1) = -dv * mall(2) / mtot + (/0.0, 0.5, 0.0/) ! add a small velocity to have a drift
+      v(1:3,2) =  dv * mall(1) / mtot + (/0.0, 0.5, 0.0/)
+    else 
+      x(1:3,1) = -dx * mall(2) / mtot + x_shift
+      x(1:3,2) =  dx * mall(1) / mtot + x_shift    
 
-   !  print*, x(1:3,1), "x(1:3,1)", x(1:3,2), "x(1:3,2)"
-   !  print*, v(1:3,1), "v(1:3,1)", v(1:3,2), "v(1:3,2)"
+      v(1:3,1) = -dv * mall(2) / mtot + v_shift
+      v(1:3,2) =  dv * mall(1) / mtot + v_shift
+    endif
 
-   !  print*, ecc, 'eccentricity at the start'
-   !  dx = x(1:3,2) - x(1:3,1)
-   !  dv = v(1:3,2) - v(1:3,1)
-
-   !  rdotv = dot_product(dx(1:3),dv(1:3))
-   !  mu = mtot
-   !  v2 = dot_product(dv(1:3),dv(1:3))
-   !  rmag = sqrt(dot_product(dx(1:3),dx(1:3)))
-
-   !  ecc_vec = (v2 / mu - 1 / rmag)* dx(1:3) - (rdotv / mu)*dv(1:3)
-   !  print*,  ecc_vec, 'eccentricity vector at the start'
-   !  print*, sqrt(dot_product(ecc_vec,ecc_vec)), 'eccentricity at the start'
-    ! The following parameters are a test collision case from Monte Carlo code of Alexander Heger
-    ! x(1:3,1) = (/22170.50316413,  6506.44584756,    -0./)
-    ! x(1:3,2) = (/22163.56404343,  6494.1490515 ,     0./)
-    !
-    ! v(1:3,1) = (/-0.00937932, -0.00118909, -0./)
-    ! v(1:3,2) = (/-0.00903958, -0.00145593,  0./)
-
-    ! this is the one we will test for different time step
-    ! x(1:3,1) = (/ 4205172.308006175, 407876.95095306425,0./)
-    ! x(1:3,2) = (/ 4205171.860429131, 407874.317039877, 0./)
-    ! v(1:3,1) = (/  -0.02215735126131465, -0.0009752156643123136,0./)
-    ! v(1:3,2) = (/ -0.021307350537264028, -0.001127753206150499,0./)
-
-    ! x(1:3,1) = (/ 414635., 15098.168012089971,0./)
-    ! x(1:3,2) = (/ 414634., 15100.455024693552, 0./)
-    ! v(1:3,1) = (/ -0.0018125042852483984, 0.00017179484524338824,0./)
-    ! v(1:3,2) = (/ -0.002577916936322562, -0.0002517095306686536,0./)
-
-
-    ! x(1:3,1) = (/182126.6666551551607, 116897.5526729668345, -0.0000000000000/)
-    ! x(1:3,2) = (/182125.4840725345712, 116898.9204948952101, 0.0000000000000/)
-    ! v(1:3,1) = (/-0.0907537884349, -0.0265191266771, -0.0000000000000/)
-    ! v(1:3,2) = (/-0.0915493579137, -0.0272069968298, 0.0000000000000/)
-
-   !  x(1:3,1) = (/6163760.3942570993677, 652285.4969001520658, 0.0000000000000/)
-   !  x(1:3,2) = (/6163759.5778802530840, 652287.2021698787576, 0.0000000000000/)
-   !  v(1:3,1) = (/-0.0174743682774, -0.0007244617089, -0.0000000000000/)
-   !  v(1:3,2) = (/-0.0184020612329, -0.0011685832680, 0.0000000000000/)
-
-x(1:3,1) = (/6164039.4095, 652315.0473500001, 0.0/)
-x(1:3,2) = (/6164038.5905, 652316.75265, 0.0/)
-v(1:3,1) = (/-0.0174743635, -0.0007244617, 0.0/)
-v(1:3,2) = (/-0.0184020565, -0.0011685833, 0.0/)
-
+  
  case(isingle)
-
-   
-   ! x(1:3,1) = (/1466161.8667043117 ,  319547.11416651646,       0./)
-   ! v(1:3,1) = (/-0.0362978315338778, -0.0039096311721948,  0./)
-
+   ! can provide the initial position and velocity of a single particle, and it will just follow the geodesic. Useful for testing.
+   print*,'#--- Single particle ---#'
    x(1:3,1) = (/1466162.2748927348, 319546.2615316531, -0.0/)
    v(1:3,1) = (/-0.035833985056138815, -0.0036875703926903193, -0.0/)
 
 
  case(iemilio)
-   ! call prompt('beta',beta)
-   ! call prompt('phi',phi)
-   ! call prompt('a',a)
-
-   ! a = 0.1*101.30607675019033 ! 0.1 AU in code units
-   ! print*,a, 'a',mall,'mall',mass1,'mass1'
-   ! beta = 1.0
-   ! phi = 0.0
-
 
     filename = 'sample'//'.params'
     inquire(file=filename,exist=iexist)
@@ -492,32 +432,7 @@ v(1:3,2) = (/-0.0184020565, -0.0011685833, 0.0/)
    v(2,2) = vcm(2) - mall(2)/mb * a * phidot * cos(phi)
    v(3,2) = 0.
 
-   ! x(1:3,1) = (/5.06561168E+03,  5.01500474E-01, 0./)
-   ! x(1:3,2) = (/5.06546893E+03,  -5.01500474E-01, 0./)
-   ! v(1:3,1) = (/-2.03100412E-02, 1.39319918E-03, 0./)
-   ! v(1:3,2) = (/-1.93264431E-02, 1.25321244E-03, 0./)
-
-   ! x(1:3,1) = (/5.06553235E+03,  5.06491538E-01, 0./)
-   ! x(1:3,2) = (/5.06554826E+03, -5.06491538E-01, 0./)
-   ! v(1:3,1) = (/-1.93215486E-02, 1.33100850E-03, 0./)
-   ! v(1:3,2) = (/-2.03149357E-02, 1.31540312E-03, 0./)
-
-   ! x(1:3,1) = (/40863.139718948034, 62785.040303442765, -0.0/)
-   ! x(1:3,2) = (/40861.47520727811, 62784.974664595204, 0.0/)
-   ! v(1:3,1) = (/-0.13847582671224368, -0.07569230010834962, -0.0/)
-   ! v(1:3,2) = (/-0.13843222271479302, -0.07678714844456629, 0.0/)
-
-   ! x(1:3,1) = (/1466162.2748927348, 319546.2615316531, -0.0/) 
-   ! x(1:3,2) = (/1466161.4585158883, 319547.96680137987, 0.0/)
-   ! v(1:3,1) = (/-0.035833985056138815, -0.0036875703926903193, -0.0/) ! add a velocity and then plot in COM frame
-   ! v(1:3,2) = (/-0.03676167801161674, -0.004131691951699353, 0.0/) 
-   !  v(1:3,1) = (/0.000463846477739 ,  0.0002220607795045, -0./)  + (/0.,0.0,0.0/)
-   !  v(1:3,2) = (/-0.000463846477739 , -0.0002220607795045,  0./) + (/0.0,0.0,0.0/)
-
-   ! set the system without the frame vel
-   ! v(1:3,1) = (/0.000463846477739 ,  0.0002220607795045, -0./)
-   ! v(1:3,2) = (/-0.000463846477739 , -0.0002220607795045,  0./)
-
+   
    print*,x(1:3,1),'1st star'
    print*,x(1:3,2),'2nd star'
    print*,v(1:3,1),'1st vel'

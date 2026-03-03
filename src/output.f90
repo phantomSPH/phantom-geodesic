@@ -164,7 +164,7 @@ subroutine write_vxyz(time,vall,np,force)
  logical, save       :: first = .true.
  integer, parameter  :: iu = 70
  integer :: i,i1,i2
- character(len=11) :: ihead1,ihead2,ihead3,ihead4,ihead5,ihead6,column_labels(np*3+3)
+ character(len=11) :: ihead1,ihead2,ihead3,column_labels(np*3)
  character(len=6)  :: nstring
  character(len=120)   :: velocities_file
  CHARACTER(len=120)   :: file_input
@@ -192,12 +192,6 @@ subroutine write_vxyz(time,vall,np,force)
       column_labels(i1:i2) = [ihead1,ihead2,ihead3]
     enddo
     
-    !-- Add additional labels for force components
-    write(ihead4,'("fx",i0)') 1
-    write(ihead5,'("fy",i0)') 1
-    write(ihead6,'("fz",i0)') 1
-    column_labels(np*3+1:) = [ihead4,ihead5,ihead6]
-
     !-- Create the format string for column labels
     write(nstring,'(i0)') np*3
     write(iu,'(A)', advance='no') '# Time'        ! no newline yet
@@ -210,7 +204,7 @@ subroutine write_vxyz(time,vall,np,force)
  else
     open(unit=iu, file=velocities_file,position='append')
  endif
- write(iu,*) time, vall(1:3,:), force(1:3,1)
+ write(iu,*) time, vall(1:3,:)
  close(iu)
 end subroutine write_vxyz
 end module
